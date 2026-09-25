@@ -107,8 +107,11 @@ if ! "$apksigner" verify --verbose --print-certs "$apk" >"$info.apksigner" 2>&1;
   j3_die "apksigner could not verify $(basename "$apk")"
 fi
 tee -a "$info" <"$info.apksigner"
-signer_dn="$(grep -m 1 'Signer #1 certificate DN:' "$info.apksigner" | sed 's/^Signer #1 certificate DN: //' || true)"
-signer_sha256="$(grep -m 1 'Signer #1 certificate SHA-256 digest:' "$info.apksigner" | awk '{print $NF}' || true)"
+# apksigner prints "Signer #1 certificate ..." (build-tools <= 35) or
+# "V2 Signer: certificate ..." (newer build-tools); accept both.
+signer_re='^(Signer #1|V[0-9.]+ Signer:) certificate'
+signer_dn="$(grep -m 1 -E "$signer_re DN: " "$info.apksigner" | sed -E 's/^.* certificate DN: //' || true)"
+signer_sha256="$(grep -m 1 -E "$signer_re SHA-256 digest: " "$info.apksigner" | awk '{print $NF}' || true)"
 rm -f "$info.apksigner"
 [ -n "$signer_dn" ] || j3_die "No signer certificate found in $(basename "$apk")"
 

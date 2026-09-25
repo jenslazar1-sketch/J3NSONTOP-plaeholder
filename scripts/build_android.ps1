@@ -85,10 +85,13 @@ try {
     $apksignerOut | Write-Host
     $infoLines = @("J3NSONTOP Multitool $($version.Full) - Android $Mode build", "Built: $((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))", '', "## apksigner verify --print-certs $(Split-Path -Leaf $apk)") + $apksignerOut
 
-    $dnLine = $apksignerOut | Where-Object { $_ -like 'Signer #1 certificate DN:*' } | Select-Object -First 1
-    $shaLine = $apksignerOut | Where-Object { $_ -like 'Signer #1 certificate SHA-256 digest:*' } | Select-Object -First 1
+    # apksigner prints "Signer #1 certificate ..." (build-tools <= 35) or
+    # "V2 Signer: certificate ..." (newer build-tools); accept both.
+    $signerRe = '^(Signer #1|V[0-9.]+ Signer:) certificate'
+    $dnLine = $apksignerOut | Where-Object { $_ -match "$signerRe DN: " } | Select-Object -First 1
+    $shaLine = $apksignerOut | Where-Object { $_ -match "$signerRe SHA-256 digest: " } | Select-Object -First 1
     if (-not $dnLine) { Stop-J3 'No signer certificate found in the APK.' }
-    $signerDn = $dnLine -replace '^Signer #1 certificate DN: ', ''
+    $signerDn = $dnLine -replace '^.* certificate DN: ', ''
     $signerSha = ''
     if ($shaLine) { $signerSha = ($shaLine -split '\s+')[-1] }
     $debugSigned = $signerDn -like '*CN=Android Debug*'
