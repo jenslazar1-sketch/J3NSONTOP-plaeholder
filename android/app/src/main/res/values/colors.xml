@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive icon background layer (J3Colors.background). -->
+    <color name="ic_launcher_background">#050507</color>
+    <!-- Launch / splash screen and window background behind Flutter. -->
+    <color name="splash_background">#050507</color>
+</resources>

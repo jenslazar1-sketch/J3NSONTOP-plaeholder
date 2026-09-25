@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  J3NSONTOP BIGGEST MULTITOOL MADE - monochrome silhouette (Android 13+ themed icon). Only alpha matters.
+  Original artwork made for this project (see docs/ASSETS.md). It echoes the
+  ASCII skull in lib/features/intro/skull_art.dart: angular sockets that slant
+  down toward the nose, glowing eyes, the inverted-V nose /_^_\, the hairline
+  crack on the upper right of the dome, the |_|_| upper teeth and a separate
+  jaw hanging open mid-laugh.
+  Palette: background #050507, neon #FF163B, dark red #750C20, text #F4F4F7.
+  Rendered to every platform asset by tool/art/render_icons.py.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>J3NSONTOP skull silhouette</title>
+  <defs>
+    <!-- Geometry (1024 grid, mirror axis x=512). Right socket = mirrored left. -->
+    <path id="cranium-fill" d="M512 104C712 104 868 244 868 430C868 510 864 560 852 600C834 652 804 694 764 700H708V778H316V700H260C220 694 190 652 172 600C160 560 156 510 156 430C156 244 312 104 512 104Z"/>
+    <path id="cranium-line" d="M512 104C712 104 868 244 868 430C868 510 864 560 852 600C834 652 804 694 764 700H260C220 694 190 652 172 600C160 560 156 510 156 430C156 244 312 104 512 104ZM316 700V778M708 700V778"/>
+    <path id="jaw-fill" d="M316 822V880C316 918 360 942 432 942H592C664 942 708 918 708 880V822Z"/>
+    <path id="jaw-line" d="M316 822V880C316 918 360 942 432 942H592C664 942 708 918 708 880V822M316 876H708"/>
+    <path id="socket" d="M246 448L452 532L474 568L472 606C471 626 458 636 438 636L300 636C256 636 228 608 228 566L228 482C228 460 234 452 246 448Z"/>
+    <path id="nose" d="M512 596L568 682L530 682L512 660L494 682L456 682Z"/>
+    <path id="crack" d="M624 128L644 194L612 248L662 302L704 306L730 372"/>
+    <path id="teeth-upper"
+          d="M345 708H385.67Q388.67 708 388.67 711V760Q388.67 776 372.67 776H358Q342 776 342 760V711Q342 708 345 708Z
+             M403.67 708H444.33Q447.33 708 447.33 711V760Q447.33 776 431.33 776H416.67Q400.67 776 400.67 760V711Q400.67 708 403.67 708Z
+             M462.33 708H503Q506 708 506 711V760Q506 776 490 776H475.33Q459.33 776 459.33 760V711Q459.33 708 462.33 708Z
+             M521 708H561.67Q564.67 708 564.67 711V760Q564.67 776 548.67 776H534Q518 776 518 760V711Q518 708 521 708Z
+             M579.67 708H620.33Q623.33 708 623.33 711V760Q623.33 776 607.33 776H592.67Q576.67 776 576.67 760V711Q576.67 708 579.67 708Z
+             M638.33 708H679Q682 708 682 711V760Q682 776 666 776H651.33Q635.33 776 635.33 760V711Q635.33 708 638.33 708Z"/>
+    <path id="teeth-lower"
+          d="M358 824H372.67Q388.67 824 388.67 840V865Q388.67 868 385.67 868H345Q342 868 342 865V840Q342 824 358 824Z
+             M416.67 824H431.33Q447.33 824 447.33 840V865Q447.33 868 444.33 868H403.67Q400.67 868 400.67 865V840Q400.67 824 416.67 824Z
+             M475.33 824H490Q506 824 506 840V865Q506 868 503 868H462.33Q459.33 868 459.33 865V840Q459.33 824 475.33 824Z
+             M534 824H548.67Q564.67 824 564.67 840V865Q564.67 868 561.67 868H521Q518 868 518 865V840Q518 824 534 824Z
+             M592.67 824H607.33Q623.33 824 623.33 840V865Q623.33 868 620.33 868H579.67Q576.67 868 576.67 865V840Q576.67 824 592.67 824Z
+             M651.33 824H666Q682 824 682 840V865Q682 868 679 868H638.33Q635.33 868 635.33 865V840Q635.33 824 651.33 824Z"/>
+
+    <path id="mouth-upper" d="M332 716H692V778H332Z"/>
+    <path id="mouth-lower" d="M332 822H692V860H332Z"/>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <!-- solid silhouette: bone + tube thickness -->
+      <use href="#cranium-fill" fill="#fff"/>
+      <use href="#jaw-fill" fill="#fff"/>
+      <g fill="none" stroke="#fff" stroke-width="32" stroke-linejoin="round" stroke-linecap="round">
+        <use href="#cranium-line"/>
+        <use href="#jaw-line"/>
+      </g>
+      <!-- voids -->
+      <g fill="#000">
+        <use href="#socket"/>
+        <use href="#socket" transform="translate(1024 0) scale(-1 1)"/>
+        <use href="#nose"/>
+        <use href="#mouth-upper"/>
+        <use href="#mouth-lower"/>
+      </g>
+      <use href="#crack" fill="none" stroke="#000" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- teeth and pupils stay solid -->
+      <g fill="#fff">
+        <use href="#teeth-upper"/>
+        <use href="#teeth-lower"/>
+        <circle cx="354" cy="560" r="34"/>
+        <circle cx="670" cy="560" r="34"/>
+      </g>
+    </mask>
+  </defs>
+  <rect transform="translate(0 -12)" width="1024" height="1024" fill="#ffffff" mask="url(#cut)"/>
+</svg>

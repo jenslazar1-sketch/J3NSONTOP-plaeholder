@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  J3NSONTOP BIGGEST MULTITOOL MADE - master app icon (48 px and up).
+  Composition of icon_background.svg (terminal screen) and
+  skull_foreground.svg (the laughing skull) on a rounded tile with a faint
+  neon rim. Original artwork, see docs/ASSETS.md.
+
+  tool/art/render_icons.py renders this file twice:
+    * as is                    -> rounded tile with transparent corners
+                                  (Windows .ico, legacy Android launcher)
+    * with class="full-bleed"  -> opaque square, no rim; iOS applies its own
+                                  mask (App Store / home screen icons)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>J3NSONTOP app icon</title>
+  <style>
+    .full-bleed #tile { x: 0px; y: 0px; width: 1024px; height: 1024px; rx: 0px; ry: 0px; }
+    .full-bleed #rim { display: none; }
+  </style>
+  <defs>
+    <clipPath id="tile-clip">
+      <rect id="tile" x="24" y="24" width="976" height="976" rx="212" ry="212"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#tile-clip)">
+    <image href="icon_background.svg" x="0" y="0" width="1024" height="1024"/>
+    <image href="skull_foreground.svg" x="62" y="52" width="900" height="900"/>
+  </g>
+  <rect id="rim" x="26" y="26" width="972" height="972" rx="210" ry="210"
+        fill="none" stroke="#ff163b" stroke-opacity="0.28" stroke-width="4"/>
+</svg>

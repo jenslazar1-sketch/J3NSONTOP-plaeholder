@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive launcher icon (API 26+). The foreground and monochrome layers
+     are 108 dp bitmaps rendered by tool/art/render_icons.py; the skull stays
+     inside the 66 dp safe circle. <monochrome> is the Android 13+ themed icon
+     and is ignored by older releases. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome"/>
+</adaptive-icon>
