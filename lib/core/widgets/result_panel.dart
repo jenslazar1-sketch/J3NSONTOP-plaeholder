@@ -68,9 +68,14 @@ class ResultPanel extends ConsumerWidget {
                   if (lineNumbers)
                     SizedBox(
                       width: gutter * 9.0 + 14,
-                      child: Text('${i + 1}'.padLeft(gutter), style: J3Type.codeSmall.copyWith(color: J3Colors.textMuted)),
+                      child: Text(
+                        '${i + 1}'.padLeft(gutter),
+                        style: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
+                      ),
                     ),
-                  Expanded(child: Text(lines[i], style: J3Type.code, softWrap: false, overflow: TextOverflow.fade)),
+                  Expanded(
+                    child: Text(lines[i], style: J3Type.code, softWrap: false, overflow: TextOverflow.fade),
+                  ),
                 ],
               ),
             ),
@@ -106,7 +111,14 @@ class ResultPanel extends ConsumerWidget {
           tooltip: 'Save / export',
           onPressed: text.isEmpty
               ? null
-              : () => saveOutput(context, ref, suggestedName: fileName, bytes: Uint8List.fromList(utf8.encode(text)), mimeType: mimeType, toolId: toolId),
+              : () => saveOutput(
+                  context,
+                  ref,
+                  suggestedName: fileName,
+                  bytes: Uint8List.fromList(utf8.encode(text)),
+                  mimeType: mimeType,
+                  toolId: toolId,
+                ),
           icon: const Icon(Icons.save_alt_rounded, size: 18),
         ),
       ],

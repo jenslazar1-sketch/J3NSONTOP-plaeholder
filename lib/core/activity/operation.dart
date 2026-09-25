@@ -102,12 +102,7 @@ class OperationRecord {
     final id = JsonRead.optString(j, 'id');
     final started = JsonRead.dateTime(j, 'startedAt');
     if (id == null || started == null) return null;
-    var status = JsonRead.enumByName(
-      j,
-      'status',
-      OperationStatus.values,
-      OperationStatus.failed,
-    );
+    var status = JsonRead.enumByName(j, 'status', OperationStatus.values, OperationStatus.failed);
     String? error = JsonRead.optString(j, 'error');
     // An operation persisted while running never finished (app closed).
     if (status == OperationStatus.running) {

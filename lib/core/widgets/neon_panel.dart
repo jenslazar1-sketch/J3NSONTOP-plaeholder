@@ -59,10 +59,7 @@ class NeonPanel extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 18, color: fx.accentText),
-                  const SizedBox(width: J3Space.sm),
-                ],
+                if (icon != null) ...[Icon(icon, size: 18, color: fx.accentText), const SizedBox(width: J3Space.sm)],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +103,13 @@ class NeonPanel extends StatelessWidget {
         borderRadius: J3Radius.medium,
         border: Border.all(color: borderColor),
         boxShadow: blur > 0
-            ? [BoxShadow(color: glowColor.withValues(alpha: 0.10 + 0.08 * fx.intensity), blurRadius: blur, spreadRadius: -4)]
+            ? [
+                BoxShadow(
+                  color: glowColor.withValues(alpha: 0.10 + 0.08 * fx.intensity),
+                  blurRadius: blur,
+                  spreadRadius: -4,
+                ),
+              ]
             : null,
       ),
       child: content,
@@ -166,7 +169,8 @@ class SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (kicker != null) Text('// ${kicker!.toUpperCase()}', style: J3Type.kicker.copyWith(color: context.effects.accentText)),
+                if (kicker != null)
+                  Text('// ${kicker!.toUpperCase()}', style: J3Type.kicker.copyWith(color: context.effects.accentText)),
                 Text(title, style: J3Type.title),
               ],
             ),

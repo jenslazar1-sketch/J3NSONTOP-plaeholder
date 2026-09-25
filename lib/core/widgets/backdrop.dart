@@ -27,7 +27,10 @@ class J3Backdrop extends StatelessWidget {
             painter: _GridPainter(accent: fx.accentColor, strength: 0.35 + 0.4 * fx.intensity),
           ),
         ),
-        if (fx.particles) RepaintBoundary(child: _Particles(intensity: fx.intensity, color: fx.accentColor)),
+        if (fx.particles)
+          RepaintBoundary(
+            child: _Particles(intensity: fx.intensity, color: fx.accentColor),
+          ),
         child,
         if (fx.scanlines)
           IgnorePointer(
@@ -65,7 +68,10 @@ class _GridPainter extends CustomPainter {
         ..shader = RadialGradient(
           center: const Alignment(0, -1.3),
           radius: 1.2,
-          colors: [accent.withValues(alpha: 0.10 * strength), Colors.transparent],
+          colors: [
+            accent.withValues(alpha: 0.10 * strength),
+            Colors.transparent,
+          ],
         ).createShader(rect),
     );
     canvas.drawRect(
@@ -153,9 +159,7 @@ class _ParticlesState extends State<_Particles> with SingleTickerProviderStateMi
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      _particles.add(
-        _Particle(_rng.nextDouble(), _rng.nextDouble(), 0.004 + _rng.nextDouble() * 0.012, painter),
-      );
+      _particles.add(_Particle(_rng.nextDouble(), _rng.nextDouble(), 0.004 + _rng.nextDouble() * 0.012, painter));
     }
   }
 
@@ -192,10 +196,7 @@ class _ParticlesState extends State<_Particles> with SingleTickerProviderStateMi
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      child: CustomPaint(
-        painter: _ParticlePainter(_particles, _frame),
-        size: Size.infinite,
-      ),
+      child: CustomPaint(painter: _ParticlePainter(_particles, _frame), size: Size.infinite),
     );
   }
 }

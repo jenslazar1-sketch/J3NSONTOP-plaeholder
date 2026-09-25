@@ -7,13 +7,7 @@ import '../theme/j3_typography.dart';
 /// Labelled switch row with an explanation line. Whole row is tappable and
 /// keyboard-focusable.
 class OptionSwitch extends StatelessWidget {
-  const OptionSwitch({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    this.description,
-  });
+  const OptionSwitch({super.key, required this.label, required this.value, required this.onChanged, this.description});
 
   final String label;
   final String? description;
@@ -93,8 +87,13 @@ class KeyValueTable extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(width: keyWidth, child: Text(k, style: J3Type.caption)),
-                Expanded(child: SelectableText(v, style: J3Type.code.copyWith(color: J3Colors.text))),
+                SizedBox(
+                  width: keyWidth,
+                  child: Text(k, style: J3Type.caption),
+                ),
+                Expanded(
+                  child: SelectableText(v, style: J3Type.code.copyWith(color: J3Colors.text)),
+                ),
               ],
             ),
           ),

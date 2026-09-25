@@ -6,13 +6,7 @@ import '../theme/j3_typography.dart';
 /// with a strut so rows never drift; the block scales down to fit narrow
 /// screens instead of wrapping or clipping.
 class AsciiArt extends StatelessWidget {
-  const AsciiArt({
-    super.key,
-    required this.lines,
-    this.style = J3Type.ascii,
-    this.fit = true,
-    this.semanticLabel,
-  });
+  const AsciiArt({super.key, required this.lines, this.style = J3Type.ascii, this.fit = true, this.semanticLabel});
 
   final List<String> lines;
   final TextStyle style;
@@ -43,7 +37,9 @@ class AsciiArt extends StatelessWidget {
           ),
       ],
     );
-    final content = ExcludeSemantics(child: fit ? FittedBox(fit: BoxFit.scaleDown, child: block) : block);
+    final content = ExcludeSemantics(
+      child: fit ? FittedBox(fit: BoxFit.scaleDown, child: block) : block,
+    );
     if (semanticLabel == null) return content;
     return Semantics(label: semanticLabel, image: true, child: content);
   }

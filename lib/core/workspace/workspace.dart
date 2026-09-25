@@ -7,16 +7,10 @@ enum WorkspaceKind {
   linked('Linked folder', 'Files are edited in place in the folder you chose.'),
 
   /// Files copied into app storage via the system document picker.
-  imported(
-    'Imported copy',
-    'Files were copied into app storage. Export to get results out.',
-  ),
+  imported('Imported copy', 'Files were copied into app storage. Export to get results out.'),
 
   /// The disposable demo workspace generated on first run.
-  sample(
-    'Sample (disposable)',
-    'Generated example files. Safe to modify, reset or delete.',
-  );
+  sample('Sample (disposable)', 'Generated example files. Safe to modify, reset or delete.');
 
   const WorkspaceKind(this.label, this.explanation);
   final String label;
@@ -47,11 +41,7 @@ class Workspace {
   final DateTime lastOpenedAt;
   final String? note;
 
-  Workspace copyWith({
-    String? name,
-    DateTime? lastOpenedAt,
-    String? note,
-  }) => Workspace(
+  Workspace copyWith({String? name, DateTime? lastOpenedAt, String? note}) => Workspace(
     id: id,
     name: name ?? this.name,
     kind: kind,
@@ -79,12 +69,7 @@ class Workspace {
     return Workspace(
       id: id,
       name: JsonRead.string(j, 'name', 'Workspace'),
-      kind: JsonRead.enumByName(
-        j,
-        'kind',
-        WorkspaceKind.values,
-        WorkspaceKind.imported,
-      ),
+      kind: JsonRead.enumByName(j, 'kind', WorkspaceKind.values, WorkspaceKind.imported),
       rootPath: root,
       createdAt: created,
       lastOpenedAt: JsonRead.dateTime(j, 'lastOpenedAt') ?? created,

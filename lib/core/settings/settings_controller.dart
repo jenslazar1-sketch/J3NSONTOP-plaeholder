@@ -20,6 +20,4 @@ class SettingsController extends Notifier<AppSettings> {
   Future<void> resetToDefaults() => update((_) => const AppSettings());
 }
 
-final settingsProvider = NotifierProvider<SettingsController, AppSettings>(
-  SettingsController.new,
-);
+final settingsProvider = NotifierProvider<SettingsController, AppSettings>(SettingsController.new);

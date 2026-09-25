@@ -111,7 +111,10 @@ class _CodeFieldState extends State<CodeField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: widget.expands ? MainAxisSize.max : MainAxisSize.min,
-      children: [widget.expands ? Expanded(child: field) : field, status],
+      children: [
+        widget.expands ? Expanded(child: field) : field,
+        status,
+      ],
     );
   }
 }

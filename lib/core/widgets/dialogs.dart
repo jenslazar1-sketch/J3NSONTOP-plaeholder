@@ -21,7 +21,10 @@ Future<bool> showJ3Confirm(
     builder: (ctx) => AlertDialog(
       title: Row(
         children: [
-          Icon(destructive ? Icons.warning_amber_rounded : Icons.help_outline, color: destructive ? J3Colors.warning : J3Colors.info),
+          Icon(
+            destructive ? Icons.warning_amber_rounded : Icons.help_outline,
+            color: destructive ? J3Colors.warning : J3Colors.info,
+          ),
           const SizedBox(width: J3Space.sm),
           Expanded(child: Text(title)),
         ],

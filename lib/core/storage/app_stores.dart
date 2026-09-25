@@ -25,14 +25,13 @@ class AppStores {
   });
 
   factory AppStores.forPaths(AppPaths paths) {
-    JsonDocumentStore make(String path, (String, int) schema) =>
-        JsonDocumentStore(
-          path: path,
-          schema: schema.$1,
-          currentVersion: schema.$2,
-          defaults: () => <String, dynamic>{},
-          migrations: migrations[schema.$1],
-        );
+    JsonDocumentStore make(String path, (String, int) schema) => JsonDocumentStore(
+      path: path,
+      schema: schema.$1,
+      currentVersion: schema.$2,
+      defaults: () => <String, dynamic>{},
+      migrations: migrations[schema.$1],
+    );
     return AppStores(
       settings: make(paths.settingsFile, StoreSchemas.settings),
       userData: make(paths.userDataFile, StoreSchemas.userData),
@@ -53,13 +52,7 @@ class AppStores {
   /// unit tests with synthetic versions.
   static const Map<String, Map<int, JsonMigration>> migrations = {};
 
-  List<JsonDocumentStore> get all => [
-    settings,
-    userData,
-    history,
-    workspaces,
-    features,
-  ];
+  List<JsonDocumentStore> get all => [settings, userData, history, workspaces, features];
 }
 
 /// Results of loading every store at startup (including recovery notices).
@@ -88,10 +81,7 @@ class BootData {
       if (r.message != null) r.message!,
   ];
 
-  static Future<BootData> load(
-    AppStores stores, {
-    LaunchArgs launchArgs = const LaunchArgs(),
-  }) async {
+  static Future<BootData> load(AppStores stores, {LaunchArgs launchArgs = const LaunchArgs()}) async {
     final results = await Future.wait(stores.all.map((s) => s.load()));
     return BootData(
       settings: results[0],
@@ -106,11 +96,7 @@ class BootData {
 
 /// Parsed command-line arguments (desktop). Mobile launches have none.
 class LaunchArgs {
-  const LaunchArgs({
-    this.dataDir,
-    this.smokeTestReport,
-    this.skipIntro = false,
-  });
+  const LaunchArgs({this.dataDir, this.smokeTestReport, this.skipIntro = false});
 
   /// `--data-dir=<path>`: use an isolated data directory.
   final String? dataDir;
@@ -137,11 +123,7 @@ class LaunchArgs {
         skip = true;
       }
     }
-    return LaunchArgs(
-      dataDir: dataDir,
-      smokeTestReport: smoke,
-      skipIntro: skip || smoke != null,
-    );
+    return LaunchArgs(dataDir: dataDir, smokeTestReport: smoke, skipIntro: skip || smoke != null);
   }
 }
 
@@ -149,6 +131,4 @@ final appStoresProvider = Provider<AppStores>(
   (ref) => throw UnimplementedError('appStoresProvider must be overridden'),
 );
 
-final bootDataProvider = Provider<BootData>(
-  (ref) => throw UnimplementedError('bootDataProvider must be overridden'),
-);
+final bootDataProvider = Provider<BootData>((ref) => throw UnimplementedError('bootDataProvider must be overridden'));

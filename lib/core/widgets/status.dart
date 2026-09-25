@@ -81,7 +81,12 @@ class StatusBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: kind.color.withValues(alpha: 0.07),
           borderRadius: J3Radius.medium,
-          border: Border(left: BorderSide(color: kind.color, width: 3), top: BorderSide(color: kind.color.withValues(alpha: 0.3)), right: BorderSide(color: kind.color.withValues(alpha: 0.3)), bottom: BorderSide(color: kind.color.withValues(alpha: 0.3))),
+          border: Border(
+            left: BorderSide(color: kind.color, width: 3),
+            top: BorderSide(color: kind.color.withValues(alpha: 0.3)),
+            right: BorderSide(color: kind.color.withValues(alpha: 0.3)),
+            bottom: BorderSide(color: kind.color.withValues(alpha: 0.3)),
+          ),
         ),
         padding: const EdgeInsets.all(J3Space.md),
         child: Row(
@@ -105,8 +110,7 @@ class StatusBanner extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 2),
                         child: SelectableText('> $d', style: J3Type.codeSmall),
                       ),
-                    if (details.length > 12)
-                      Text('... ${details.length - 12} more', style: J3Type.caption),
+                    if (details.length > 12) Text('... ${details.length - 12} more', style: J3Type.caption),
                   ],
                   if (actions.isNotEmpty) ...[
                     const SizedBox(height: J3Space.sm),
@@ -116,11 +120,7 @@ class StatusBanner extends StatelessWidget {
               ),
             ),
             if (onDismiss != null)
-              IconButton(
-                tooltip: 'Dismiss',
-                onPressed: onDismiss,
-                icon: const Icon(Icons.close, size: 18),
-              ),
+              IconButton(tooltip: 'Dismiss', onPressed: onDismiss, icon: const Icon(Icons.close, size: 18)),
           ],
         ),
       ),
@@ -144,7 +144,8 @@ class ErrorPanel extends StatelessWidget {
       message: error.toString(),
       details: [?hint],
       actions: [
-        if (onRetry != null) TextButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh, size: 18), label: const Text('Retry')),
+        if (onRetry != null)
+          TextButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh, size: 18), label: const Text('Retry')),
       ],
     );
   }
@@ -152,13 +153,7 @@ class ErrorPanel extends StatelessWidget {
 
 /// Empty state with a small ASCII glyph, message and optional action.
 class EmptyState extends StatelessWidget {
-  const EmptyState({
-    super.key,
-    required this.title,
-    this.message,
-    this.action,
-    this.glyph = '[ -_- ]',
-  });
+  const EmptyState({super.key, required this.title, this.message, this.action, this.glyph = '[ -_- ]'});
 
   final String title;
   final String? message;
@@ -216,7 +211,11 @@ class LoadingState extends StatelessWidget {
             const SizedBox(height: J3Space.sm),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton.icon(onPressed: onCancel, icon: const Icon(Icons.stop_circle_outlined, size: 18), label: const Text('Cancel')),
+              child: TextButton.icon(
+                onPressed: onCancel,
+                icon: const Icon(Icons.stop_circle_outlined, size: 18),
+                label: const Text('Cancel'),
+              ),
             ),
           ],
         ],

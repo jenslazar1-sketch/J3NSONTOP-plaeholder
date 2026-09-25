@@ -19,11 +19,7 @@ enum TextEncodingKind { utf8, utf8Bom, utf16le, utf16be, latin1 }
 
 /// Result of decoding bytes as text.
 class DecodedText {
-  const DecodedText({
-    required this.text,
-    required this.encoding,
-    required this.hadMalformedBytes,
-  });
+  const DecodedText({required this.text, required this.encoding, required this.hadMalformedBytes});
 
   final String text;
   final TextEncodingKind encoding;
@@ -75,23 +71,11 @@ abstract final class TextCodec {
       final body = bytes.sublist(2);
       final units = <int>[];
       for (var i = 0; i + 1 < body.length; i += 2) {
-        units.add(
-          utf16 == TextEncodingKind.utf16le
-              ? body[i] | (body[i + 1] << 8)
-              : (body[i] << 8) | body[i + 1],
-        );
+        units.add(utf16 == TextEncodingKind.utf16le ? body[i] | (body[i + 1] << 8) : (body[i] << 8) | body[i + 1]);
       }
-      return DecodedText(
-        text: String.fromCharCodes(units),
-        encoding: utf16,
-        hadMalformedBytes: body.length.isOdd,
-      );
+      return DecodedText(text: String.fromCharCodes(units), encoding: utf16, hadMalformedBytes: body.length.isOdd);
     }
-    final hasBom =
-        bytes.length >= 3 &&
-        bytes[0] == 0xEF &&
-        bytes[1] == 0xBB &&
-        bytes[2] == 0xBF;
+    final hasBom = bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
     final body = hasBom ? bytes.sublist(3) : bytes;
     try {
       return DecodedText(
@@ -100,11 +84,7 @@ abstract final class TextCodec {
         hadMalformedBytes: false,
       );
     } on FormatException {
-      return DecodedText(
-        text: latin1.decode(body),
-        encoding: TextEncodingKind.latin1,
-        hadMalformedBytes: true,
-      );
+      return DecodedText(text: latin1.decode(body), encoding: TextEncodingKind.latin1, hadMalformedBytes: true);
     }
   }
 
@@ -119,9 +99,7 @@ abstract final class TextCodec {
       case TextEncodingKind.utf16le:
       case TextEncodingKind.utf16be:
         final out = BytesBuilder();
-        out.add(
-          encoding == TextEncodingKind.utf16le ? [0xFF, 0xFE] : [0xFE, 0xFF],
-        );
+        out.add(encoding == TextEncodingKind.utf16le ? [0xFF, 0xFE] : [0xFE, 0xFF]);
         for (final unit in text.codeUnits) {
           if (encoding == TextEncodingKind.utf16le) {
             out.add([unit & 0xFF, unit >> 8]);
@@ -162,8 +140,7 @@ abstract final class TextCodec {
   }
 
   /// Splits text into lines, accepting LF, CRLF and CR.
-  static List<String> splitLines(String text) =>
-      text.split(RegExp(r'\r\n|\r|\n'));
+  static List<String> splitLines(String text) => text.split(RegExp(r'\r\n|\r|\n'));
 
   /// 1-based line and column for a character [offset] in [text].
   static (int line, int column) lineColumn(String text, int offset) {

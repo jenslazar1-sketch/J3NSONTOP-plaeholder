@@ -81,7 +81,10 @@ class SectionHub extends ConsumerWidget {
     return SingleChildScrollView(
       padding: J3Space.pagePaddingWide,
       child: Center(
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: J3Size.maxContentWidth), child: column),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: J3Size.maxContentWidth),
+          child: column,
+        ),
       ),
     );
   }
@@ -125,7 +128,15 @@ class _ToolCardState extends ConsumerState<ToolCard> {
               color: active ? J3Colors.surfaceRaised : J3Colors.surface,
               borderRadius: J3Radius.medium,
               border: Border.all(color: active ? fx.accentColor : J3Colors.border, width: _focus ? 2 : 1),
-              boxShadow: active && fx.glow ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.22), blurRadius: fx.glowBlur(18), spreadRadius: -4)] : null,
+              boxShadow: active && fx.glow
+                  ? [
+                      BoxShadow(
+                        color: fx.accentColor.withValues(alpha: 0.22),
+                        blurRadius: fx.glowBlur(18),
+                        spreadRadius: -4,
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +185,9 @@ class AllToolsPage extends ConsumerWidget {
               SectionHeader(
                 title: s.label,
                 kicker: s.tagline,
-                trailing: s == ToolSection.system ? null : TextButton(onPressed: () => context.go(s.route), child: const Text('Open')),
+                trailing: s == ToolSection.system
+                    ? null
+                    : TextButton(onPressed: () => context.go(s.route), child: const Text('Open')),
               ),
               SectionHub(section: s, embedded: true),
               const SizedBox(height: J3Space.xl),

@@ -25,10 +25,7 @@ GoRouter buildRouter({required bool showIntro}) {
         path: '/intro',
         pageBuilder: (context, state) => NoTransitionPage<void>(
           key: state.pageKey,
-          child: IntroScreen(
-            replay: state.uri.queryParameters['replay'] == '1',
-            onFinished: () => context.go('/'),
-          ),
+          child: IntroScreen(replay: state.uri.queryParameters['replay'] == '1', onFinished: () => context.go('/')),
         ),
       ),
       ShellRoute(
@@ -37,7 +34,10 @@ GoRouter buildRouter({required bool showIntro}) {
           GoRoute(path: '/', pageBuilder: (c, s) => page(const HomeScreen(), s)),
           for (final section in ToolSection.values)
             if (section != ToolSection.system)
-              GoRoute(path: section.route, pageBuilder: (c, s) => page(SectionPage(section: section), s)),
+              GoRoute(
+                path: section.route,
+                pageBuilder: (c, s) => page(SectionPage(section: section), s),
+              ),
           GoRoute(path: '/tools', pageBuilder: (c, s) => page(const AllToolsPage(), s)),
           GoRoute(path: '/activity', pageBuilder: (c, s) => page(const ActivityScreen(), s)),
           GoRoute(path: '/settings', pageBuilder: (c, s) => page(const SettingsScreen(), s)),

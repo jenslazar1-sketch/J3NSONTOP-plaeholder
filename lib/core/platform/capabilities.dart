@@ -32,40 +32,16 @@ enum AppPlatform {
 
 /// A platform capability a tool or action may require.
 enum Capability {
-  linkFolder(
-    'Link an existing folder',
-    'Work directly on a folder chosen with the system folder picker.',
-  ),
-  importFiles(
-    'Import files',
-    'Copy files chosen in the system document picker into a workspace.',
-  ),
-  importFolder(
-    'Import a folder',
-    'Copy a whole folder chosen in the system folder picker.',
-  ),
-  exportSaveDialog(
-    'Save/export dialog',
-    'Write results to a location chosen in the system save dialog.',
-  ),
+  linkFolder('Link an existing folder', 'Work directly on a folder chosen with the system folder picker.'),
+  importFiles('Import files', 'Copy files chosen in the system document picker into a workspace.'),
+  importFolder('Import a folder', 'Copy a whole folder chosen in the system folder picker.'),
+  exportSaveDialog('Save/export dialog', 'Write results to a location chosen in the system save dialog.'),
   shareSheet('Share sheet', 'Hand results to other apps via the share sheet.'),
-  inPlaceModApply(
-    'Apply mods in place',
-    'Apply mod profiles directly to a linked game folder.',
-  ),
-  revealInFileManager(
-    'Reveal in file manager',
-    'Open the containing folder in the system file manager.',
-  ),
+  inPlaceModApply('Apply mods in place', 'Apply mod profiles directly to a linked game folder.'),
+  revealInFileManager('Reveal in file manager', 'Open the containing folder in the system file manager.'),
   keyboardShortcuts('Keyboard shortcuts', 'Ctrl+K palette and other shortcuts.'),
-  networkRequests(
-    'Network requests',
-    'Send explicitly entered HTTP requests to development endpoints.',
-  ),
-  backgroundIsolates(
-    'Background workers',
-    'Heavy work runs off the UI thread in Dart isolates.',
-  ),
+  networkRequests('Network requests', 'Send explicitly entered HTTP requests to development endpoints.'),
+  backgroundIsolates('Background workers', 'Heavy work runs off the UI thread in Dart isolates.'),
   audio('Sound', 'Optional interface and intro sounds.');
 
   const Capability(this.label, this.description);
@@ -84,33 +60,14 @@ class CapabilityMatrix {
 
   static const Map<Capability, Set<AppPlatform>> table = {
     Capability.linkFolder: {AppPlatform.windows, AppPlatform.linux},
-    Capability.importFiles: {
-      AppPlatform.android,
-      AppPlatform.ios,
-      AppPlatform.windows,
-      AppPlatform.linux,
-    },
+    Capability.importFiles: {AppPlatform.android, AppPlatform.ios, AppPlatform.windows, AppPlatform.linux},
     Capability.importFolder: {AppPlatform.windows, AppPlatform.linux},
-    Capability.exportSaveDialog: {
-      AppPlatform.android,
-      AppPlatform.ios,
-      AppPlatform.windows,
-      AppPlatform.linux,
-    },
+    Capability.exportSaveDialog: {AppPlatform.android, AppPlatform.ios, AppPlatform.windows, AppPlatform.linux},
     Capability.shareSheet: {AppPlatform.android, AppPlatform.ios},
     Capability.inPlaceModApply: {AppPlatform.windows, AppPlatform.linux},
     Capability.revealInFileManager: {AppPlatform.windows, AppPlatform.linux},
-    Capability.keyboardShortcuts: {
-      AppPlatform.windows,
-      AppPlatform.linux,
-      AppPlatform.macos,
-    },
-    Capability.networkRequests: {
-      AppPlatform.android,
-      AppPlatform.ios,
-      AppPlatform.windows,
-      AppPlatform.linux,
-    },
+    Capability.keyboardShortcuts: {AppPlatform.windows, AppPlatform.linux, AppPlatform.macos},
+    Capability.networkRequests: {AppPlatform.android, AppPlatform.ios, AppPlatform.windows, AppPlatform.linux},
     Capability.backgroundIsolates: {
       AppPlatform.android,
       AppPlatform.ios,
@@ -118,12 +75,7 @@ class CapabilityMatrix {
       AppPlatform.linux,
       AppPlatform.macos,
     },
-    Capability.audio: {
-      AppPlatform.android,
-      AppPlatform.ios,
-      AppPlatform.windows,
-      AppPlatform.linux,
-    },
+    Capability.audio: {AppPlatform.android, AppPlatform.ios, AppPlatform.windows, AppPlatform.linux},
   };
 
   /// Supported alternative shown when a capability is unavailable.
@@ -131,21 +83,22 @@ class CapabilityMatrix {
     Capability.linkFolder:
         'Mobile systems do not allow direct access to other folders. Import '
         'files or a ZIP into a workspace copy instead, then export results.',
-    Capability.importFolder:
-        'Pick several files, or import a ZIP archive of the folder.',
-    Capability.shareSheet: 'Use Export to choose a location with the system '
+    Capability.importFolder: 'Pick several files, or import a ZIP archive of the folder.',
+    Capability.shareSheet:
+        'Use Export to choose a location with the system '
         'save dialog.',
     Capability.inPlaceModApply:
         'Profiles are applied to the imported workspace copy. Export the '
         'modified files or the whole workspace as a ZIP afterwards.',
-    Capability.revealInFileManager: 'Use Export or Share to hand the file to '
+    Capability.revealInFileManager:
+        'Use Export or Share to hand the file to '
         'another app.',
-    Capability.keyboardShortcuts: 'Use the search button to open the command '
+    Capability.keyboardShortcuts:
+        'Use the search button to open the command '
         'palette.',
   };
 
-  bool supports(Capability c) =>
-      _overrides[c] ?? (table[c]?.contains(platform) ?? false);
+  bool supports(Capability c) => _overrides[c] ?? (table[c]?.contains(platform) ?? false);
 
   String? alternativeFor(Capability c) => supports(c) ? null : alternatives[c];
 
@@ -158,6 +111,4 @@ class CapabilityMatrix {
 /// Current platform. Override in tests to simulate other platforms.
 final appPlatformProvider = Provider<AppPlatform>((ref) => AppPlatform.detect());
 
-final capabilitiesProvider = Provider<CapabilityMatrix>(
-  (ref) => CapabilityMatrix(ref.watch(appPlatformProvider)),
-);
+final capabilitiesProvider = Provider<CapabilityMatrix>((ref) => CapabilityMatrix(ref.watch(appPlatformProvider)));

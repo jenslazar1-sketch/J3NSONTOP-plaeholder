@@ -8,8 +8,7 @@ class OperationTimedOut implements Exception {
   const OperationTimedOut(this.timeout);
   final Duration timeout;
   @override
-  String toString() =>
-      'Stopped after ${timeout.inMilliseconds} ms (time limit reached)';
+  String toString() => 'Stopped after ${timeout.inMilliseconds} ms (time limit reached)';
 }
 
 /// Runs [computation] in a fresh isolate with a hard time limit.
@@ -45,10 +44,7 @@ Future<R> runBounded<R>(
         completer.complete(message[1] as R);
       } else {
         final err = message[1] as List;
-        completer.completeError(
-          _RemoteError(err[0] as String),
-          StackTrace.fromString(err[1] as String),
-        );
+        completer.completeError(_RemoteError(err[0] as String), StackTrace.fromString(err[1] as String));
       }
     } else {
       completer.completeError(StateError('worker exited unexpectedly'));
@@ -75,12 +71,14 @@ Future<R> runBounded<R>(
       finish();
     }
   });
-  token?.whenCancelled.then((_) {
-    if (!completer.isCompleted) {
-      completer.completeError(const OperationCancelled());
-      finish();
-    }
-  });
+  unawaited(
+    token?.whenCancelled.then((_) {
+      if (!completer.isCompleted) {
+        completer.completeError(const OperationCancelled());
+        finish();
+      }
+    }),
+  );
   return completer.future;
 }
 

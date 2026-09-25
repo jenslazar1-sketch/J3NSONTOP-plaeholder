@@ -12,10 +12,7 @@ abstract final class J3Space {
   static const double xxxl = 48;
 
   static const EdgeInsets pagePadding = EdgeInsets.all(lg);
-  static const EdgeInsets pagePaddingWide = EdgeInsets.symmetric(
-    horizontal: xl,
-    vertical: lg,
-  );
+  static const EdgeInsets pagePaddingWide = EdgeInsets.symmetric(horizontal: xl, vertical: lg);
 }
 
 abstract final class J3Radius {

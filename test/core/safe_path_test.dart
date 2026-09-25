@@ -60,8 +60,9 @@ void main() {
 
     test('rejects writing through an existing symlink target', () {
       if (Platform.isWindows) return;
-      final outsideFile = File(p.join(Directory.systemTemp.path, 'j3_target_${DateTime.now().microsecondsSinceEpoch}.txt'))
-        ..writeAsStringSync('x');
+      final outsideFile = File(
+        p.join(Directory.systemTemp.path, 'j3_target_${DateTime.now().microsecondsSinceEpoch}.txt'),
+      )..writeAsStringSync('x');
       addTearDown(outsideFile.deleteSync);
       Link(p.join(root.path, 'f.txt')).createSync(outsideFile.path);
       expect(() => SafePath.resolveInside(root.path, 'f.txt'), throwsA(isA<UnsafePathException>()));

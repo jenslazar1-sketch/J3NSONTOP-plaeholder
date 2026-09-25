@@ -79,8 +79,7 @@ class AppSettings {
       volume: volume ?? this.volume,
       accent: accent ?? this.accent,
       showActivityPanel: showActivityPanel ?? this.showActivityPanel,
-      sampleWorkspaceCreated:
-          sampleWorkspaceCreated ?? this.sampleWorkspaceCreated,
+      sampleWorkspaceCreated: sampleWorkspaceCreated ?? this.sampleWorkspaceCreated,
     );
   }
 
@@ -104,12 +103,7 @@ class AppSettings {
     const d = AppSettings();
     return AppSettings(
       skipIntro: JsonRead.boolean(j, 'skipIntro', d.skipIntro),
-      motion: JsonRead.enumByName(
-        j,
-        'motion',
-        MotionPreference.values,
-        d.motion,
-      ),
+      motion: JsonRead.enumByName(j, 'motion', MotionPreference.values, d.motion),
       intensity: JsonRead.number(j, 'intensity', d.intensity, min: 0, max: 1),
       scanlines: JsonRead.boolean(j, 'scanlines', d.scanlines),
       particles: JsonRead.boolean(j, 'particles', d.particles),
@@ -118,16 +112,8 @@ class AppSettings {
       sound: JsonRead.boolean(j, 'sound', d.sound),
       volume: JsonRead.number(j, 'volume', d.volume, min: 0, max: 1),
       accent: JsonRead.enumByName(j, 'accent', AccentPreset.values, d.accent),
-      showActivityPanel: JsonRead.boolean(
-        j,
-        'showActivityPanel',
-        d.showActivityPanel,
-      ),
-      sampleWorkspaceCreated: JsonRead.boolean(
-        j,
-        'sampleWorkspaceCreated',
-        d.sampleWorkspaceCreated,
-      ),
+      showActivityPanel: JsonRead.boolean(j, 'showActivityPanel', d.showActivityPanel),
+      sampleWorkspaceCreated: JsonRead.boolean(j, 'sampleWorkspaceCreated', d.sampleWorkspaceCreated),
     );
   }
 }

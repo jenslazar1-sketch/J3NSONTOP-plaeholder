@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:j3nsontop_multitool/core/platform/app_paths.dart';
 import 'package:j3nsontop_multitool/core/platform/capabilities.dart';
@@ -54,7 +55,9 @@ class TestEnv {
     List<FeatureModule> modules = const [],
     AppPlatform platform = AppPlatform.linux,
     FileAccessService? fileAccess,
-  }) => ProviderContainer(overrides: overrides(modules: modules, platform: platform, fileAccess: fileAccess));
+  }) => ProviderContainer(
+    overrides: overrides(modules: modules, platform: platform, fileAccess: fileAccess),
+  );
 
   Future<void> dispose() async {
     if (await dir.exists()) await dir.delete(recursive: true);
@@ -70,14 +73,22 @@ class FakeFileAccess extends FileAccessService {
   final List<String> copied = [];
 
   @override
-  Future<List<PickedLocalFile>> pickFiles({bool multiple = true, List<String>? extensions, String? destinationDir, CancellationToken? token}) async =>
-      queuedPicks.isEmpty ? const [] : queuedPicks.removeAt(0);
+  Future<List<PickedLocalFile>> pickFiles({
+    bool multiple = true,
+    List<String>? extensions,
+    String? destinationDir,
+    CancellationToken? token,
+  }) async => queuedPicks.isEmpty ? const [] : queuedPicks.removeAt(0);
 
   @override
   Future<String?> pickDirectory({String? title}) async => queuedDirectory;
 
   @override
-  Future<ExportResult> saveBytes({required String suggestedName, required Uint8List bytes, String mimeType = 'application/octet-stream'}) async {
+  Future<ExportResult> saveBytes({
+    required String suggestedName,
+    required Uint8List bytes,
+    String mimeType = 'application/octet-stream',
+  }) async {
     savedBytes.add((suggestedName, bytes));
     return ExportResult.saved('/fake/$suggestedName');
   }
@@ -100,7 +111,10 @@ Widget themed(Widget child, {EffectsConfig effects = EffectsConfig.fallback, Siz
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: J3Theme.build(effects.accent),
-    home: J3Effects(config: effects, child: Scaffold(body: child)),
+    home: J3Effects(
+      config: effects,
+      child: Scaffold(body: child),
+    ),
   );
 }
 
@@ -143,7 +157,9 @@ Future<void> loadAppFonts() async {
     'JetBrainsMono_700Bold.ttf',
   ]);
   // Material icons for realistic screenshots.
-  final iconFont = File('${Platform.environment['FLUTTER_ROOT'] ?? '/opt/sdk/flutter'}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  final iconFont = File(
+    '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/sdk/flutter'}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+  );
   if (iconFont.existsSync()) {
     final loader = FontLoader('MaterialIcons')..addFont(Future.value(ByteData.sublistView(iconFont.readAsBytesSync())));
     await loader.load();

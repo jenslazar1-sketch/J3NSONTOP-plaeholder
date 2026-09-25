@@ -29,8 +29,7 @@ class WorkspacesState {
   }
 
   /// Most recently opened first.
-  List<Workspace> get recent =>
-      [...workspaces]..sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
+  List<Workspace> get recent => [...workspaces]..sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
 }
 
 /// Result of checking whether a workspace root is still reachable.
@@ -58,9 +57,7 @@ class WorkspaceController extends Notifier<WorkspacesState> {
     final active = data['activeId'];
     return WorkspacesState(
       workspaces: list,
-      activeId: active is String && list.any((w) => w.id == active)
-          ? active
-          : (list.isEmpty ? null : list.first.id),
+      activeId: active is String && list.any((w) => w.id == active) ? active : (list.isEmpty ? null : list.first.id),
     );
   }
 
@@ -88,9 +85,7 @@ class WorkspaceController extends Notifier<WorkspacesState> {
       lastOpenedAt: now,
     );
     await Directory(_paths.workspaceMetaDir(w.id)).create(recursive: true);
-    await _save(
-      WorkspacesState(workspaces: [...state.workspaces, w], activeId: w.id),
-    );
+    await _save(WorkspacesState(workspaces: [...state.workspaces, w], activeId: w.id));
     return w;
   }
 
@@ -107,18 +102,8 @@ class WorkspaceController extends Notifier<WorkspacesState> {
     final root = _paths.workspaceFilesDir(wid);
     await Directory(root).create(recursive: true);
     await Directory(_paths.workspaceMetaDir(wid)).create(recursive: true);
-    final w = Workspace(
-      id: wid,
-      name: name,
-      kind: kind,
-      rootPath: root,
-      createdAt: now,
-      lastOpenedAt: now,
-      note: note,
-    );
-    await _save(
-      WorkspacesState(workspaces: [...state.workspaces, w], activeId: w.id),
-    );
+    final w = Workspace(id: wid, name: name, kind: kind, rootPath: root, createdAt: now, lastOpenedAt: now, note: note);
+    await _save(WorkspacesState(workspaces: [...state.workspaces, w], activeId: w.id));
     return w;
   }
 
@@ -127,10 +112,7 @@ class WorkspaceController extends Notifier<WorkspacesState> {
     if (w == null) return;
     await _save(
       WorkspacesState(
-        workspaces: [
-          for (final e in state.workspaces)
-            e.id == id ? e.copyWith(lastOpenedAt: DateTime.now()) : e,
-        ],
+        workspaces: [for (final e in state.workspaces) e.id == id ? e.copyWith(lastOpenedAt: DateTime.now()) : e],
         activeId: id,
       ),
     );
@@ -138,10 +120,7 @@ class WorkspaceController extends Notifier<WorkspacesState> {
 
   Future<void> rename(String id, String name) => _save(
     WorkspacesState(
-      workspaces: [
-        for (final e in state.workspaces)
-          e.id == id ? e.copyWith(name: name) : e,
-      ],
+      workspaces: [for (final e in state.workspaces) e.id == id ? e.copyWith(name: name) : e],
       activeId: state.activeId,
     ),
   );
@@ -155,9 +134,7 @@ class WorkspaceController extends Notifier<WorkspacesState> {
     await _save(
       WorkspacesState(
         workspaces: remaining,
-        activeId: state.activeId == id
-            ? (remaining.isEmpty ? null : remaining.first.id)
-            : state.activeId,
+        activeId: state.activeId == id ? (remaining.isEmpty ? null : remaining.first.id) : state.activeId,
       ),
     );
     if (deleteAppOwnedFiles && w.kind.isAppOwned) {
@@ -187,11 +164,6 @@ class WorkspaceController extends Notifier<WorkspacesState> {
   }
 }
 
-final workspacesProvider =
-    NotifierProvider<WorkspaceController, WorkspacesState>(
-      WorkspaceController.new,
-    );
+final workspacesProvider = NotifierProvider<WorkspaceController, WorkspacesState>(WorkspaceController.new);
 
-final activeWorkspaceProvider = Provider<Workspace?>(
-  (ref) => ref.watch(workspacesProvider).active,
-);
+final activeWorkspaceProvider = Provider<Workspace?>((ref) => ref.watch(workspacesProvider).active);

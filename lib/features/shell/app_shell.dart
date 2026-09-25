@@ -57,12 +57,12 @@ class _AppShellState extends ConsumerState<AppShell> {
       const SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true): () => showCommandPalette(context),
       const SingleActivator(LogicalKeyboardKey.backquote, control: true): () => _go(kTerminalRoute),
       const SingleActivator(LogicalKeyboardKey.comma, control: true): () => _go('/settings'),
-      const SingleActivator(LogicalKeyboardKey.keyJ, control: true): () => ref
-          .read(settingsProvider.notifier)
-          .update((s) => s.copyWith(showActivityPanel: !s.showActivityPanel)),
+      const SingleActivator(LogicalKeyboardKey.keyJ, control: true): () =>
+          ref.read(settingsProvider.notifier).update((s) => s.copyWith(showActivityPanel: !s.showActivityPanel)),
       for (final d in kDestinations)
         if (d.shortcutDigit != null)
-          SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + d.shortcutDigit!), control: true): () => _go(d.route),
+          SingleActivator(LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + d.shortcutDigit!), control: true): () =>
+              _go(d.route),
     };
   }
 
@@ -95,7 +95,9 @@ class _AppShellState extends ConsumerState<AppShell> {
         key: _scaffold,
         backgroundColor: Colors.transparent,
         appBar: _CompactAppBar(title: tool?.name ?? current?.label ?? AppInfo.shortName),
-        drawer: Drawer(child: _NavList(current: current, onSelect: _go, dense: false)),
+        drawer: Drawer(
+          child: _NavList(current: current, onSelect: _go, dense: false),
+        ),
         endDrawer: const Drawer(width: 340, child: ActivityPanel()),
         body: content,
         bottomNavigationBar: _BottomNav(current: current, onSelect: _go),
@@ -121,7 +123,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                       panelVisible: showPanel,
                       onActivity: () {
                         if (isExpanded) {
-                          ref.read(settingsProvider.notifier).update((s) => s.copyWith(showActivityPanel: !s.showActivityPanel));
+                          ref
+                              .read(settingsProvider.notifier)
+                              .update((s) => s.copyWith(showActivityPanel: !s.showActivityPanel));
                         } else {
                           _scaffold.currentState?.openEndDrawer();
                         }
@@ -136,7 +140,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                             SizedBox(
                               width: J3Size.activityPanel,
                               child: ActivityPanel(
-                                onClose: () => ref.read(settingsProvider.notifier).update((s) => s.copyWith(showActivityPanel: false)),
+                                onClose: () => ref
+                                    .read(settingsProvider.notifier)
+                                    .update((s) => s.copyWith(showActivityPanel: false)),
                               ),
                             ),
                         ],
@@ -160,7 +166,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
 
     if (!caps.supports(Capability.keyboardShortcuts)) return framed;
-    return CallbackShortcuts(bindings: _shortcuts(), child: Focus(autofocus: true, child: framed));
+    return CallbackShortcuts(
+      bindings: _shortcuts(),
+      child: Focus(autofocus: true, child: framed),
+    );
   }
 }
 
@@ -220,7 +229,9 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const Divider(),
-          Expanded(child: _NavList(current: current, onSelect: onSelect, dense: !expanded)),
+          Expanded(
+            child: _NavList(current: current, onSelect: onSelect, dense: !expanded),
+          ),
         ],
       ),
     );
@@ -238,16 +249,28 @@ class _NavList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <Widget>[
-      for (final d in kDestinations) _NavItem(d: d, selected: d == current, dense: dense, onTap: () => onSelect(d.route)),
-      const Padding(padding: EdgeInsets.symmetric(vertical: J3Space.sm), child: Divider()),
+      for (final d in kDestinations)
+        _NavItem(d: d, selected: d == current, dense: dense, onTap: () => onSelect(d.route)),
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: J3Space.sm),
+        child: Divider(),
+      ),
       _NavItem(
-        d: const NavDestination(label: 'Terminal', route: kTerminalRoute, icon: Icons.terminal, selectedIcon: Icons.terminal),
+        d: const NavDestination(
+          label: 'Terminal',
+          route: kTerminalRoute,
+          icon: Icons.terminal,
+          selectedIcon: Icons.terminal,
+        ),
         selected: false,
         dense: dense,
         onTap: () => onSelect(kTerminalRoute),
       ),
     ];
-    return ListView(padding: const EdgeInsets.symmetric(vertical: J3Space.sm), children: items);
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: J3Space.sm),
+      children: items,
+    );
   }
 }
 
@@ -275,7 +298,10 @@ class _NavItemState extends State<_NavItem> {
     final tile = AnimatedContainer(
       duration: fx.motion(J3Durations.fast),
       margin: const EdgeInsets.symmetric(horizontal: J3Space.sm, vertical: 2),
-      padding: EdgeInsets.symmetric(horizontal: widget.dense ? 0 : J3Space.md, vertical: widget.dense ? J3Space.sm : 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.dense ? 0 : J3Space.md,
+        vertical: widget.dense ? J3Space.sm : 10,
+      ),
       decoration: BoxDecoration(
         color: sel ? J3Colors.selection : (_hover ? J3Colors.surfaceRaised : Colors.transparent),
         borderRadius: J3Radius.medium,
@@ -283,7 +309,9 @@ class _NavItemState extends State<_NavItem> {
           color: _focus ? fx.accentColor : (sel ? fx.accentColor.withValues(alpha: 0.5) : Colors.transparent),
           width: _focus ? 2 : 1,
         ),
-        boxShadow: sel && fx.glow ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.18), blurRadius: fx.glowBlur(12))] : null,
+        boxShadow: sel && fx.glow
+            ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.18), blurRadius: fx.glowBlur(12))]
+            : null,
       ),
       child: widget.dense
           ? Column(
@@ -302,7 +330,13 @@ class _NavItemState extends State<_NavItem> {
               children: [
                 icon,
                 const SizedBox(width: J3Space.md),
-                Expanded(child: Text(widget.d.label, style: J3Type.label.copyWith(color: color), overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  child: Text(
+                    widget.d.label,
+                    style: J3Type.label.copyWith(color: color),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 if (widget.d.shortcutDigit != null && _hover)
                   Text('^${widget.d.shortcutDigit}', style: J3Type.codeSmall.copyWith(fontSize: 10)),
               ],
@@ -361,7 +395,11 @@ class _TopBar extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (section != null) Text('// ${section!.toUpperCase()}', style: J3Type.kicker.copyWith(fontSize: 10, color: fx.accentText)),
+                if (section != null)
+                  Text(
+                    '// ${section!.toUpperCase()}',
+                    style: J3Type.kicker.copyWith(fontSize: 10, color: fx.accentText),
+                  ),
                 Text(title, style: J3Type.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
@@ -376,7 +414,9 @@ class _TopBar extends ConsumerWidget {
             label: Text('$running'),
             backgroundColor: fx.accentColor,
             child: IconButton(
-              tooltip: showPanelToggle ? (panelVisible ? 'Hide activity (Ctrl+J)' : 'Show activity (Ctrl+J)') : 'Activity',
+              tooltip: showPanelToggle
+                  ? (panelVisible ? 'Hide activity (Ctrl+J)' : 'Show activity (Ctrl+J)')
+                  : 'Activity',
               onPressed: onActivity,
               isSelected: panelVisible,
               icon: Icon(panelVisible ? Icons.view_sidebar : Icons.view_sidebar_outlined),
@@ -411,10 +451,15 @@ class _SearchLauncher extends StatelessWidget {
             children: [
               Icon(Icons.search, size: 18, color: fx.accentText),
               const SizedBox(width: J3Space.sm),
-              Expanded(child: Text('Search tools and actions', style: J3Type.bodySecondary, overflow: TextOverflow.ellipsis)),
+              Expanded(
+                child: Text('Search tools and actions', style: J3Type.bodySecondary, overflow: TextOverflow.ellipsis),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(borderRadius: J3Radius.small, border: Border.all(color: J3Colors.borderStrong)),
+                decoration: BoxDecoration(
+                  borderRadius: J3Radius.small,
+                  border: Border.all(color: J3Colors.borderStrong),
+                ),
                 child: Text('Ctrl+K', style: J3Type.codeSmall.copyWith(fontSize: 10.5)),
               ),
             ],
@@ -450,7 +495,11 @@ class WorkspaceChip extends ConsumerWidget {
             value: w.id,
             child: Row(
               children: [
-                Icon(w.id == state.activeId ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 16, color: fx.accentText),
+                Icon(
+                  w.id == state.activeId ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  size: 16,
+                  color: fx.accentText,
+                ),
                 const SizedBox(width: J3Space.sm),
                 Expanded(child: Text(w.name, overflow: TextOverflow.ellipsis)),
                 const SizedBox(width: J3Space.sm),
@@ -543,10 +592,18 @@ class _BottomNav extends StatelessWidget {
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       destinations: const [
         NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Home'),
-        NavigationDestination(icon: Icon(Icons.folder_open_outlined), selectedIcon: Icon(Icons.folder_open), label: 'Workspaces'),
+        NavigationDestination(
+          icon: Icon(Icons.folder_open_outlined),
+          selectedIcon: Icon(Icons.folder_open),
+          label: 'Workspaces',
+        ),
         NavigationDestination(icon: Icon(Icons.extension_outlined), selectedIcon: Icon(Icons.extension), label: 'Mods'),
         NavigationDestination(icon: Icon(Icons.apps_outlined), selectedIcon: Icon(Icons.apps), label: 'Tools'),
-        NavigationDestination(icon: Icon(Icons.monitor_heart_outlined), selectedIcon: Icon(Icons.monitor_heart), label: 'Activity'),
+        NavigationDestination(
+          icon: Icon(Icons.monitor_heart_outlined),
+          selectedIcon: Icon(Icons.monitor_heart),
+          label: 'Activity',
+        ),
       ],
     );
   }

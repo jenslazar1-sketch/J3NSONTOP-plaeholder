@@ -32,12 +32,7 @@ class ToolDefinition {
     required this.icon,
     required this.builder,
     this.keywords = const [],
-    this.platforms = const {
-      AppPlatform.android,
-      AppPlatform.ios,
-      AppPlatform.windows,
-      AppPlatform.linux,
-    },
+    this.platforms = const {AppPlatform.android, AppPlatform.ios, AppPlatform.windows, AppPlatform.linux},
     this.requiredCapabilities = const {},
     this.worksOffline = true,
   });
@@ -60,8 +55,7 @@ class ToolDefinition {
   String get route => '/tool/$id';
 
   bool availableOn(CapabilityMatrix caps) =>
-      platforms.contains(caps.platform) &&
-      caps.supportsAll(requiredCapabilities);
+      platforms.contains(caps.platform) && caps.supportsAll(requiredCapabilities);
 }
 
 /// Custom landing page for a section (otherwise a generic tool grid).
@@ -75,12 +69,7 @@ class SectionLanding {
 /// Everything a feature contributes to the app.
 @immutable
 class FeatureModule {
-  const FeatureModule({
-    required this.id,
-    this.tools = const [],
-    this.landings = const [],
-    this.commands = const [],
-  });
+  const FeatureModule({required this.id, this.tools = const [], this.landings = const [], this.commands = const []});
 
   final String id;
   final List<ToolDefinition> tools;

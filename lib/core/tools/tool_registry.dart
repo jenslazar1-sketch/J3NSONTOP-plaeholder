@@ -63,11 +63,7 @@ class ToolRegistry {
   /// Ranks tools against [query] by name, keywords and description.
   /// Empty query returns nothing (callers show favourites/recents instead).
   List<ToolMatch> search(String query, {CapabilityMatrix? caps, int limit = 50}) {
-    final terms = query
-        .toLowerCase()
-        .split(RegExp(r'\s+'))
-        .where((t) => t.isNotEmpty)
-        .toList();
+    final terms = query.toLowerCase().split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
     if (terms.isEmpty) return const [];
     final hits = <ToolMatch>[];
     for (final t in _byId.values) {

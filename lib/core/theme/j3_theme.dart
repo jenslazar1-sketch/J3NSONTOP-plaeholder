@@ -79,11 +79,7 @@ abstract final class J3Theme {
       highlightColor: a.withValues(alpha: 0.12),
       splashColor: a.withValues(alpha: 0.16),
       dividerColor: J3Colors.border,
-      dividerTheme: const DividerThemeData(
-        color: J3Colors.border,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: const DividerThemeData(color: J3Colors.border, thickness: 1, space: 1),
       iconTheme: const IconThemeData(color: J3Colors.textSecondary, size: 20),
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -183,16 +179,11 @@ abstract final class J3Theme {
         ),
         checkColor: const WidgetStatePropertyAll(J3Colors.text),
         side: WidgetStateBorderSide.resolveWith(
-          (s) => BorderSide(
-            color: s.contains(WidgetState.selected) ? a : J3Colors.borderStrong,
-            width: 1.5,
-          ),
+          (s) => BorderSide(color: s.contains(WidgetState.selected) ? a : J3Colors.borderStrong, width: 1.5),
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? a : J3Colors.borderStrong,
-        ),
+        fillColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? a : J3Colors.borderStrong),
       ),
       sliderTheme: SliderThemeData(
         activeTrackColor: a,
@@ -224,14 +215,10 @@ abstract final class J3Theme {
           ),
           foregroundColor: const WidgetStatePropertyAll(J3Colors.text),
           side: WidgetStateProperty.resolveWith(
-            (s) => BorderSide(
-              color: s.contains(WidgetState.selected) ? a : J3Colors.border,
-            ),
+            (s) => BorderSide(color: s.contains(WidgetState.selected) ? a : J3Colors.border),
           ),
           textStyle: const WidgetStatePropertyAll(J3Type.label),
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: J3Radius.medium),
-          ),
+          shape: const WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: J3Radius.medium)),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -303,20 +290,13 @@ abstract final class J3Theme {
         indicatorColor: accent.accentDeep,
         height: 68,
         labelTextStyle: WidgetStateProperty.resolveWith(
-          (s) => J3Type.caption.copyWith(
-            color: s.contains(WidgetState.selected) ? J3Colors.text : J3Colors.textMuted,
-          ),
+          (s) => J3Type.caption.copyWith(color: s.contains(WidgetState.selected) ? J3Colors.text : J3Colors.textMuted),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
-          (s) => IconThemeData(
-            color: s.contains(WidgetState.selected) ? J3Colors.text : J3Colors.textMuted,
-          ),
+          (s) => IconThemeData(color: s.contains(WidgetState.selected) ? J3Colors.text : J3Colors.textMuted),
         ),
       ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: J3Colors.surface,
-        surfaceTintColor: Colors.transparent,
-      ),
+      drawerTheme: const DrawerThemeData(backgroundColor: J3Colors.surface, surfaceTintColor: Colors.transparent),
       appBarTheme: const AppBarTheme(
         backgroundColor: J3Colors.background,
         foregroundColor: J3Colors.text,

@@ -10,11 +10,7 @@ abstract final class AppInfo {
 
   /// The same full name split with deliberate line breaks so it never clips
   /// on narrow screens. Rendered one line per entry.
-  static const List<String> fullNameLines = <String>[
-    'J3NSONTOP',
-    'BIGGEST',
-    'MULTITOOL MADE',
-  ];
+  static const List<String> fullNameLines = <String>['J3NSONTOP', 'BIGGEST', 'MULTITOOL MADE'];
 
   /// Application identifier used for the Android applicationId/namespace,
   /// the iOS bundle identifier and signing documentation.

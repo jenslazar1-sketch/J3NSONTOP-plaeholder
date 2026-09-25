@@ -98,8 +98,7 @@ class PlatformFileAccessService extends FileAccessService {
       picked = one == null ? const [] : [one];
     }
     if (picked.isEmpty) return const [];
-    final dest = destinationDir ??
-        p.join(_paths.pickedDir, DateTime.now().microsecondsSinceEpoch.toString());
+    final dest = destinationDir ?? p.join(_paths.pickedDir, DateTime.now().microsecondsSinceEpoch.toString());
     await Directory(dest).create(recursive: true);
     final out = <PickedLocalFile>[];
     for (final f in picked) {
@@ -141,9 +140,7 @@ class PlatformFileAccessService extends FileAccessService {
         mimeType: mimeType,
       );
       if (uri == null) return const ExportResult.cancelled();
-      return ExportResult.saved(
-        uri.scheme == 'file' ? uri.toFilePath() : uri.toString(),
-      );
+      return ExportResult.saved(uri.scheme == 'file' ? uri.toFilePath() : uri.toString());
     } on PlatformException catch (e) {
       return ExportResult.failed(e.message ?? e.code);
     } catch (e) {
@@ -189,8 +186,5 @@ class PlatformFileAccessService extends FileAccessService {
 }
 
 final fileAccessProvider = Provider<FileAccessService>(
-  (ref) => PlatformFileAccessService(
-    ref.watch(appPathsProvider),
-    ref.watch(capabilitiesProvider),
-  ),
+  (ref) => PlatformFileAccessService(ref.watch(appPathsProvider), ref.watch(capabilitiesProvider)),
 );

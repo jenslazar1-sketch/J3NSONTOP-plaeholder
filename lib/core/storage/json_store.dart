@@ -5,8 +5,7 @@ import 'dart:io';
 import 'atomic_file.dart';
 
 /// Upgrades the `data` payload of a document from version `n` to `n + 1`.
-typedef JsonMigration =
-    Map<String, dynamic> Function(Map<String, dynamic> data);
+typedef JsonMigration = Map<String, dynamic> Function(Map<String, dynamic> data);
 
 /// Describes how a stored document was loaded.
 enum LoadOutcome {
@@ -34,13 +33,7 @@ enum LoadOutcome {
 }
 
 class LoadResult {
-  const LoadResult({
-    required this.data,
-    required this.outcome,
-    this.fromVersion,
-    this.backupPath,
-    this.message,
-  });
+  const LoadResult({required this.data, required this.outcome, this.fromVersion, this.backupPath, this.message});
 
   final Map<String, dynamic> data;
   final LoadOutcome outcome;
@@ -147,11 +140,7 @@ class JsonDocumentStore {
       );
     }
     if (version == currentVersion) {
-      return LoadResult(
-        data: data,
-        outcome: LoadOutcome.loaded,
-        fromVersion: version,
-      );
+      return LoadResult(data: data, outcome: LoadOutcome.loaded, fromVersion: version);
     }
     // Migrate step by step. Keep a copy of the pre-migration file.
     var migrated = data;
@@ -244,13 +233,7 @@ abstract final class JsonRead {
     return v is bool ? v : fallback;
   }
 
-  static double number(
-    Map<String, dynamic> m,
-    String key,
-    double fallback, {
-    double? min,
-    double? max,
-  }) {
+  static double number(Map<String, dynamic> m, String key, double fallback, {double? min, double? max}) {
     final v = m[key];
     if (v is! num || v.isNaN) return fallback;
     var d = v.toDouble();
@@ -274,12 +257,7 @@ abstract final class JsonRead {
     return v is String ? v : null;
   }
 
-  static T enumByName<T extends Enum>(
-    Map<String, dynamic> m,
-    String key,
-    List<T> values,
-    T fallback,
-  ) {
+  static T enumByName<T extends Enum>(Map<String, dynamic> m, String key, List<T> values, T fallback) {
     final v = m[key];
     if (v is! String) return fallback;
     for (final e in values) {
@@ -294,10 +272,7 @@ abstract final class JsonRead {
     return v.whereType<String>().toList();
   }
 
-  static List<Map<String, dynamic>> objectList(
-    Map<String, dynamic> m,
-    String key,
-  ) {
+  static List<Map<String, dynamic>> objectList(Map<String, dynamic> m, String key) {
     final v = m[key];
     if (v is! List) return <Map<String, dynamic>>[];
     return v.whereType<Map<String, dynamic>>().toList();

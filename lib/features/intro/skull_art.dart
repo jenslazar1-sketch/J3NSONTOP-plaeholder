@@ -17,24 +17,24 @@ const int kSkullColumns = 41;
 
 /// Cranium layer: rows 0..17. The last row holds the upper teeth.
 const List<String> kSkullCranium = <String>[
-  r"             _.--~~~~~~~--._",
+  r'             _.--~~~~~~~--._',
   r"         _.-~'   '     ' , '~-._",
   r"      .-'   .             \ .   '-.",
   r"    .'   '                /    '   '.",
   r"  .'                       \_        '.",
-  r" /    .                      \    .    \",
-  r"|                                       |",
-  r"|                                       |",
-  r"|   .-~~~~~~-._           _.-~~~~~~-.   |",
+  r' /    .                      \    .    \',
+  r'|                                       |',
+  r'|                                       |',
+  r'|   .-~~~~~~-._           _.-~~~~~~-.   |',
   r"| .'           '-.     .-'           '. |",
-  r"| |               \   /               | |",
-  r"| |                | |                | |",
+  r'| |               \   /               | |',
+  r'| |                | |                | |',
   r" \'.              .' '.              .'/",
   r"  \ '-._________.-'   '-._________.-' /",
   r"   '.              / \              .'",
   r"    '.            /_^_\            .'",
   r"      '-._______________________.-'",
-  r"        | |_|_|_|_|_|_|_|_|_|_| |",
+  r'        | |_|_|_|_|_|_|_|_|_|_| |',
 ];
 
 /// Jaw layer: lower teeth, mandible and chin. Drawn directly under the
@@ -42,30 +42,24 @@ const List<String> kSkullCranium = <String>[
 const List<String> kSkullJaw = <String>[
   r'        | |"|"|"|"|"|"|"|"|"|"| |',
   r"        | '-'-'-'-'-'-'-'-'-'-' |",
-  r"        \                       /",
+  r'        \                       /',
   r"         '.                   .'",
   r"           '-._____________.-'",
 ];
 
 /// Eye socket centres in (column, row) grid units, used to place the glow.
-const List<(double, double)> kSkullEyeCentres = <(double, double)>[
-  (10.0, 10.6),
-  (30.0, 10.6),
-];
+const List<(double, double)> kSkullEyeCentres = <(double, double)>[(10.0, 10.6), (30.0, 10.6)];
 
 /// Hinge point of the jaw in grid units (the top centre of the jaw layer).
 const (double, double) kSkullJawHinge = (20.5, 0.0);
 
 /// A compact skull used for the rail logo, empty states and the easter egg.
 const List<String> kMiniSkullCranium = <String>[
-  r"   _.---._",
+  r'   _.---._',
   r" .'       '.",
-  r"| .-.   .-. |",
+  r'| .-.   .-. |',
   r"| '-' ^ '-' |",
   r" '._|_|_|_.'",
 ];
 
-const List<String> kMiniSkullJaw = <String>[
-  r'   |"|"|"|',
-  r"   '-----'",
-];
+const List<String> kMiniSkullJaw = <String>[r'   |"|"|"|', r"   '-----'"];

@@ -60,7 +60,11 @@ class ActivityPanel extends ConsumerWidget {
                   icon: const Icon(Icons.open_in_full, size: 18),
                 ),
                 if (onClose != null)
-                  IconButton(tooltip: 'Hide activity panel', onPressed: onClose, icon: const Icon(Icons.close, size: 18)),
+                  IconButton(
+                    tooltip: 'Hide activity panel',
+                    onPressed: onClose,
+                    icon: const Icon(Icons.close, size: 18),
+                  ),
               ],
             ),
           ),
@@ -107,7 +111,9 @@ class OperationTile extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(op.title, style: J3Type.label, maxLines: 1, overflow: TextOverflow.ellipsis)),
+              Expanded(
+                child: Text(op.title, style: J3Type.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
               StatusBadge(kind: kind, text: op.status.label, dense: true),
             ],
           ),

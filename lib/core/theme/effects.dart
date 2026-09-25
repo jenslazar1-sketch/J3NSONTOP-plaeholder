@@ -88,16 +88,7 @@ class EffectsConfig {
       other.volume == volume;
 
   @override
-  int get hashCode => Object.hash(
-    reduceMotion,
-    intensity,
-    scanlines,
-    particles,
-    glow,
-    accent,
-    sound,
-    volume,
-  );
+  int get hashCode => Object.hash(reduceMotion, intensity, scanlines, particles, glow, accent, sound, volume);
 }
 
 class J3Effects extends InheritedWidget {
@@ -106,8 +97,7 @@ class J3Effects extends InheritedWidget {
   final EffectsConfig config;
 
   static EffectsConfig of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<J3Effects>()?.config ??
-      EffectsConfig.fallback;
+      context.dependOnInheritedWidgetOfExactType<J3Effects>()?.config ?? EffectsConfig.fallback;
 
   @override
   bool updateShouldNotify(J3Effects oldWidget) => oldWidget.config != config;

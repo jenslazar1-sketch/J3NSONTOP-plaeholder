@@ -56,7 +56,10 @@ class _WorkspaceBrowser extends StatefulWidget {
 }
 
 class _WorkspaceBrowserState extends State<_WorkspaceBrowser> {
-  late String _dir = widget.initialDir != null && SafePath.isWithin(widget.workspace.rootPath, widget.initialDir!) && Directory(widget.initialDir!).existsSync()
+  late String _dir =
+      widget.initialDir != null &&
+          SafePath.isWithin(widget.workspace.rootPath, widget.initialDir!) &&
+          Directory(widget.initialDir!).existsSync()
       ? widget.initialDir!
       : widget.workspace.rootPath;
   List<FileSystemEntity>? _entries;
@@ -150,7 +153,10 @@ class _WorkspaceBrowserState extends State<_WorkspaceBrowser> {
                             title: Text(name, style: J3Type.code),
                             onTap: () => _open(e.path),
                             trailing: widget.mode == BrowseMode.pickFolder
-                                ? TextButton(onPressed: () => Navigator.of(context).pop(e.path), child: const Text('Select'))
+                                ? TextButton(
+                                    onPressed: () => Navigator.of(context).pop(e.path),
+                                    child: const Text('Select'),
+                                  )
                                 : const Icon(Icons.chevron_right),
                           );
                         }

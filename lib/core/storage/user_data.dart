@@ -66,14 +66,12 @@ class UserData {
   /// Terminal command history (newest last), capped.
   final List<String> commandHistory;
 
-  List<ToolPreset> presetsFor(String toolId) =>
-      presets.where((p) => p.toolId == toolId).toList();
+  List<ToolPreset> presetsFor(String toolId) => presets.where((p) => p.toolId == toolId).toList();
 
   Map<String, dynamic> toJson() => {
     'favorites': favorites,
     'recentTools': [
-      for (final r in recentTools)
-        {'toolId': r.toolId, 'openedAt': r.openedAt.toUtc().toIso8601String()},
+      for (final r in recentTools) {'toolId': r.toolId, 'openedAt': r.openedAt.toUtc().toIso8601String()},
     ],
     'presets': [for (final p in presets) p.toJson()],
     'commandHistory': commandHistory,
@@ -85,15 +83,9 @@ class UserData {
       recentTools: [
         for (final m in JsonRead.objectList(j, 'recentTools'))
           if (m['toolId'] is String)
-            RecentTool(
-              m['toolId'] as String,
-              JsonRead.dateTime(m, 'openedAt') ?? DateTime.now(),
-            ),
+            RecentTool(m['toolId'] as String, JsonRead.dateTime(m, 'openedAt') ?? DateTime.now()),
       ],
-      presets: [
-        for (final m in JsonRead.objectList(j, 'presets'))
-          ?ToolPreset.fromJson(m),
-      ],
+      presets: [for (final m in JsonRead.objectList(j, 'presets')) ?ToolPreset.fromJson(m)],
       commandHistory: JsonRead.stringList(j, 'commandHistory'),
     );
   }
@@ -148,26 +140,17 @@ class UserDataController extends Notifier<UserData> {
   }
 
   Future<void> savePreset(ToolPreset preset) {
-    final presets = [
-      ...state.presets.where((p) => p.id != preset.id),
-      preset,
-    ];
+    final presets = [...state.presets.where((p) => p.id != preset.id), preset];
     return _set(state.copyWith(presets: presets));
   }
 
-  Future<void> deletePreset(String presetId) => _set(
-    state.copyWith(
-      presets: state.presets.where((p) => p.id != presetId).toList(),
-    ),
-  );
+  Future<void> deletePreset(String presetId) =>
+      _set(state.copyWith(presets: state.presets.where((p) => p.id != presetId).toList()));
 
   Future<void> recordCommand(String line) {
     final trimmed = line.trim();
     if (trimmed.isEmpty) return Future.value();
-    final history = [
-      ...state.commandHistory.where((c) => c != trimmed),
-      trimmed,
-    ];
+    final history = [...state.commandHistory.where((c) => c != trimmed), trimmed];
     final capped = history.length > commandHistoryLimit
         ? history.sublist(history.length - commandHistoryLimit)
         : history;
@@ -175,17 +158,14 @@ class UserDataController extends Notifier<UserData> {
   }
 }
 
-final userDataProvider = NotifierProvider<UserDataController, UserData>(
-  UserDataController.new,
-);
+final userDataProvider = NotifierProvider<UserDataController, UserData>(UserDataController.new);
 
 /// Namespaced, JSON-compatible storage for feature-owned data (palettes,
 /// HTTP history, saved patterns...). Each feature owns its key and embeds
 /// its own `"v"` field if it needs to migrate its payload later.
 class FeatureDataController extends Notifier<Map<String, dynamic>> {
   @override
-  Map<String, dynamic> build() =>
-      Map<String, dynamic>.from(ref.watch(bootDataProvider).features.data);
+  Map<String, dynamic> build() => Map<String, dynamic>.from(ref.watch(bootDataProvider).features.data);
 
   Object? read(String key) => state[key];
 
@@ -201,7 +181,4 @@ class FeatureDataController extends Notifier<Map<String, dynamic>> {
   }
 }
 
-final featureDataProvider =
-    NotifierProvider<FeatureDataController, Map<String, dynamic>>(
-      FeatureDataController.new,
-    );
+final featureDataProvider = NotifierProvider<FeatureDataController, Map<String, dynamic>>(FeatureDataController.new);

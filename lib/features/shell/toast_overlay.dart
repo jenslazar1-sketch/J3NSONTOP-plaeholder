@@ -114,7 +114,12 @@ class _ToastState extends ConsumerState<_Toast> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(kind.label, style: J3Type.codeSmall.copyWith(color: kind.color)),
-                        Text(widget.notice.message, style: J3Type.bodySecondary.copyWith(color: J3Colors.text), maxLines: 4, overflow: TextOverflow.ellipsis),
+                        Text(
+                          widget.notice.message,
+                          style: J3Type.bodySecondary.copyWith(color: J3Colors.text),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),

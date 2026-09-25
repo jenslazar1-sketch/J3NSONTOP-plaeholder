@@ -140,11 +140,7 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (widget.busy)
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: fg),
-          )
+          SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
         else if (widget.icon != null)
           Icon(widget.icon, size: 18, color: fg),
         if (widget.busy || widget.icon != null) const SizedBox(width: J3Space.sm),
@@ -182,7 +178,13 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
             children: [
               Transform.translate(
                 offset: Offset(-dx, 0),
-                child: Opacity(opacity: 0.6, child: ColorFiltered(colorFilter: const ColorFilter.mode(Color(0xFF00E5FF), BlendMode.modulate), child: child)),
+                child: Opacity(
+                  opacity: 0.6,
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.mode(Color(0xFF00E5FF), BlendMode.modulate),
+                    child: child,
+                  ),
+                ),
               ),
               Transform.translate(offset: Offset(dx, 0), child: child),
             ],
@@ -191,11 +193,7 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
       ),
     );
 
-    body = AnimatedScale(
-      scale: _pressed ? 0.97 : 1,
-      duration: fx.motion(J3Durations.instant),
-      child: body,
-    );
+    body = AnimatedScale(scale: _pressed ? 0.97 : 1, duration: fx.motion(J3Durations.instant), child: body);
 
     Widget result = FocusableActionDetector(
       enabled: _enabled,
@@ -207,10 +205,12 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
         SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
       },
       actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-          _activate();
-          return null;
-        }),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            _activate();
+            return null;
+          },
+        ),
       },
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -218,13 +218,7 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
         onTapUp: _enabled ? (_) => setState(() => _pressed = false) : null,
         onTapCancel: () => setState(() => _pressed = false),
         onTap: _activate,
-        child: Semantics(
-          button: true,
-          enabled: _enabled,
-          label: widget.label,
-          excludeSemantics: true,
-          child: body,
-        ),
+        child: Semantics(button: true, enabled: _enabled, label: widget.label, excludeSemantics: true, child: body),
       ),
     );
 

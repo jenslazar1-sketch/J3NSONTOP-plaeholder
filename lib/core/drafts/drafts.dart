@@ -10,10 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// final input = ref.watch(draftTextProvider('dev.base64/input'));
 /// TextField(controller: input)
 /// ```
-final draftTextProvider = Provider.family<TextEditingController, String>((
-  ref,
-  key,
-) {
+final draftTextProvider = Provider.family<TextEditingController, String>((ref, key) {
   final controller = TextEditingController();
   ref.onDispose(controller.dispose);
   return controller;
@@ -31,9 +28,7 @@ class DraftValue extends Notifier<Object?> {
   void set(Object? value) => state = value;
 }
 
-final draftValueProvider = NotifierProvider.family<DraftValue, Object?, String>(
-  DraftValue.new,
-);
+final draftValueProvider = NotifierProvider.family<DraftValue, Object?, String>(DraftValue.new);
 
 extension DraftRead on WidgetRef {
   /// Reads a typed draft value with a fallback.
@@ -42,6 +37,5 @@ extension DraftRead on WidgetRef {
     return v is T ? v : fallback;
   }
 
-  void setDraft(String key, Object? value) =>
-      read(draftValueProvider(key).notifier).set(value);
+  void setDraft(String key, Object? value) => read(draftValueProvider(key).notifier).set(value);
 }

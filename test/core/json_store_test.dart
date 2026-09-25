@@ -93,7 +93,13 @@ void main() {
 
   test('document from a newer app version is preserved, not overwritten', () async {
     final s = store('n.json');
-    File(s.path).writeAsStringSync(jsonEncode({'schema': 'test.n.json', 'version': 9, 'data': {'future': true}}));
+    File(s.path).writeAsStringSync(
+      jsonEncode({
+        'schema': 'test.n.json',
+        'version': 9,
+        'data': {'future': true},
+      }),
+    );
     final r = await s.load();
     expect(r.outcome, LoadOutcome.recoveredFromNewerVersion);
     expect(File(r.backupPath!).readAsStringSync(), contains('future'));
@@ -101,7 +107,13 @@ void main() {
 
   test('interrupted save leaves a recoverable temp file', () async {
     final s = store('t.json');
-    File('${s.path}.tmp').writeAsStringSync(jsonEncode({'schema': 'test.t.json', 'version': 1, 'data': {'value': 'from-temp'}}));
+    File('${s.path}.tmp').writeAsStringSync(
+      jsonEncode({
+        'schema': 'test.t.json',
+        'version': 1,
+        'data': {'value': 'from-temp'},
+      }),
+    );
     final r = await s.load();
     expect(r.outcome, LoadOutcome.recoveredFromTemp);
     expect(r.data['value'], 'from-temp');
@@ -109,7 +121,9 @@ void main() {
 
   test('concurrent saves are serialised and the last one wins', () async {
     final s = store('s.json');
-    await Future.wait([for (var i = 0; i < 25; i++) s.save({'i': i})]);
+    await Future.wait([
+      for (var i = 0; i < 25; i++) s.save({'i': i}),
+    ]);
     final r = await s.load();
     expect(r.data['i'], 24);
     expect(File('${s.path}.tmp').existsSync(), isFalse);

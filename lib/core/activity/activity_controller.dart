@@ -26,16 +26,10 @@ class ActivityState {
   /// Pending toasts (consumed by the shell's toast overlay).
   final List<Notice> notices;
 
-  List<OperationRecord> get running =>
-      operations.where((o) => o.status == OperationStatus.running).toList();
+  List<OperationRecord> get running => operations.where((o) => o.status == OperationStatus.running).toList();
 
   int countToday(DateTime now) => operations
-      .where(
-        (o) =>
-            o.startedAt.year == now.year &&
-            o.startedAt.month == now.month &&
-            o.startedAt.day == now.day,
-      )
+      .where((o) => o.startedAt.year == now.year && o.startedAt.month == now.month && o.startedAt.day == now.day)
       .length;
 }
 
@@ -54,11 +48,7 @@ class OperationHandle {
     if (_finished) return;
     _controller._patch(
       id,
-      (r) => r.copyWith(
-        progress: fraction?.clamp(0.0, 1.0),
-        clearProgress: fraction == null,
-        progressMessage: message,
-      ),
+      (r) => r.copyWith(progress: fraction?.clamp(0.0, 1.0), clearProgress: fraction == null, progressMessage: message),
     );
   }
 
@@ -67,30 +57,13 @@ class OperationHandle {
     Map<String, num> counts = const {},
     List<String> details = const [],
     bool notify = true,
-  }) => _finish(
-    OperationStatus.succeeded,
-    summary: summary,
-    counts: counts,
-    details: details,
-    notify: notify,
-  );
+  }) => _finish(OperationStatus.succeeded, summary: summary, counts: counts, details: details, notify: notify);
 
-  void warn(
-    String summary, {
-    Map<String, num> counts = const {},
-    List<String> details = const [],
-  }) => _finish(
-    OperationStatus.warning,
-    summary: summary,
-    counts: counts,
-    details: details,
-  );
+  void warn(String summary, {Map<String, num> counts = const {}, List<String> details = const []}) =>
+      _finish(OperationStatus.warning, summary: summary, counts: counts, details: details);
 
-  void fail(Object error, {List<String> details = const []}) => _finish(
-    OperationStatus.failed,
-    error: error.toString(),
-    details: details,
-  );
+  void fail(Object error, {List<String> details = const []}) =>
+      _finish(OperationStatus.failed, error: error.toString(), details: details);
 
   void cancelled() => _finish(OperationStatus.cancelled, summary: 'Cancelled');
 
@@ -137,10 +110,7 @@ class ActivityController extends Notifier<ActivityState> {
       }
     }
     ops.sort((a, b) => b.startedAt.compareTo(a.startedAt));
-    final notices = <Notice>[
-      for (final n in boot.notices)
-        Notice(NoticeKind.warning, n, id: ++_noticeSeq),
-    ];
+    final notices = <Notice>[for (final n in boot.notices) Notice(NoticeKind.warning, n, id: ++_noticeSeq)];
     return ActivityState(operations: ops, notices: notices);
   }
 
@@ -163,10 +133,7 @@ class ActivityController extends Notifier<ActivityState> {
       workspaceId: workspaceId,
       cancellable: cancellable,
     );
-    state = ActivityState(
-      operations: [record, ...state.operations],
-      notices: state.notices,
-    );
+    state = ActivityState(operations: [record, ...state.operations], notices: state.notices);
     return OperationHandle._(this, id, token);
   }
 
@@ -182,20 +149,11 @@ class ActivityController extends Notifier<ActivityState> {
     bool cancellable = false,
     bool notify = true,
   }) async {
-    final op = start(
-      toolId: toolId,
-      title: title,
-      workspaceId: workspaceId,
-      cancellable: cancellable,
-    );
+    final op = start(toolId: toolId, title: title, workspaceId: workspaceId, cancellable: cancellable);
     try {
       final result = await body(op);
       if (!op.isFinished) {
-        op.succeed(
-          summary?.call(result) ?? 'Completed',
-          counts: counts?.call(result) ?? const {},
-          notify: notify,
-        );
+        op.succeed(summary?.call(result) ?? 'Completed', counts: counts?.call(result) ?? const {}, notify: notify);
       }
       return result;
     } on OperationCancelled {
@@ -212,30 +170,25 @@ class ActivityController extends Notifier<ActivityState> {
   void notify(NoticeKind kind, String message) {
     state = ActivityState(
       operations: state.operations,
-      notices: [...state.notices, Notice(kind, message, id: ++_noticeSeq)],
+      notices: [
+        ...state.notices,
+        Notice(kind, message, id: ++_noticeSeq),
+      ],
     );
   }
 
   void dismissNotice(int id) {
-    state = ActivityState(
-      operations: state.operations,
-      notices: state.notices.where((n) => n.id != id).toList(),
-    );
+    state = ActivityState(operations: state.operations, notices: state.notices.where((n) => n.id != id).toList());
   }
 
   Future<void> clearHistory() async {
-    state = ActivityState(
-      operations: state.running,
-      notices: state.notices,
-    );
+    state = ActivityState(operations: state.running, notices: state.notices);
     await _persist();
   }
 
   void _patch(String id, OperationRecord Function(OperationRecord) f) {
     state = ActivityState(
-      operations: [
-        for (final o in state.operations) o.id == id ? f(o) : o,
-      ],
+      operations: [for (final o in state.operations) o.id == id ? f(o) : o],
       notices: state.notices,
     );
   }
@@ -291,6 +244,4 @@ class ActivityController extends Notifier<ActivityState> {
   }
 }
 
-final activityProvider = NotifierProvider<ActivityController, ActivityState>(
-  ActivityController.new,
-);
+final activityProvider = NotifierProvider<ActivityController, ActivityState>(ActivityController.new);

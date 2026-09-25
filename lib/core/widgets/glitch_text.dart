@@ -59,7 +59,13 @@ class _GlitchTextState extends State<GlitchText> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final fx = context.effects;
-    final base = Text(widget.text, style: widget.style, textAlign: widget.textAlign, maxLines: widget.maxLines, overflow: widget.maxLines == null ? null : TextOverflow.ellipsis);
+    final base = Text(
+      widget.text,
+      style: widget.style,
+      textAlign: widget.textAlign,
+      maxLines: widget.maxLines,
+      overflow: widget.maxLines == null ? null : TextOverflow.ellipsis,
+    );
     if (!fx.decorativeMotion) return base;
     return AnimatedBuilder(
       animation: _c,
@@ -72,11 +78,21 @@ class _GlitchTextState extends State<GlitchText> with SingleTickerProviderStateM
           children: [
             Transform.translate(
               offset: Offset(-strength + jitter, 0),
-              child: Text(widget.text, style: widget.style.copyWith(color: const Color(0xFF00E5FF).withValues(alpha: 0.55)), textAlign: widget.textAlign, maxLines: widget.maxLines),
+              child: Text(
+                widget.text,
+                style: widget.style.copyWith(color: const Color(0xFF00E5FF).withValues(alpha: 0.55)),
+                textAlign: widget.textAlign,
+                maxLines: widget.maxLines,
+              ),
             ),
             Transform.translate(
               offset: Offset(strength, jitter * 0.5),
-              child: Text(widget.text, style: widget.style.copyWith(color: fx.accentColor.withValues(alpha: 0.8)), textAlign: widget.textAlign, maxLines: widget.maxLines),
+              child: Text(
+                widget.text,
+                style: widget.style.copyWith(color: fx.accentColor.withValues(alpha: 0.8)),
+                textAlign: widget.textAlign,
+                maxLines: widget.maxLines,
+              ),
             ),
             ClipRect(
               clipper: _SliceClipper(_rng.nextDouble(), 0.12 + _rng.nextDouble() * 0.3),

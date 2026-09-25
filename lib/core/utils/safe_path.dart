@@ -67,8 +67,7 @@ abstract final class SafePath {
 
   /// Case-folded key for duplicate/collision detection (Windows and default
   /// macOS filesystems are case-insensitive).
-  static String collisionKey(String relative) =>
-      relative.replaceAll('\\', '/').toLowerCase();
+  static String collisionKey(String relative) => relative.replaceAll('\\', '/').toLowerCase();
 
   /// Returns true when [candidate] is [root] or inside it (lexically).
   static bool isWithin(String root, String candidate) {
@@ -89,10 +88,7 @@ abstract final class SafePath {
     final realRoot = _realPathOfExisting(root);
     final realParent = _realPathOfExisting(p.dirname(joined));
     if (!isWithin(realRoot, realParent)) {
-      throw UnsafePathException(
-        relative,
-        'a parent directory is a link that points outside the target',
-      );
+      throw UnsafePathException(relative, 'a parent directory is a link that points outside the target');
     }
     final existing = Link(joined);
     if (existing.existsSync()) {
@@ -140,8 +136,7 @@ abstract final class SafePath {
     final stem = p.basenameWithoutExtension(desired);
     for (var i = 2; i < 10000; i++) {
       final candidate = p.join(dir, '$stem ($i)$ext');
-      if (FileSystemEntity.typeSync(candidate) ==
-          FileSystemEntityType.notFound) {
+      if (FileSystemEntity.typeSync(candidate) == FileSystemEntityType.notFound) {
         return candidate;
       }
     }

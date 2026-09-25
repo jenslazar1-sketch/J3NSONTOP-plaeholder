@@ -252,7 +252,11 @@ class _CommandPaletteState extends ConsumerState<_CommandPalette> {
                     child: entries.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.all(J3Space.xl),
-                            child: Text('No match for "${_query.text}"', style: J3Type.bodySecondary, textAlign: TextAlign.center),
+                            child: Text(
+                              'No match for "${_query.text}"',
+                              style: J3Type.bodySecondary,
+                              textAlign: TextAlign.center,
+                            ),
                           )
                         : ListView.builder(
                             controller: _scroll,
@@ -271,7 +275,9 @@ class _CommandPaletteState extends ConsumerState<_CommandPalette> {
                                   padding: const EdgeInsets.symmetric(horizontal: J3Space.lg),
                                   decoration: BoxDecoration(
                                     color: selected ? J3Colors.selection : null,
-                                    border: Border(left: BorderSide(color: selected ? fx.accentColor : Colors.transparent, width: 3)),
+                                    border: Border(
+                                      left: BorderSide(color: selected ? fx.accentColor : Colors.transparent, width: 3),
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -282,13 +288,29 @@ class _CommandPaletteState extends ConsumerState<_CommandPalette> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(e.title, style: J3Type.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                            Text(e.subtitle, style: J3Type.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                            Text(
+                                              e.title,
+                                              style: J3Type.label,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              e.subtitle,
+                                              style: J3Type.caption,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: J3Space.sm),
-                                      Text(e.kind, style: J3Type.codeSmall.copyWith(fontSize: 10, color: selected ? fx.accentText : J3Colors.textMuted)),
+                                      Text(
+                                        e.kind,
+                                        style: J3Type.codeSmall.copyWith(
+                                          fontSize: 10,
+                                          color: selected ? fx.accentText : J3Colors.textMuted,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),

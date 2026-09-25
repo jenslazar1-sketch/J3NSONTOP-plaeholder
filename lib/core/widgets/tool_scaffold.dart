@@ -29,10 +29,7 @@ class ToolScaffold extends ConsumerWidget {
     this.banner,
     this.scrollable = true,
     this.body,
-  }) : assert(
-         children != null || inputs != null || body != null,
-         'Provide children, inputs/results or body',
-       );
+  }) : assert(children != null || inputs != null || body != null, 'Provide children, inputs/results or body');
 
   final String toolId;
 
@@ -72,7 +69,9 @@ class ToolScaffold extends ConsumerWidget {
                 color: J3Colors.surfaceRaised,
                 borderRadius: J3Radius.medium,
                 border: Border.all(color: fx.accentColor.withValues(alpha: 0.6)),
-                boxShadow: fx.glow ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.25), blurRadius: fx.glowBlur(12))] : null,
+                boxShadow: fx.glow
+                    ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.25), blurRadius: fx.glowBlur(12))]
+                    : null,
               ),
               child: Icon(tool.icon, color: fx.accentText, size: 22),
             ),
@@ -80,7 +79,10 @@ class ToolScaffold extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('// ${(tool?.section.label ?? 'TOOL').toUpperCase()}', style: J3Type.kicker.copyWith(color: fx.accentText)),
+                Text(
+                  '// ${(tool?.section.label ?? 'TOOL').toUpperCase()}',
+                  style: J3Type.kicker.copyWith(color: fx.accentText),
+                ),
                 const SizedBox(height: 2),
                 GlitchText(tool?.name ?? toolId, style: J3Type.headline, maxLines: 2),
                 if (tool != null) ...[
@@ -94,7 +96,10 @@ class ToolScaffold extends ConsumerWidget {
           IconButton(
             tooltip: fav ? 'Remove from favourites' : 'Add to favourites',
             onPressed: () => ref.read(userDataProvider.notifier).toggleFavorite(toolId),
-            icon: Icon(fav ? Icons.star_rounded : Icons.star_outline_rounded, color: fav ? fx.accentText : J3Colors.textMuted),
+            icon: Icon(
+              fav ? Icons.star_rounded : Icons.star_outline_rounded,
+              color: fav ? fx.accentText : J3Colors.textMuted,
+            ),
           ),
         ],
       ),
@@ -134,7 +139,10 @@ class ToolScaffold extends ConsumerWidget {
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [left, if (results != null && results!.isNotEmpty) ...[const SizedBox(height: J3Space.lg), right]],
+                  children: [
+                    left,
+                    if (results != null && results!.isNotEmpty) ...[const SizedBox(height: J3Space.lg), right],
+                  ],
                 );
         } else {
           content = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: _gap(children!));
@@ -167,9 +175,6 @@ class ToolScaffold extends ConsumerWidget {
   }
 
   static List<Widget> _gap(List<Widget> items) => [
-    for (var i = 0; i < items.length; i++) ...[
-      if (i > 0) const SizedBox(height: J3Space.lg),
-      items[i],
-    ],
+    for (var i = 0; i < items.length; i++) ...[if (i > 0) const SizedBox(height: J3Space.lg), items[i]],
   ];
 }

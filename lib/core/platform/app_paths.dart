@@ -28,14 +28,12 @@ class AppPaths {
   String get exportStagingDir => p.join(cacheDir, 'export');
 
   /// Directory holding the files of an imported or sample workspace.
-  String workspaceFilesDir(String workspaceId) =>
-      p.join(workspacesDir, workspaceId, 'files');
+  String workspaceFilesDir(String workspaceId) => p.join(workspacesDir, workspaceId, 'files');
 
   /// App-owned metadata for any workspace (linked ones included): mod
   /// library, profiles, operation journals and backups. Kept outside linked
   /// folders so the user's game directory stays clean.
-  String workspaceMetaDir(String workspaceId) =>
-      p.join(workspacesDir, workspaceId, 'meta');
+  String workspaceMetaDir(String workspaceId) => p.join(workspacesDir, workspaceId, 'meta');
 
   Future<void> ensureCreated() async {
     for (final dir in [root, workspacesDir, cacheDir, pickedDir]) {
@@ -60,6 +58,4 @@ class AppPaths {
 }
 
 /// Overridden in `main()` with the resolved paths.
-final appPathsProvider = Provider<AppPaths>(
-  (ref) => throw UnimplementedError('appPathsProvider must be overridden'),
-);
+final appPathsProvider = Provider<AppPaths>((ref) => throw UnimplementedError('appPathsProvider must be overridden'));

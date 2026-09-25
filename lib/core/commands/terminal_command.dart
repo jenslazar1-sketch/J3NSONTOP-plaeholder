@@ -25,12 +25,9 @@ class CommandResult {
   final bool clearScreen;
 
   static CommandResult ok(List<TermLine> lines) => CommandResult(lines);
-  static CommandResult text(String s) =>
-      CommandResult([for (final l in s.split('\n')) TermLine(l)]);
-  static CommandResult error(String message, {String? usage}) => CommandResult([
-    TermLine.error(message),
-    if (usage != null) TermLine.dim('usage: $usage'),
-  ], exitCode: 1);
+  static CommandResult text(String s) => CommandResult([for (final l in s.split('\n')) TermLine(l)]);
+  static CommandResult error(String message, {String? usage}) =>
+      CommandResult([TermLine.error(message), if (usage != null) TermLine.dim('usage: $usage')], exitCode: 1);
 }
 
 /// Parsed arguments: positionals plus `--key value`, `--key=value`, `--flag`
@@ -41,17 +38,14 @@ class ParsedArgs {
   final List<String> positional;
   final Map<String, String?> options;
 
-  bool flag(String name, [String? short]) =>
-      options.containsKey(name) || (short != null && options.containsKey(short));
+  bool flag(String name, [String? short]) => options.containsKey(name) || (short != null && options.containsKey(short));
 
-  String? option(String name, [String? short]) =>
-      options[name] ?? (short != null ? options[short] : null);
+  String? option(String name, [String? short]) => options[name] ?? (short != null ? options[short] : null);
 
   String? at(int i) => i < positional.length ? positional[i] : null;
 
   /// Positionals from [start] joined back with spaces (for free text).
-  String rest([int start = 0]) =>
-      start >= positional.length ? '' : positional.sublist(start).join(' ');
+  String rest([int start = 0]) => start >= positional.length ? '' : positional.sublist(start).join(' ');
 }
 
 /// Argument spec used for `help` output and autocomplete.
@@ -67,11 +61,7 @@ class CommandArg {
 
 /// What a command can use while running.
 class CommandContext {
-  CommandContext({
-    required this.read,
-    required this.navigate,
-    required this.token,
-  });
+  CommandContext({required this.read, required this.navigate, required this.token});
 
   /// Reads a provider (the terminal passes `ref.read`).
   final T Function<T>(ProviderListenable<T> provider) read;

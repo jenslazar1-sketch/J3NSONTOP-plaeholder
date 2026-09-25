@@ -43,8 +43,7 @@ Future<void> atomicWriteBytes(String path, List<int> bytes) async {
   }
 }
 
-Future<void> atomicWriteString(String path, String contents) =>
-    atomicWriteBytes(path, utf8.encode(contents));
+Future<void> atomicWriteString(String path, String contents) => atomicWriteBytes(path, utf8.encode(contents));
 
 /// Pretty JSON used for every document the app persists.
 const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');

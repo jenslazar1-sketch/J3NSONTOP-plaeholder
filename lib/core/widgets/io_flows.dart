@@ -71,7 +71,11 @@ Future<SelectedInput?> pickInputFile(
   if (source == _Source.workspace && ws != null) {
     final path = await showWorkspaceBrowser(context, workspace: ws, extensions: extensions, title: title);
     if (path == null) return null;
-    return SelectedInput(path: path, displayName: p.relative(path, from: ws.rootPath), fromWorkspace: true);
+    return SelectedInput(
+      path: path,
+      displayName: p.relative(path, from: ws.rootPath),
+      fromWorkspace: true,
+    );
   }
   try {
     final files = await ref.read(fileAccessProvider).pickFiles(multiple: false, extensions: extensions);
@@ -174,7 +178,8 @@ Future<String?> saveOutput(
         final keepBoth = await showJ3Confirm(
           context,
           title: 'File already exists',
-          message: '"${p.basename(dest)}" already exists. The original will not be overwritten. Save as "${p.basename(unique)}" instead?',
+          message:
+              '"${p.basename(dest)}" already exists. The original will not be overwritten. Save as "${p.basename(unique)}" instead?',
           confirmLabel: 'Save as new file',
         );
         if (!keepBoth) return null;
@@ -190,7 +195,9 @@ Future<String?> saveOutput(
         return null;
       }
     case _SaveTarget.export:
-      final r = await ref.read(fileAccessProvider).saveBytes(suggestedName: suggestedName, bytes: bytes, mimeType: mimeType);
+      final r = await ref
+          .read(fileAccessProvider)
+          .saveBytes(suggestedName: suggestedName, bytes: bytes, mimeType: mimeType);
       if (r.saved) {
         activity.notify(NoticeKind.success, 'Exported ${r.location ?? suggestedName}');
         return r.location ?? suggestedName;
@@ -198,7 +205,9 @@ Future<String?> saveOutput(
       if (r.error != null) activity.notify(NoticeKind.error, 'Export failed: ${r.error}');
       return null;
     case _SaveTarget.share:
-      final dir = Directory(p.join(ref.read(appPathsProvider).exportStagingDir, DateTime.now().microsecondsSinceEpoch.toString()));
+      final dir = Directory(
+        p.join(ref.read(appPathsProvider).exportStagingDir, DateTime.now().microsecondsSinceEpoch.toString()),
+      );
       await dir.create(recursive: true);
       final file = File(p.join(dir.path, SafePath.sanitizeFileName(suggestedName)));
       await file.writeAsBytes(bytes, flush: true);
