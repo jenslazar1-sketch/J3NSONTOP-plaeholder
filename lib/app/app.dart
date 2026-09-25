@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,7 @@ import '../core/widgets/backdrop.dart';
 import '../features/sample/sample_workspace.dart';
 import 'app_info.dart';
 import 'router.dart';
+import 'smoke_test.dart';
 
 /// Root widget. Applies the accent theme and the resolved effects config
 /// (user settings + system reduce-motion), and owns the router.
@@ -34,8 +37,23 @@ class _J3AppState extends ConsumerState<J3App> {
     _router = widget.routerOverride ?? buildRouter(showIntro: !settings.skipIntro && !launch.skipIntro);
     // Real first-run work starts right away, in parallel with the intro.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ensureSampleWorkspaceOnFirstRun(ref);
+      if (!mounted) return;
+      if (launch.isSmokeTest) {
+        _runSmokeTest(launch.smokeTestReport!);
+      } else {
+        ensureSampleWorkspaceOnFirstRun(ref);
+      }
     });
+  }
+
+  Future<void> _runSmokeTest(String reportPath) async {
+    var ok = false;
+    try {
+      ok = await SmokeTestRunner(ref: ref, router: _router, reportPath: reportPath).run();
+    } catch (e, st) {
+      stderr.writeln('Smoke test crashed: $e\n$st');
+    }
+    exit(ok ? 0 : 1);
   }
 
   @override

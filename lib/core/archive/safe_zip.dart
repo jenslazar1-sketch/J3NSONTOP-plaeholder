@@ -26,7 +26,7 @@ class ZipLimits {
   final int maxTotalBytes;
 
   /// Uncompressed/compressed ratio above which an entry larger than
-  /// [ratioCheckMinBytes] is treated as a decompression bomb.
+  /// [ratioCheckMinBytes] gets a warning (hard limits block real bombs).
   final double maxCompressionRatio;
   final int ratioCheckMinBytes;
   final int maxPathLength;
@@ -223,7 +223,16 @@ abstract final class SafeZip {
         }
         if (h.uncompressedSize >= limits.ratioCheckMinBytes &&
             h.uncompressedSize / (h.compressedSize == 0 ? 1 : h.compressedSize) > limits.maxCompressionRatio) {
-          issues.add(ZipIssue(raw, 'suspicious compression ratio (possible decompression bomb)'));
+          // Warning only: highly compressible real files (sparse data, logs)
+          // exceed this too. Bombs are stopped by the hard size limits and the
+          // byte-counted streaming inflate, which never exceeds declared sizes.
+          issues.add(
+            ZipIssue(
+              raw,
+              'very high compression ratio; extraction is capped at the declared size',
+              ZipIssueSeverity.warning,
+            ),
+          );
         }
         total += h.uncompressedSize;
       }

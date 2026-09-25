@@ -61,13 +61,16 @@ void main() {
       expect(SafeZip.inspect(big, limits: const ZipLimits(maxTotalBytes: 4000)).isSafe, isFalse);
     });
 
-    test('flags suspicious compression ratios (zip bomb)', () {
+    test('high compression ratio warns; hard size limits block bombs', () {
       final z = writeRawZip(tmp, 'bomb.zip', [
         RawZipEntry('zeros.bin', List.filled(4 * 1024 * 1024, 0), deflate: true),
       ]);
       final r = SafeZip.inspect(z);
-      expect(r.isSafe, isFalse);
-      expect(r.issues.single.message, contains('ratio'));
+      expect(r.isSafe, isTrue, reason: 'legitimately compressible data must not be blocked');
+      expect(r.issues.single.severity, ZipIssueSeverity.warning);
+      expect(r.issues.single.message, contains('compression ratio'));
+      final strict = SafeZip.inspect(z, limits: const ZipLimits(maxEntryBytes: 1024 * 1024));
+      expect(strict.isSafe, isFalse);
     });
 
     test('non-zip input is a FormatException', () {
