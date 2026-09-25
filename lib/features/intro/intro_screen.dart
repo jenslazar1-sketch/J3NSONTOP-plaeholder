@@ -247,7 +247,13 @@ class _IntroScreenState extends ConsumerState<IntroScreen> with SingleTickerProv
           if (fx.sound && !_muted)
             NeonIconButton(key: IntroKeys.mute, icon: Icons.volume_up_rounded, tooltip: 'Mute', onPressed: _mute),
           const SizedBox(width: J3Space.xs),
-          NeonButton.secondary(key: IntroKeys.skip, label: 'SKIP >>', tooltip: 'Skip intro (Esc)', onPressed: _finish),
+          NeonButton.secondary(
+            key: IntroKeys.skip,
+            label: 'SKIP >>',
+            semanticLabel: 'Skip intro',
+            tooltip: 'Skip intro (Esc)',
+            onPressed: _finish,
+          ),
         ],
       ),
     );

@@ -22,6 +22,7 @@ class NeonButton extends StatefulWidget {
     this.tooltip,
     this.dense = false,
     this.expand = false,
+    this.semanticLabel,
   });
 
   const NeonButton.secondary({
@@ -33,6 +34,7 @@ class NeonButton extends StatefulWidget {
     this.tooltip,
     this.dense = false,
     this.expand = false,
+    this.semanticLabel,
   }) : variant = NeonButtonVariant.secondary;
 
   const NeonButton.ghost({
@@ -44,6 +46,7 @@ class NeonButton extends StatefulWidget {
     this.tooltip,
     this.dense = false,
     this.expand = false,
+    this.semanticLabel,
   }) : variant = NeonButtonVariant.ghost;
 
   const NeonButton.danger({
@@ -55,6 +58,7 @@ class NeonButton extends StatefulWidget {
     this.tooltip,
     this.dense = false,
     this.expand = false,
+    this.semanticLabel,
   }) : variant = NeonButtonVariant.danger;
 
   final String label;
@@ -67,6 +71,9 @@ class NeonButton extends StatefulWidget {
   final String? tooltip;
   final bool dense;
   final bool expand;
+
+  /// Spoken label when the visible label is stylised (e.g. "SKIP >>").
+  final String? semanticLabel;
 
   @override
   State<NeonButton> createState() => _NeonButtonState();
