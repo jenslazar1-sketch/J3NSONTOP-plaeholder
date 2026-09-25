@@ -1,0 +1,5 @@
+Screen Shot 1
+
+Not really a screenshot: a text file with a messy name (spaces, mixed case)
+for the batch rename tool. Try renaming everything in rename-demo/ to
+neon-shot-###.<ext> with lower-case extensions.

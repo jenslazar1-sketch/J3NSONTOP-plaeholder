@@ -1,0 +1,14 @@
+{
+  "format": "j3profile",
+  "formatVersion": 1,
+  "id": "vanilla-plus",
+  "name": "Vanilla+ HUD",
+  "description": "Just the neon HUD: the simplest apply and rollback.",
+  "target": "game",
+  "mods": [
+    {
+      "id": "neon-hud",
+      "enabled": true
+    }
+  ]
+}

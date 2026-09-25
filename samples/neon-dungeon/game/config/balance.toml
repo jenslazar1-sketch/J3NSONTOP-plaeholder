@@ -1,0 +1,67 @@
+# Neon Dungeon - balance values
+# Vanilla 1.4.2 values. Mods may replace this file (see hardcore-balance, brutal-mode).
+
+title = "Vanilla"
+game_version = "1.4.2"
+last_tuned = 2026-09-01T12:00:00Z
+season_start = 2026-09-01
+difficulty_scale = 1.0
+permadeath = false
+
+[player]
+max_health = 100
+max_mana = 50
+move_speed = 4.5
+crit_chance = 0.05
+crit_multiplier = 1.5
+starting_items = ["rusty-sword", "small-potion", "small-potion"]
+regen = { health_per_second = 0.5, mana_per_second = 1.0 }
+
+[economy]
+starting_gold = 150
+max_gold = 999_999
+sell_ratio = 0.5
+shop_restock_minutes = 10
+price_multiplier = 1.0
+
+[economy.drop_rates]
+common = 0.70
+uncommon = 0.20
+rare = 0.08
+legendary = 0.02
+
+[[enemies]]
+id = "slime"
+health = 30
+damage = 4
+xp = 5
+spawn_weight = 40
+
+[[enemies]]
+id = "skeleton"
+health = 45
+damage = 7
+xp = 12
+spawn_weight = 30
+
+[[enemies]]
+id = "ghoul"
+health = 70
+damage = 10
+xp = 22
+spawn_weight = 18
+
+[[enemies]]
+id = "neon-golem"
+health = 240
+damage = 22
+xp = 110
+spawn_weight = 6
+
+[[enemies]]
+id = "lich"
+health = 900
+damage = 35
+xp = 1000
+spawn_weight = 1
+boss = true

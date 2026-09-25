@@ -1,0 +1,22 @@
+{
+  "format": "j3profile",
+  "formatVersion": 1,
+  "id": "hardcore-run",
+  "name": "Hardcore run",
+  "description": "Core patch + hardcore balance + neon HUD (dependencies in order).",
+  "target": "game",
+  "mods": [
+    {
+      "id": "core-patch",
+      "enabled": true
+    },
+    {
+      "id": "hardcore-balance",
+      "enabled": true
+    },
+    {
+      "id": "neon-hud",
+      "enabled": true
+    }
+  ]
+}

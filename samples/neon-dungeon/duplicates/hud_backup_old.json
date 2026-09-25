@@ -1,0 +1,80 @@
+{
+  "theme": "classic",
+  "version": 3,
+  "font": {
+    "family": "PixelMono",
+    "size": 12,
+    "outline": true
+  },
+  "colors": {
+    "text": "#E0E0E0",
+    "accent": "#4FC3F7",
+    "health": "#E53935",
+    "mana": "#1E88E5",
+    "gold": "#FDD835",
+    "panel": "#101010CC"
+  },
+  "elements": [
+    {
+      "id": "health_bar",
+      "anchor": "top-left",
+      "x": 18,
+      "y": 16,
+      "width": 200,
+      "height": 14,
+      "visible": true
+    },
+    {
+      "id": "mana_bar",
+      "anchor": "top-left",
+      "x": 16,
+      "y": 36,
+      "width": 160,
+      "height": 10,
+      "visible": true
+    },
+    {
+      "id": "gold_counter",
+      "anchor": "top-left",
+      "x": 16,
+      "y": 54,
+      "icon": "sprites/items/gem.png",
+      "visible": true
+    },
+    {
+      "id": "minimap",
+      "anchor": "top-right",
+      "x": -16,
+      "y": 16,
+      "width": 160,
+      "height": 160,
+      "zoom": 1.5,
+      "visible": true,
+      "border": "#9E9E9E"
+    },
+    {
+      "id": "hotbar",
+      "anchor": "bottom-center",
+      "x": 0,
+      "y": -24,
+      "slots": 6,
+      "slotSize": 40,
+      "visible": true
+    },
+    {
+      "id": "boss_bar",
+      "anchor": "top-center",
+      "x": 0,
+      "y": 24,
+      "width": 480,
+      "height": 12,
+      "visible": false
+    }
+  ],
+  "damageNumbers": {
+    "enabled": true,
+    "critColor": "#FFEB3B",
+    "durationMs": 700
+  },
+  "crosshair": null
+}

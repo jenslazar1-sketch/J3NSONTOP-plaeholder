@@ -11,7 +11,7 @@ removed at any time. The same content is exported to `samples/` in the repo by
 README.txt
 game/
   game.json                        {"id":"neon-dungeon","name":"Neon Dungeon","version":"1.4.2"}
-  config/settings.ini              INI with [Display] [Audio] [Gameplay], ; and # comments
+  config/settings.ini              INI with [Display] [Audio] [Gameplay] [Network], ; and # comments
   config/graphics.json             nested JSON (resolution, quality, vsync, fov, postfx...)
   config/controls.yaml             YAML key bindings with comments
   config/balance.toml              TOML: [player], [economy], [[enemies]] tables
@@ -33,8 +33,8 @@ downloads/                         the sample packages as files (importable)
   brutal-mode-0.9.0.j3mod          ALSO edits config/balance.toml -> intentional overlap with hardcore-balance
   legacy-skin-0.3.0.j3mod          requires "retro-core" which does not exist -> missing dependency demo
   cycle-a-1.0.0.j3mod / cycle-b-1.0.0.j3mod   depend on each other -> cycle demo
-duplicates/                        exact copies of some files for the duplicate finder
-rename-demo/                       IMG_0001.png ... files for batch rename
+duplicates/                        exact copies of some files (+ one near-copy) for the duplicate finder
+rename-demo/                       IMG_0001.png ... IMG_0006.png + 2 text files for batch rename
 notes/todo.md
 notes/unicode-名前-ünïcødé.txt      Unicode file name demo
 ```
@@ -50,6 +50,11 @@ Pre-imported into the workspace's mod library (`meta/mods/`), with profiles in
 | `broken-deps` "Broken dependencies" | legacy-skin, cycle-a, cycle-b | missing dependency + cycle errors |
 
 All profiles target `game`.
+
+The content is generated deterministically by
+`lib/features/sample/sample_content.dart` (fixed dates, seeded generators,
+Stored ZIP entries, a pure-Dart PNG encoder), so `samples/SHA256SUMS.txt` is
+reproducible on every platform.
 
 ## Save schema subset
 

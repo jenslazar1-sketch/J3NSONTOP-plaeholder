@@ -1,0 +1,54 @@
+==============================================================
+ NEON DUNGEON CRASH REPORT
+==============================================================
+Game:       Neon Dungeon 1.4.2 (build 2026.09.01-r1842)
+Time:       2026-09-01 12:09:19.246 (local)
+Session:    8f3a1c2e
+Uptime:     00:09:19
+Exception:  GpuDeviceLostError: GPU device lost (reason: TDR timeout)
+Thread:     render (id 7)
+
+Stack trace (most recent call first):
+  #0  RenderDevice.present (render/device.nd:512)
+  #1  Renderer.endFrame (render/renderer.nd:233)
+  #2  Game.frame (core/game.nd:130)
+  #3  Game.run (core/game.nd:88)
+  #4  main (core/main.nd:12)
+
+Caused by: ShaderCompileError: postfx/bloom.frag:41: 'threshhold' undeclared identifier
+  #0  ShaderCache.compile (render/shader_cache.nd:96)
+  #1  PostFx.rebuild (render/postfx.nd:61)
+  #2  Renderer.applySettings (render/renderer.nd:118)
+
+Other threads:
+  [main]    waiting   Game.tick (core/game.nd:130)
+  [audio]   running   AudioMixer.mix (audio/mixer.nd:77)
+  [loader]  idle
+  [jobs x6] idle
+
+System:
+  OS:       Fictional OS 11 (x64)
+  CPU:      8 cores @ 3.6 GHz
+  GPU:      Neon GFX 3000 (driver 31.0.15, 8192 MiB)
+  RAM:      16384 MiB total, 5120 MiB used by the game
+  Display:  1920x1080 @ 144 Hz, borderless
+
+Configuration:
+  config/settings.ini   config_version 3, difficulty normal
+  config/graphics.json  preset high, bloom on (threshold 0.8)
+  Loaded mods:          (none)
+
+Last 10 log lines before the crash:
+  [2026-09-01 12:09:01.005] [DEBUG] [assets] cache hit sprites/items/sword.png
+  [2026-09-01 12:09:02.075] [DEBUG] [audio] play sfx/hit_bone.ogg (voice 21)
+  [2026-09-01 12:09:04.675] [INFO] [combat] mimic#129 defeated (+8 XP)
+  [2026-09-01 12:09:07.706] [DEBUG] [world] Spawned skeleton#130 at (57,32)
+  [2026-09-01 12:09:08.841] [DEBUG] [ai] skeleton#130 state stunned -> flee
+  [2026-09-01 12:09:11.112] [TRACE] [physics] tick 79365: 24 bodies, 6 contacts
+  [2026-09-01 12:09:14.873] [INFO] [combat] slime#128 hit for 23
+  [2026-09-01 12:09:15.373] [DEBUG] [ai] slime#128 state attack -> patrol
+  [2026-09-01 12:09:16.865] [WARN] [render] GPU did not respond for 2000 ms, attempting recovery
+  [2026-09-01 12:09:19.242] [ERROR] [render] Device reset failed: NGL_DEVICE_LOST (0x887A0005)
+
+Please attach this file when reporting the problem. (Neon Dungeon is fictional;
+this report was generated as sample data by J3NSONTOP.)

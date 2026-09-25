@@ -1,0 +1,170 @@
+{
+  "title": "Neon Dungeon save file",
+  "description": "Save data written by Neon Dungeon 1.4.x (fictional). Uses the documented JSON Schema subset: type, title, description, properties, required, additionalProperties, items, minimum, maximum, minLength, maxLength, pattern, enum, default.",
+  "type": "object",
+  "required": [
+    "version",
+    "slot",
+    "player",
+    "inventory",
+    "progress"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "Save format version.",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "slot": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "savedAt": {
+      "type": "string",
+      "description": "UTC timestamp, ISO 8601.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "maxLength": 20
+    },
+    "player": {
+      "type": "object",
+      "title": "Player",
+      "required": [
+        "name",
+        "class",
+        "level",
+        "health",
+        "gold"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16,
+          "pattern": "^[A-Za-z0-9_ -]+$"
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "warrior",
+            "rogue",
+            "mage",
+            "necromancer"
+          ]
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99
+        },
+        "xp": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "health": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999
+        },
+        "gold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999
+        },
+        "position": {
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "floor"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "floor": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          }
+        },
+        "hardcore": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "description": "Item stacks; ids refer to data/items.csv.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "maxLength": 32
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99
+          },
+          "equipped": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "properties": {
+        "floorsCleared": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "bossesDefeated": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "slime-king",
+              "bone-warden",
+              "neon-golem",
+              "laughing-lich"
+            ]
+          }
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": [
+            "easy",
+            "normal",
+            "hard",
+            "brutal"
+          ],
+          "default": "normal"
+        },
+        "playTimeSeconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

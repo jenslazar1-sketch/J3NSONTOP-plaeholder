@@ -1,0 +1,27 @@
+{
+  "language": "en",
+  "name": "English",
+  "gameVersion": "1.4.2",
+  "strings": {
+    "menu.title": "NEON DUNGEON",
+    "menu.play": "Play",
+    "menu.continue": "Continue",
+    "menu.options": "Options",
+    "menu.mods": "Mods",
+    "menu.quit": "Qiut",
+    "hud.health": "Health",
+    "hud.mana": "Mana",
+    "hud.gold": "Gold",
+    "hud.floor": "Floor {floor}",
+    "item.pickup": "Picked up {item} ×{count}",
+    "item.recieve": "You recieve {item}.",
+    "dialog.merchant.greeting": "Welcome, traveller… care to trade?",
+    "dialog.skull.laugh": "HA HA HA — you will never escape!",
+    "death.title": "YOU DIED ☠",
+    "death.hint": "Press {key} to try again →",
+    "achievement.floor10": "★ Ten floors deep ★",
+    "credits.thanks": "Thanks for playing ♥",
+    "lang.others": "Deutsch · Français · 日本語 · Русский · العربية",
+    "save.corrupt": "Save slot {slot} is damaged. Start over? «Yes» / «No»"
+  }
+}

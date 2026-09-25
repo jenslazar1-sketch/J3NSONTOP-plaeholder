@@ -1,0 +1,22 @@
+{
+  "format": "j3profile",
+  "formatVersion": 1,
+  "id": "broken-deps",
+  "name": "Broken dependencies",
+  "description": "legacy-skin needs the missing retro-core; cycle-a and cycle-b depend on each other.",
+  "target": "game",
+  "mods": [
+    {
+      "id": "legacy-skin",
+      "enabled": true
+    },
+    {
+      "id": "cycle-a",
+      "enabled": true
+    },
+    {
+      "id": "cycle-b",
+      "enabled": true
+    }
+  ]
+}

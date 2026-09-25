@@ -1,0 +1,84 @@
+{
+  "version": 2,
+  "resolution": {
+    "width": 1920,
+    "height": 1080,
+    "renderScale": 1.0
+  },
+  "display": {
+    "mode": "borderless",
+    "vsync": true,
+    "fpsLimit": 144,
+    "fov": 90.0,
+    "monitor": 0
+  },
+  "quality": {
+    "preset": "high",
+    "textures": "high",
+    "shadows": "medium",
+    "particles": 0.75,
+    "anisotropy": 8,
+    "antialiasing": "fxaa"
+  },
+  "postfx": {
+    "bloom": {
+      "enabled": true,
+      "intensity": 0.65,
+      "threshold": 0.8
+    },
+    "scanlines": {
+      "enabled": true,
+      "opacity": 0.12,
+      "lineWidth": 2
+    },
+    "chromaticAberration": {
+      "enabled": false,
+      "strength": 0.0
+    },
+    "vignette": {
+      "enabled": true,
+      "radius": 0.75,
+      "color": "#1A0008"
+    }
+  },
+  "palette": [
+    "#0A0A0A",
+    "#1A0008",
+    "#FF1744",
+    "#FF6E86",
+    "#FFFFFF"
+  ],
+  "presets": [
+    {
+      "name": "low",
+      "shadows": "off",
+      "bloom": false,
+      "particles": 0.25
+    },
+    {
+      "name": "medium",
+      "shadows": "low",
+      "bloom": true,
+      "particles": 0.5
+    },
+    {
+      "name": "high",
+      "shadows": "medium",
+      "bloom": true,
+      "particles": 0.75
+    },
+    {
+      "name": "ultra",
+      "shadows": "high",
+      "bloom": true,
+      "particles": 1.0
+    }
+  ],
+  "customShader": null,
+  "gpuOverride": null,
+  "debug": {
+    "showFps": false,
+    "wireframe": false,
+    "logShaderCompiles": true
+  }
+}

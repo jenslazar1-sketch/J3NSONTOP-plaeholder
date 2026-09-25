@@ -1,0 +1,10 @@
+id	name	health	damage	speed	xp	floor_min	weakness
+slime	Neon Slime	30	4	1.2	5	1	fire
+bat	Cave Bat	18	3	3.5	4	1	light
+skeleton	Skeleton	45	7	2.0	12	2	blunt
+skeleton-archer	Skeleton Archer	38	9	1.8	15	3	blunt
+ghoul	Ghoul	70	10	1.6	22	4	fire
+mimic	Mimic	120	16	1.0	60	5	
+wraith	Wraith	55	12	2.8	30	6	light
+neon-golem	Neon Golem	240	22	0.8	110	8	water
+lich	The Laughing Lich	900	35	1.4	1000	10	light

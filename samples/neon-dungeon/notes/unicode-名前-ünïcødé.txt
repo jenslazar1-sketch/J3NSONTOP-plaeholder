@@ -1,0 +1,12 @@
+Unicode file name demo: unicode-名前-ünïcødé.txt
+
+名前 (namae) means "name" in Japanese.
+Ünïcødé: diaereses and a slashed ø.
+Greek: Καλημέρα κόσμε
+Cyrillic: Привет, подземелье!
+Arabic (right-to-left): مرحبا بالعالم
+Hebrew (right-to-left): שלום עולם
+Emoji: 💀 🔥 🗡️ 🛡️ 💎 🔑
+Combining mark: é (e + U+0301) vs é (U+00E9) - look the same, different bytes
+Zero-width joiner: 👩‍💻 (three code points, one glyph)
+Box drawing: ┌──┐ │░▒▓│ └──┘

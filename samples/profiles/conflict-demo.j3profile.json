@@ -1,0 +1,22 @@
+{
+  "format": "j3profile",
+  "formatVersion": 1,
+  "id": "conflict-demo",
+  "name": "Conflict demo",
+  "description": "hardcore-balance and brutal-mode both replace config/balance.toml; brutal-mode (last) wins.",
+  "target": "game",
+  "mods": [
+    {
+      "id": "core-patch",
+      "enabled": true
+    },
+    {
+      "id": "hardcore-balance",
+      "enabled": true
+    },
+    {
+      "id": "brutal-mode",
+      "enabled": true
+    }
+  ]
+}
