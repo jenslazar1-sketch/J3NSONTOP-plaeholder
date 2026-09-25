@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/workspace/workspace.dart';
+import '../features/dev_tools/dev_smoke.dart';
 import '../features/sample/sample_smoke.dart';
 
 /// A feature-level self-test step run by `--smoke-test`. Each step performs
@@ -13,4 +14,4 @@ class FeatureSmokeStep {
 }
 
 /// Feature operations exercised by the packaged-app smoke test.
-final List<FeatureSmokeStep> featureSmokeSteps = [sampleSmokeStep];
+final List<FeatureSmokeStep> featureSmokeSteps = [sampleSmokeStep, devToolsSmokeStep];

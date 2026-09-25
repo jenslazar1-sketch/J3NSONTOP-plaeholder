@@ -38,13 +38,13 @@ class CasePage extends ConsumerWidget {
             ),
             const HelpText('Each line is converted separately, so you can paste a list of names.'),
             const MiniHeader('Word splitting'),
-            DevSwitch(
+            OptionSwitch(
               label: 'Split numbers',
               description: 'utf8Decoder -> utf, 8, Decoder (off: utf8, Decoder).',
               value: splitDigits,
               onChanged: (v) => ref.setDraft('$k/splitDigits', v),
             ),
-            DevSwitch(
+            OptionSwitch(
               label: 'Keep acronyms',
               description: 'XML http -> XMLHttp in Pascal/camel/Title instead of XmlHttp.',
               value: keepAcronyms,

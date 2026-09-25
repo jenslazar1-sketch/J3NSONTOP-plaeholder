@@ -103,7 +103,7 @@ class _NumberBasePageState extends ConsumerState<NumberBasePage> {
               min: 2,
               max: 36,
             ),
-            DevSwitch(
+            OptionSwitch(
               label: 'Group digits',
               description: 'Binary in 4s, hex in 2s, decimal in 3s.',
               value: group,

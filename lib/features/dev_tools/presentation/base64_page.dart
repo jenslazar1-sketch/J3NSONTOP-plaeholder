@@ -165,7 +165,7 @@ class _Base64PageState extends ConsumerState<Base64Page> {
               labelOf: (u) => u ? Base64Alphabet.urlSafe.label : Base64Alphabet.standard.label,
               onSelected: (u) => ref.setDraft('$_k/urlSafe', u),
             ),
-            DevSwitch(
+            OptionSwitch(
               label: 'Keep padding (=)',
               description: 'Off strips trailing "=" (common for Base64URL in tokens and URLs).',
               value: padding,
@@ -341,7 +341,7 @@ class _Base64PageState extends ConsumerState<Base64Page> {
             '${Fmt.bytes(text.length)} of Base64',
             style: J3Type.caption,
           ),
-          DevSwitch(
+          OptionSwitch(
             label: 'As data: URI',
             description: 'Prefix with data:${type?.mimeType ?? 'application/octet-stream'};base64, (no wrapping)',
             value: dataUri,

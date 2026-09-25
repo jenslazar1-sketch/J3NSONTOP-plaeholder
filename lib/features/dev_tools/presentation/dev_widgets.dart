@@ -542,24 +542,6 @@ class InputActions extends StatelessWidget {
   }
 }
 
-/// [OptionSwitch] on its own transparent [Material]. Inside a [NeonPanel]
-/// (a coloured DecoratedBox) the switch's ListTile would otherwise paint
-/// its ink below the panel, which Flutter reports as an error.
-class DevSwitch extends StatelessWidget {
-  const DevSwitch({super.key, required this.label, required this.value, required this.onChanged, this.description});
-
-  final String label;
-  final String? description;
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    type: MaterialType.transparency,
-    child: OptionSwitch(label: label, description: description, value: value, onChanged: onChanged),
-  );
-}
-
 /// Accent-coloured caption used for short explanations under controls.
 class HelpText extends StatelessWidget {
   const HelpText(this.text, {super.key});

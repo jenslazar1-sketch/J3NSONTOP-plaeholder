@@ -200,7 +200,7 @@ class _DiffPageState extends ConsumerState<DiffPage> {
               children: [
                 SizedBox(
                   width: 300,
-                  child: DevSwitch(
+                  child: OptionSwitch(
                     label: 'Ignore whitespace',
                     description: 'Runs of spaces/tabs compare equal; leading/trailing ignored.',
                     value: ignoreWs,
@@ -209,7 +209,7 @@ class _DiffPageState extends ConsumerState<DiffPage> {
                 ),
                 SizedBox(
                   width: 300,
-                  child: DevSwitch(
+                  child: OptionSwitch(
                     label: 'Ignore case',
                     value: ignoreCase,
                     onChanged: (v) => _setOption('ignoreCase', v),

@@ -309,7 +309,7 @@ class _HttpPageState extends ConsumerState<HttpPage> {
             max: 120,
             width: 180,
           ),
-          DevSwitch(
+          OptionSwitch(
             label: 'Follow redirects',
             description: 'Up to 5 hops; the final URL is shown with the response.',
             value: draft.followRedirects,

@@ -94,9 +94,9 @@ class _UuidPageState extends ConsumerState<UuidPage> {
                 max: UuidTools.maxCount,
                 width: 180,
               ),
-              DevSwitch(label: 'Uppercase', value: upper, onChanged: (v) => ref.setDraft('$_k/upper', v)),
-              DevSwitch(label: 'No hyphens', value: noHyphens, onChanged: (v) => ref.setDraft('$_k/noHyphens', v)),
-              DevSwitch(
+              OptionSwitch(label: 'Uppercase', value: upper, onChanged: (v) => ref.setDraft('$_k/upper', v)),
+              OptionSwitch(label: 'No hyphens', value: noHyphens, onChanged: (v) => ref.setDraft('$_k/noHyphens', v)),
+              OptionSwitch(
                 label: 'Braces {...}',
                 description: 'Microsoft GUID style',
                 value: braces,

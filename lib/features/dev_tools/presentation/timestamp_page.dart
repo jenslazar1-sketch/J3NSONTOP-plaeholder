@@ -77,7 +77,7 @@ class _TimestampPageState extends ConsumerState<TimestampPage> {
               'Auto picks the Unix unit by magnitude: < 1e11 seconds, < 1e14 ms, < 1e17 us, otherwise ns. '
               'Override it when a value is ambiguous (for example ms timestamps before 1973).',
             ),
-            DevSwitch(
+            OptionSwitch(
               label: 'Times without an offset are UTC',
               description: 'Off: "2026-09-25T10:00" is read as local time on this device.',
               value: assumeUtc,

@@ -197,7 +197,7 @@ class _RegexPageState extends ConsumerState<RegexPage> {
                 minLines: 5,
                 maxLines: 14,
               ),
-              DevSwitch(
+              OptionSwitch(
                 label: 'Replace preview',
                 description: r'$1 or ${1} group, ${name} named group, $& or $0 whole match, $$ literal $',
                 value: replaceOn,
@@ -215,7 +215,7 @@ class _RegexPageState extends ConsumerState<RegexPage> {
                   enableSuggestions: false,
                   decoration: const InputDecoration(labelText: 'Replacement', hintText: r'${key}: $2'),
                 ),
-              DevSwitch(
+              OptionSwitch(
                 label: 'Live matching',
                 description: 'Runs 300 ms after you stop typing. Every run is time-limited (1.5 s).',
                 value: live,

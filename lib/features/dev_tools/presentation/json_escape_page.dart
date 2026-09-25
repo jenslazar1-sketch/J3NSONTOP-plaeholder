@@ -91,19 +91,19 @@ class _JsonEscapePageState extends ConsumerState<JsonEscapePage> {
             ),
             if (mode == JsonEscapeMode.escape) ...[
               const MiniHeader('Options'),
-              DevSwitch(
+              OptionSwitch(
                 label: 'Surrounding quotes',
                 description: 'Output a complete "..." literal.',
                 value: quotes,
                 onChanged: (v) => ref.setDraft('$_k/quotes', v),
               ),
-              DevSwitch(
+              OptionSwitch(
                 label: 'Escape non-ASCII',
                 description: r'Write every non-ASCII character as \uXXXX (surrogate pairs above U+FFFF).',
                 value: ascii,
                 onChanged: (v) => ref.setDraft('$_k/ascii', v),
               ),
-              DevSwitch(
+              OptionSwitch(
                 label: r'Escape / as \/',
                 description: 'Safe inside an HTML <script> block.',
                 value: slash,

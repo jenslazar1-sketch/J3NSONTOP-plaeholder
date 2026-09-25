@@ -92,7 +92,7 @@ class _UrlPageState extends ConsumerState<UrlPage> {
               HelpText(encodeMode.description),
             ],
             if (mode == UrlToolMode.decode)
-              DevSwitch(
+              OptionSwitch(
                 label: 'Form decoding (+ means space)',
                 description: 'For application/x-www-form-urlencoded data such as query strings.',
                 value: plus,
