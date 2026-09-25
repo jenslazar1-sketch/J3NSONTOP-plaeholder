@@ -20,13 +20,15 @@ class EffectsConfig {
     required this.volume,
   });
 
-  factory EffectsConfig.resolve(AppSettings s, {required bool systemReduce}) {
+  /// [systemHighContrast] (OS accessibility setting) removes decorative
+  /// scanlines, particles and bloom that reduce legibility.
+  factory EffectsConfig.resolve(AppSettings s, {required bool systemReduce, bool systemHighContrast = false}) {
     final reduce = switch (s.motion) {
       MotionPreference.system => systemReduce,
       MotionPreference.reduced => true,
       MotionPreference.full => false,
     };
-    final low = s.lowEffects;
+    final low = s.lowEffects || systemHighContrast;
     return EffectsConfig(
       reduceMotion: reduce,
       intensity: low ? 0 : s.intensity,

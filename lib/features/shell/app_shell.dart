@@ -157,12 +157,21 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
     }
 
-    final framed = Stack(
-      fit: StackFit.expand,
-      children: [
-        body,
-        ToastOverlay(alignment: isCompact ? Alignment.topCenter : Alignment.bottomRight),
-      ],
+    final atHome = Uri.parse(widget.location).path == '/';
+    final framed = PopScope(
+      // System back (Android) from any section returns to Home instead of
+      // leaving the app; from Home it behaves normally.
+      canPop: atHome,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/');
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          body,
+          ToastOverlay(alignment: isCompact ? Alignment.topCenter : Alignment.bottomRight),
+        ],
+      ),
     );
 
     if (!caps.supports(Capability.keyboardShortcuts)) return framed;
@@ -381,8 +390,9 @@ class _TopBar extends ConsumerWidget {
     final fx = context.effects;
     final running = ref.watch(activityProvider.select((s) => s.running.length));
     return Container(
-      height: J3Size.topBar,
-      padding: const EdgeInsets.symmetric(horizontal: J3Space.lg),
+      // Grows with the text scale instead of overflowing.
+      constraints: const BoxConstraints(minHeight: J3Size.topBar),
+      padding: const EdgeInsets.symmetric(horizontal: J3Space.lg, vertical: J3Space.xs),
       decoration: BoxDecoration(
         color: J3Colors.background.withValues(alpha: 0.85),
         border: Border(bottom: BorderSide(color: fx.accentColor.withValues(alpha: 0.25))),

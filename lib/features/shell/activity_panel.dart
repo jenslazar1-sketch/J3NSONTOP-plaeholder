@@ -99,13 +99,9 @@ class OperationTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final kind = statusKindOf(op.status);
     final running = op.status == OperationStatus.running;
-    return Container(
-      padding: const EdgeInsets.all(J3Space.sm),
-      decoration: BoxDecoration(
-        color: J3Colors.surfaceRaised,
-        borderRadius: J3Radius.small,
-        border: Border(left: BorderSide(color: kind.color, width: 2)),
-      ),
+    return AccentBarBox(
+      color: kind.color,
+      borderOpacity: 0.18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

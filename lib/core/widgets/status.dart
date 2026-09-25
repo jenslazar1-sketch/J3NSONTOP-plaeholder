@@ -77,17 +77,11 @@ class StatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       liveRegion: kind == StatusKind.error || kind == StatusKind.success,
-      child: Container(
-        decoration: BoxDecoration(
-          color: kind.color.withValues(alpha: 0.07),
-          borderRadius: J3Radius.medium,
-          border: Border(
-            left: BorderSide(color: kind.color, width: 3),
-            top: BorderSide(color: kind.color.withValues(alpha: 0.3)),
-            right: BorderSide(color: kind.color.withValues(alpha: 0.3)),
-            bottom: BorderSide(color: kind.color.withValues(alpha: 0.3)),
-          ),
-        ),
+      child: AccentBarBox(
+        color: kind.color,
+        background: kind.color.withValues(alpha: 0.07),
+        barWidth: 3,
+        radius: J3Radius.medium,
         padding: const EdgeInsets.all(J3Space.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,6 +237,59 @@ class NeonProgressBar extends StatelessWidget {
           backgroundColor: J3Colors.surfaceHigh,
           semanticsLabel: 'Progress',
           semanticsValue: value == null ? null : '${(value! * 100).round()}%',
+        ),
+      ),
+    );
+  }
+}
+
+/// Box with a coloured accent bar on the leading edge, a uniform subtle
+/// border and rounded corners. (Flutter cannot paint non-uniform border
+/// colours together with a border radius, so the bar is a separate layer.)
+class AccentBarBox extends StatelessWidget {
+  const AccentBarBox({
+    super.key,
+    required this.color,
+    required this.child,
+    this.background = J3Colors.surfaceRaised,
+    this.barWidth = 2,
+    this.radius = J3Radius.small,
+    this.padding = const EdgeInsets.all(J3Space.sm),
+    this.borderOpacity = 0.3,
+  });
+
+  final Color color;
+  final Widget child;
+  final Color background;
+  final double barWidth;
+  final BorderRadius radius;
+  final EdgeInsetsGeometry padding;
+  final double borderOpacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: radius,
+        border: Border.all(color: color.withValues(alpha: borderOpacity)),
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: barWidth,
+              child: ColoredBox(color: color),
+            ),
+            Padding(
+              padding: padding.add(EdgeInsets.only(left: barWidth)),
+              child: child,
+            ),
+          ],
         ),
       ),
     );

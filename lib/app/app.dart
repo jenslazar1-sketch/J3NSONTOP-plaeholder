@@ -74,7 +74,11 @@ class _J3AppState extends ConsumerState<J3App> {
       routerConfig: _router,
       builder: (context, child) {
         final media = MediaQuery.of(context);
-        final config = EffectsConfig.resolve(settings, systemReduce: media.disableAnimations);
+        final config = EffectsConfig.resolve(
+          settings,
+          systemReduce: media.disableAnimations,
+          systemHighContrast: media.highContrast,
+        );
         return J3Effects(
           config: config,
           child: J3Backdrop(child: child ?? const SizedBox.shrink()),
