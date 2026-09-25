@@ -3,11 +3,12 @@
 #
 #   scripts/ci/ios_simulator_smoke.sh <out-dir>
 #
-# Boots the newest available iPhone simulator. If integration tests exist it
-# runs `flutter test integration_test -d <udid>`. Otherwise it builds a debug
-# simulator app, installs and launches it, checks that it is still running
-# after 20 s and after a relaunch, looks for crash reports and saves
-# screenshots to <out-dir>.
+# Boots the newest available iPhone simulator, builds a debug simulator app,
+# installs and launches it, checks that it is still running after 20 s and
+# after a relaunch, and looks for crash reports. Then, if integration tests
+# exist, runs `flutter test integration_test -d <udid>` with a time limit.
+# Screenshots, the app log and crash reports go to <out-dir>; on failure the
+# log tail and crash reports are also printed to the job log.
 set -euo pipefail
 
 # shellcheck source=../lib/common.sh
@@ -79,20 +80,50 @@ xcrun simctl boot "$udid" 2>/dev/null || true
 xcrun simctl bootstatus "$udid" -b
 record "Simulator" "$device_name, iOS $ios_version ($udid)"
 
-# --- Integration tests, if any -----------------------------------------------------------
-if [ -n "$(j3_integration_tests)" ]; then
-  if bash "$J3_REPO_ROOT/scripts/ci/integration_tests.sh" "$udid" "iOS Simulator $device_name ($ios_version)"; then
-    record "Integration tests" "passed"
-    xcrun simctl io "$udid" screenshot "$out/ios-simulator-after-tests.png" >/dev/null 2>&1 || true
-    write_summary
-    exit 0
-  fi
-  fail "integration tests failed on the iOS Simulator"
-fi
-echo "No integration tests found (integration_test/**/*_test.dart) - running the install/launch smoke test instead."
-record "Integration tests" "skipped (none in integration_test/)"
+# --- Diagnostics shown in the job log on failure ------------------------------------------
+reports_dir="$HOME/Library/Logs/DiagnosticReports"
+marker="$work/start-marker"
+touch "$marker"
 
-# --- Build, install, launch ------------------------------------------------------------------
+dump_diagnostics() {
+  local report
+  xcrun simctl io "$udid" screenshot "$out/ios-simulator-failure.png" >/dev/null 2>&1 || true
+  xcrun simctl spawn "$udid" log show --last 10m --style compact --predicate 'process == "Runner"' \
+    >"$out/runner-log.txt" 2>/dev/null || true
+  echo "::group::Runner log (last 120 lines)"
+  tail -n 120 "$out/runner-log.txt" || true
+  echo "::endgroup::"
+  find "$reports_dir" -maxdepth 1 -name 'Runner*' -newer "$marker" -print 2>/dev/null | while IFS= read -r report; do
+    cp "$report" "$out/" || true
+    echo "::group::Crash report $(basename "$report") (first 200 lines)"
+    head -n 200 "$report" || true
+    echo "::endgroup::"
+  done
+}
+
+# Runs "$@" in its own process group; kills the whole group after $1 seconds.
+run_with_timeout() {
+  local secs="$1" pid waited=0
+  shift
+  set -m
+  "$@" &
+  pid=$!
+  set +m
+  while kill -0 "$pid" 2>/dev/null; do
+    if [ "$waited" -ge "$secs" ]; then
+      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+      sleep 5
+      kill -KILL -- "-$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      return 124
+    fi
+    sleep 5
+    waited=$((waited + 5))
+  done
+  wait "$pid"
+}
+
+# --- Build, install, launch (always; independent of the test runner) ---------------------------
 j3_info "flutter build ios --simulator --debug"
 flutter build ios --simulator --debug
 app="$J3_REPO_ROOT/build/ios/iphonesimulator/Runner.app"
@@ -100,10 +131,6 @@ app="$J3_REPO_ROOT/build/ios/iphonesimulator/Runner.app"
 xcrun simctl uninstall "$udid" "$J3_APP_ID" >/dev/null 2>&1 || true
 xcrun simctl install "$udid" "$app"
 record "Install" "OK"
-
-marker="$work/start-marker"
-touch "$marker"
-reports_dir="$HOME/Library/Logs/DiagnosticReports"
 
 app_pid() {
   # launchctl prints "<pid|-> <status> UIKitApplication:<bundle id>[...]".
@@ -119,7 +146,10 @@ launch() {
   if [ -z "$pid" ] && pgrep -f "iphonesimulator/Runner.app/Runner|/Runner.app/Runner" >/dev/null 2>&1; then
     pid="$(pgrep -f "/Runner.app/Runner" | head -n 1)"
   fi
-  [ -n "$pid" ] || fail "The app is not running ${wait_s}s after the $name launch (crashed or exited)."
+  if [ -z "$pid" ]; then
+    dump_diagnostics
+    fail "The app is not running ${wait_s}s after the $name launch (crashed or exited)."
+  fi
   xcrun simctl io "$udid" screenshot "$out/ios-simulator-$name.png" >/dev/null 2>&1 || j3_warn "screenshot failed"
   record "Launch ($name)" "OK, alive after ${wait_s} s (pid $pid)"
 }
@@ -131,13 +161,35 @@ launch relaunch 10
 
 crash_reports="$(find "$reports_dir" -maxdepth 1 -name 'Runner*' -newer "$marker" -print 2>/dev/null || true)"
 if [ -n "$crash_reports" ]; then
-  printf '%s\n' "$crash_reports" | while IFS= read -r report; do cp "$report" "$out/" || true; done
+  dump_diagnostics
   fail "Crash report(s) were written for Runner: $(printf '%s' "$crash_reports" | tr '\n' ' ')"
 fi
 record "Crash reports" "none"
-
 xcrun simctl spawn "$udid" log show --last 3m --style compact --predicate 'process == "Runner"' \
   >"$out/runner-log.txt" 2>/dev/null || true
 xcrun simctl terminate "$udid" "$J3_APP_ID" >/dev/null 2>&1 || true
+
+# --- Integration tests, if any (time-limited: a runner that never connects fails clearly) ----
+if [ -n "$(j3_integration_tests)" ]; then
+  limit_s="${J3_IOS_TEST_TIMEOUT_S:-1200}"
+  set +e
+  run_with_timeout "$limit_s" bash "$J3_REPO_ROOT/scripts/ci/integration_tests.sh" "$udid" \
+    "iOS Simulator $device_name ($ios_version)"
+  status=$?
+  set -e
+  if [ "$status" -eq 0 ]; then
+    record "Integration tests" "passed"
+    xcrun simctl io "$udid" screenshot "$out/ios-simulator-after-tests.png" >/dev/null 2>&1 || true
+  elif [ "$status" -eq 124 ]; then
+    dump_diagnostics
+    fail "Integration tests did not finish within ${limit_s} s (the test runner never reported)."
+  else
+    dump_diagnostics
+    fail "Integration tests failed on the iOS Simulator (exit $status)."
+  fi
+else
+  record "Integration tests" "skipped (none in integration_test/)"
+fi
+
 write_summary
 j3_info "iOS Simulator smoke test passed."
