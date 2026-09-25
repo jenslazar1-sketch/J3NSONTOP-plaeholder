@@ -12,9 +12,7 @@ import '../../core/theme/j3_colors.dart';
 import '../../core/theme/j3_spacing.dart';
 import '../../core/theme/j3_typography.dart';
 import '../../core/tools/tool_registry.dart';
-import '../../core/widgets/ascii_art.dart';
 import '../../core/workspace/workspace_controller.dart';
-import '../intro/skull_art.dart';
 import '../palette/command_palette.dart';
 import 'activity_panel.dart';
 import 'destinations.dart';
@@ -207,14 +205,7 @@ class _Sidebar extends StatelessWidget {
               child: expanded
                   ? Row(
                       children: [
-                        SizedBox(
-                          width: 44,
-                          child: AsciiArt(
-                            lines: const [...kMiniSkullCranium, ...kMiniSkullJaw],
-                            style: J3Type.ascii.copyWith(fontSize: 6),
-                            semanticLabel: 'J3NSONTOP skull logo',
-                          ),
-                        ),
+                        const _SkullLogo(size: 40),
                         const SizedBox(width: J3Space.sm),
                         Expanded(
                           child: Column(
@@ -227,14 +218,7 @@ class _Sidebar extends StatelessWidget {
                         ),
                       ],
                     )
-                  : SizedBox(
-                      height: 40,
-                      child: AsciiArt(
-                        lines: const [...kMiniSkullCranium, ...kMiniSkullJaw],
-                        style: J3Type.ascii.copyWith(fontSize: 6),
-                        semanticLabel: 'J3NSONTOP skull logo',
-                      ),
-                    ),
+                  : const Center(child: _SkullLogo(size: 40)),
             ),
           ),
           const Divider(),
@@ -242,6 +226,27 @@ class _Sidebar extends StatelessWidget {
             child: _NavList(current: current, onSelect: onSelect, dense: !expanded),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The neon skull logo (original art, assets/images).
+class _SkullLogo extends StatelessWidget {
+  const _SkullLogo({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'J3NSONTOP skull logo',
+      image: true,
+      child: Image.asset(
+        size <= 64 ? 'assets/images/skull_logo_64.png' : 'assets/images/skull_logo_128.png',
+        width: size,
+        height: size,
+        filterQuality: FilterQuality.medium,
+        excludeFromSemantics: true,
       ),
     );
   }
