@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../theme/effects.dart';
 import '../theme/j3_colors.dart';
@@ -53,27 +56,32 @@ class NeonPanel extends StatelessWidget {
         : accent;
     final blur = emphasis == PanelEmphasis.subtle ? 0.0 : fx.glowBlur(emphasis == PanelEmphasis.strong ? 22 : 14);
 
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (kicker != null) Text(kicker!.toUpperCase(), style: J3Type.kicker.copyWith(color: fx.accentText)),
+        if (title != null) Text(title!, style: J3Type.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+      ],
+    );
     final header = (title != null || kicker != null || actions.isNotEmpty)
         ? Padding(
             padding: const EdgeInsets.only(bottom: J3Space.md),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (icon != null) ...[Icon(icon, size: 18, color: fx.accentText), const SizedBox(width: J3Space.sm)],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (kicker != null)
-                        Text(kicker!.toUpperCase(), style: J3Type.kicker.copyWith(color: fx.accentText)),
-                      if (title != null)
-                        Text(title!, style: J3Type.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
-                ...actions,
-              ],
+            child: _PanelHeader(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[Icon(icon, size: 18, color: fx.accentText), const SizedBox(width: J3Space.sm)],
+                  Flexible(child: titleBlock),
+                ],
+              ),
+              actions: actions.isEmpty
+                  ? null
+                  : Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: actions,
+                    ),
             ),
           )
         : null;
@@ -118,6 +126,102 @@ class NeonPanel extends StatelessWidget {
 }
 
 enum PanelEmphasis { subtle, normal, strong, danger, success }
+
+/// Title on the start side, actions on the end side. When the actions would
+/// leave the title less than 40% of the width (phones, large text) they move
+/// to their own end-aligned row below the title instead of overflowing.
+class _PanelHeader extends MultiChildRenderObjectWidget {
+  _PanelHeader({required Widget title, Widget? actions}) : super(children: [title, ?actions]);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderPanelHeader(Directionality.of(context));
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderPanelHeader renderObject) {
+    renderObject.textDirection = Directionality.of(context);
+  }
+}
+
+class _PanelHeaderParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderPanelHeader extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _PanelHeaderParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _PanelHeaderParentData> {
+  _RenderPanelHeader(this._textDirection);
+
+  static const double _gap = J3Space.sm;
+  static const double _minTitleFraction = 0.4;
+
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (value == _textDirection) return;
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _PanelHeaderParentData) child.parentData = _PanelHeaderParentData();
+  }
+
+  Size _layout(BoxConstraints constraints, {required bool dry}) {
+    Size measure(RenderBox child, double maxWidth) {
+      final c = BoxConstraints(maxWidth: maxWidth);
+      if (dry) return child.getDryLayout(c);
+      child.layout(c, parentUsesSize: true);
+      return child.size;
+    }
+
+    final maxWidth = constraints.maxWidth;
+    final title = firstChild!;
+    final actions = childCount > 1 ? lastChild : null;
+    final a = actions == null ? Size.zero : measure(actions, maxWidth);
+    final inline = actions == null || maxWidth - a.width - _gap >= maxWidth * _minTitleFraction;
+    final t = measure(title, inline && actions != null ? maxWidth - a.width - _gap : maxWidth);
+    final width = constraints.hasBoundedWidth ? maxWidth : t.width + _gap + a.width;
+    final height = inline ? math.max(t.height, a.height) : t.height + J3Space.xs + a.height;
+    if (!dry) {
+      void place(RenderBox child, Size s, double x, double y) {
+        final dx = _textDirection == TextDirection.rtl ? width - x - s.width : x;
+        (child.parentData! as _PanelHeaderParentData).offset = Offset(dx, y);
+      }
+
+      place(title, t, 0, inline ? (height - t.height) / 2 : 0);
+      if (actions != null) {
+        place(actions, a, width - a.width, inline ? (height - a.height) / 2 : t.height + J3Space.xs);
+      }
+    }
+    return constraints.constrain(Size(width, height));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => _layout(constraints, dry: true);
+
+  @override
+  void performLayout() => size = _layout(constraints, dry: false);
+
+  @override
+  double computeMinIntrinsicWidth(double height) =>
+      getChildrenAsList().fold(0.0, (m, c) => math.max(m, c.getMinIntrinsicWidth(height)));
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      getChildrenAsList().fold(0.0, (m, c) => m + c.getMaxIntrinsicWidth(height)) + (childCount - 1) * _gap;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => _layout(BoxConstraints(maxWidth: width), dry: true).height;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => computeMinIntrinsicHeight(width);
+
+  @override
+  void paint(PaintingContext context, Offset offset) => defaultPaint(context, offset);
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
+}
 
 /// Draws short L-shaped brackets on the four corners.
 class CornerBracketsPainter extends CustomPainter {

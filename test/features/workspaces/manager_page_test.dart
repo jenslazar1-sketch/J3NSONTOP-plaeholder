@@ -177,12 +177,17 @@ void main() {
     final h = await WsHarness.create(tester);
     await h.pump(tester, const WorkspaceManagerPage(), size: const Size(1280, 1000));
     await tapVisible(tester, find.text('Create sample workspace'));
-    await settle(tester, rounds: 20);
-    // Either the sample feature exists (success banner) or the failure is
-    // explained inline - never swallowed.
-    final ok = find.textContaining('Sample workspace "').evaluate().isNotEmpty;
-    final explained = find.textContaining('ERROR //').evaluate().isNotEmpty;
-    expect(ok || explained, isTrue);
+    // Generating the sample runs real isolates and file IO: wait for an
+    // outcome. Either a success banner, or the failure explained inline -
+    // never swallowed.
+    bool outcome() =>
+        find.textContaining('Sample workspace "').evaluate().isNotEmpty ||
+        find.textContaining('ERROR //').evaluate().isNotEmpty;
+    for (var i = 0; i < 400 && !outcome(); i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 25)));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(outcome(), isTrue);
   });
 
   testWidgets('mobile shows the link-folder alternative instead of the button', (tester) async {

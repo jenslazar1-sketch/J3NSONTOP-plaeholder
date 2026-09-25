@@ -218,7 +218,7 @@ void main() {
 
       await tester.tap(find.bySemanticsLabel(RegExp(r'^Command palette\.')));
       await tester.pumpAndSettle();
-      expect(find.text('Search tools, sections and actions...'), findsOneWidget);
+      expect(find.text('Search tools and actions, or > for commands'), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
 
