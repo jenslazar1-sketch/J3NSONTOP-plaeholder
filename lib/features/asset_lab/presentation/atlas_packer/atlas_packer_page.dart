@@ -21,7 +21,6 @@ import '../../domain/image_codec.dart';
 import '../asset_actions.dart';
 import '../widgets/checkerboard.dart';
 import '../widgets/image_viewport.dart';
-import '../widgets/panel_switch.dart';
 import '../widgets/status_line.dart';
 import 'atlas_controller.dart';
 
@@ -271,7 +270,7 @@ class _OptionsPanelState extends ConsumerState<_OptionsPanel> {
             labelOf: (v) => '$v',
           ),
           const SizedBox(height: J3Space.sm),
-          PanelSwitch(
+          OptionSwitch(
             label: 'Power-of-two size',
             description: 'Width and height rounded up to 256, 512, 1024...',
             value: o.powerOfTwo,

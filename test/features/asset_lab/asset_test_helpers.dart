@@ -102,28 +102,9 @@ Future<void> settle(WidgetTester tester, [int frames = 6]) async {
   }
 }
 
-/// The kit's StatusBanner/ErrorPanel currently trips this paint assertion on
-/// the base this feature was built on (fixed upstream in core commit
-/// 3b847b0, which could not be applied in this worktree). Only this exact
-/// message is ignored; every other error still fails the test. After the
-/// fix is merged the filter never triggers.
-const String knownCoreBannerAssertion = 'A borderRadius can only be given on borders with uniform colors';
-
-/// [testWidgets] for Asset Lab pages that tolerates [knownCoreBannerAssertion].
-void assetWidgetTest(String description, Future<void> Function(WidgetTester tester) body) {
-  testWidgets(description, (tester) async {
-    final original = FlutterError.onError;
-    FlutterError.onError = (details) {
-      if (details.exceptionAsString().contains(knownCoreBannerAssertion)) return;
-      original?.call(details);
-    };
-    try {
-      await body(tester);
-    } finally {
-      FlutterError.onError = original;
-    }
-  });
-}
+/// [testWidgets] alias used by the Asset Lab tests.
+void assetWidgetTest(String description, Future<void> Function(WidgetTester tester) body) =>
+    testWidgets(description, body);
 
 /// Alternates short real-time waits (so real file IO started by the UI can
 /// progress) with frames until [done] holds. Fails after [maxRounds].

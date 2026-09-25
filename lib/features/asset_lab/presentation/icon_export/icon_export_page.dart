@@ -16,7 +16,6 @@ import '../asset_actions.dart';
 import '../widgets/checkerboard.dart';
 import '../widgets/color_widgets.dart';
 import '../widgets/image_viewport.dart';
-import '../widgets/panel_switch.dart';
 import '../widgets/status_line.dart';
 import 'icon_controller.dart';
 
@@ -149,19 +148,19 @@ class _OptionsPanel extends ConsumerWidget {
             style: J3Type.caption,
           ),
           const SizedBox(height: J3Space.sm),
-          PanelSwitch(
+          OptionSwitch(
             label: 'Android + Google Play',
             description: 'mipmap 48-192 px, adaptive foreground 108-432 px + XML, Play 512 px',
             value: o.android,
             onChanged: (v) => ctrl.setOptions(o.copyWith(android: v)),
           ),
-          PanelSwitch(
+          OptionSwitch(
             label: 'iOS',
             description: 'AppIcon.appiconset: iPhone, iPad and 1024 px App Store, no alpha',
             value: o.ios,
             onChanged: (v) => ctrl.setOptions(o.copyWith(ios: v)),
           ),
-          PanelSwitch(
+          OptionSwitch(
             label: 'Windows',
             description: 'app_icon.ico with 16, 24, 32, 48, 64, 128, 256 px',
             value: o.windows,

@@ -19,7 +19,6 @@ import '../asset_actions.dart';
 import '../widgets/color_widgets.dart';
 import '../widgets/crop_overlay.dart';
 import '../widgets/image_viewport.dart';
-import '../widgets/panel_switch.dart';
 import '../widgets/status_line.dart';
 import 'studio_controller.dart';
 
@@ -624,7 +623,7 @@ class _ExportPanelState extends ConsumerState<_ExportPanel> {
           ),
           if (ex.format == ExportFormat.webp) ...[
             const SizedBox(height: J3Space.sm),
-            PanelSwitch(
+            OptionSwitch(
               label: 'Lossless WebP',
               description: 'Exact pixels (VP8L). Turn off for smaller lossy files.',
               value: ex.webpLossless,
