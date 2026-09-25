@@ -20,12 +20,36 @@ with an animated, laughing ASCII skull.
 
 ## Status
 
-Version 1.0.0 — feature-complete first release candidate. Verification is in
-progress: the latest results of the CI pipeline (Linux validation and
-integration tests, Android test APK + emulator smoke, Windows portable ZIP +
-installer + clean-machine smoke, iOS unsigned compile check + simulator smoke)
-are on the repository's **Actions** tab. Signed Android release and signed IPA
-builds require the secrets listed under [Signing](#signing).
+Version 1.0.0. Last full verification: commit `596e486`, CI run
+[#12](https://github.com/jenslazar1-sketch/J3NSONTOP-plaeholder/actions/runs/36197512580)
+— all 7 jobs passed.
+
+| Check | Result |
+| --- | --- |
+| Formatting, analyzer | clean |
+| Unit and widget tests | 1307 passed |
+| Integration tests, Linux desktop (xvfb) | 3 of 3 passed |
+| Linux release bundle smoke test | 10 of 10 steps (every section and all 43 tools render) |
+| Android test APK | built, apksigner-verified (debug key), 16 KB page alignment OK |
+| Android emulator, API 34 x86_64 | test APK installs, stays running, survives a relaunch; integration tests 3 of 3 |
+| Windows x64 | portable ZIP and setup EXE built and verified |
+| Windows clean machine (no Flutter) | portable smoke test and install/uninstall passed |
+| iOS unsigned compile check | Runner.app compiles (not installable, not an IPA) |
+| iOS Simulator, iPhone 17 Pro, iOS 26.5 | app installs, stays running, survives a relaunch; integration tests 3 of 3 |
+
+Artifacts of that run (kept 30 days; SHA-256 of the files inside):
+
+| File | SHA-256 |
+| --- | --- |
+| `J3NSONTOP-Multitool-1.0.0-android-test-debugsigned.apk` | `0b53ff7846d836905f8384b886327045e0390570ae7a934c37570293112d9984` |
+| `J3NSONTOP-Multitool-1.0.0-windows-x64-portable.zip` | `6c77c198ec2a10f321b93955edc5c8f8c18569ed7ffadfd627d3f2360d0bee1e` |
+| `J3NSONTOP-Multitool-1.0.0-windows-x64-setup.exe` | `0728a0bf779de3404e0f82e57b1f4afb698364dc58d28b65a5857ee520d62d3f` |
+
+Not produced yet: a release-signed Android APK/AAB and a signed IPA need
+the secrets listed under [Signing](#signing) and are built by the manual
+**Release** workflow. The Windows binaries are not Authenticode-signed
+(no certificate configured), so SmartScreen may warn; compare the checksum
+before running.
 
 ## Contents
 
