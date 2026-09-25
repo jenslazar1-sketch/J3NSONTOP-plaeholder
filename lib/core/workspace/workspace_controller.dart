@@ -90,11 +90,13 @@ class WorkspaceController extends Notifier<WorkspacesState> {
   }
 
   /// Creates an empty app-owned workspace (imported copies or sample).
+  /// It becomes active when [activate] is true or no workspace is active.
   Future<Workspace> addAppOwned(
     String name, {
     WorkspaceKind kind = WorkspaceKind.imported,
     String? id,
     String? note,
+    bool activate = true,
   }) async {
     assert(kind.isAppOwned);
     final now = DateTime.now();
@@ -103,7 +105,12 @@ class WorkspaceController extends Notifier<WorkspacesState> {
     await Directory(root).create(recursive: true);
     await Directory(_paths.workspaceMetaDir(wid)).create(recursive: true);
     final w = Workspace(id: wid, name: name, kind: kind, rootPath: root, createdAt: now, lastOpenedAt: now, note: note);
-    await _save(WorkspacesState(workspaces: [...state.workspaces, w], activeId: w.id));
+    await _save(
+      WorkspacesState(
+        workspaces: [...state.workspaces, w],
+        activeId: activate || state.activeId == null ? w.id : state.activeId,
+      ),
+    );
     return w;
   }
 

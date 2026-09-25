@@ -209,6 +209,7 @@ class SampleWorkspaceService {
             kind: WorkspaceKind.sample,
             id: id,
             note: 'Generated files for the fictional game "$sampleGameName" $sampleGameVersion.',
+            activate: previousActive == null,
           );
           final meta = _workspaces.metaDir(created);
           final stats = await installSampleContent(
@@ -217,8 +218,6 @@ class SampleWorkspaceService {
             bundle: bundle,
             onProgress: (f, m) => op.progress(0.1 + f * 0.9, m),
           );
-          // addAppOwned activates the new workspace; restore the previous one.
-          if (previousActive != null) await _workspaces.setActive(previousActive);
           op.succeed(
             '${stats.files} files, ${stats.packages} mod packages and ${stats.profiles} profiles',
             counts: stats.counts,
