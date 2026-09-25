@@ -1,4 +1,4 @@
-package com.j3nsontop.j3nsontop_multitool
+package com.j3nsontop.multitool
 
 import io.flutter.embedding.android.FlutterActivity
 

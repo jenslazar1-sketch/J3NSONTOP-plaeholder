@@ -72,6 +72,11 @@ IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
 #define VERSION_AS_STRING "1.0.0"
 #endif
 
+// CompanyName and ProductName below also name the data directory:
+// path_provider_windows resolves the application support directory as
+// %APPDATA%\<CompanyName>\<ProductName> (read from this resource), i.e.
+// %APPDATA%\J3NSONTOP\J3NSONTOP Multitool. Changing either value moves the
+// location where existing installations keep their data.
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION_AS_NUMBER
  PRODUCTVERSION VERSION_AS_NUMBER
@@ -89,13 +94,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.j3nsontop" "\0"
-            VALUE "FileDescription", "j3nsontop_multitool" "\0"
+            VALUE "CompanyName", "J3NSONTOP" "\0"
+            VALUE "FileDescription", "J3NSONTOP BIGGEST MULTITOOL MADE" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "j3nsontop_multitool" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.j3nsontop. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 J3NSONTOP" "\0"
             VALUE "OriginalFilename", "j3nsontop_multitool.exe" "\0"
-            VALUE "ProductName", "j3nsontop_multitool" "\0"
+            VALUE "ProductName", "J3NSONTOP Multitool" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

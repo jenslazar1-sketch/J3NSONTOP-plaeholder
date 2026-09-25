@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network security configuration for J3NSONTOP Multitool.
+
+  Why cleartext (http://) is permitted:
+  The HTTP developer tool sends requests only to endpoints the user types in
+  explicitly - typically development servers on the local network (LAN IPs,
+  10.0.2.2 for the emulator host, *.local names) that rarely have TLS. The app
+  shows a warning whenever an http:// URL is used. The app makes no network
+  requests on its own (no telemetry, no update checks, no cloud upload).
+
+  Trade-off: any platform networking API used by the app may use plain HTTP.
+  HTTPS still validates certificates against the system trust store only
+  (user-installed CAs are NOT trusted in release builds).
+
+  Note: Flutter's dart:io HTTP stack does not consult this file (the engine
+  passes an empty domain network policy), so this setting mainly governs
+  Android platform networking such as media playback. It is declared here so
+  the behaviour is explicit and consistent. See docs/BUILD.md.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

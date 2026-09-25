@@ -25,9 +25,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
+  // Sizes are logical pixels (scaled for the monitor's DPI by Win32Window).
+  // The initial size is clamped to the monitor's work area and centred, so the
+  // window also fits on small or highly scaled displays.
   Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
-  if (!window.Create(L"j3nsontop_multitool", origin, size)) {
+  Win32Window::Size size(1360, 860);
+  // Smallest client area the UI is designed for; enforced via WM_GETMINMAXINFO.
+  window.SetMinimumSize(Win32Window::Size(800, 560));
+  if (!window.Create(L"J3NSONTOP Multitool", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
