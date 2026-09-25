@@ -117,6 +117,9 @@ class CommandPalette extends ConsumerStatefulWidget {
   const CommandPalette({super.key, this.initialQuery = ''});
   final String initialQuery;
 
+  /// Placeholder of the search field (tests use it to find the open palette).
+  static const hintText = 'Search tools and actions, or > for commands';
+
   @override
   ConsumerState<CommandPalette> createState() => _CommandPaletteState();
 }
@@ -438,7 +441,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                         onChanged: (_) => setState(() => _index = 0),
                         decoration: InputDecoration(
                           prefixIcon: Icon(commandMode ? Icons.terminal : Icons.search, color: fx.accentText),
-                          hintText: 'Search tools and actions, or > for commands',
+                          hintText: CommandPalette.hintText,
                           suffixIcon: IconButton(
                             tooltip: keyboard ? 'Close (Esc)' : 'Close',
                             onPressed: () => Navigator.of(context).pop(),

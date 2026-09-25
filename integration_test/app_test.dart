@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:j3nsontop_multitool/app/app_info.dart';
+import 'package:j3nsontop_multitool/features/palette/command_palette.dart';
 import 'package:j3nsontop_multitool/main.dart' as app;
 import 'package:path/path.dart' as p;
 
@@ -91,10 +92,10 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await settle(tester);
-    expect(find.text('Search tools, sections and actions...'), findsOneWidget);
+    expect(find.text(CommandPalette.hintText), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);
-    expect(find.text('Search tools, sections and actions...'), findsNothing);
+    expect(find.text(CommandPalette.hintText), findsNothing);
     expect(AppInfo.fullName, 'J3NSONTOP BIGGEST MULTITOOL MADE');
     await dir.delete(recursive: true);
   });

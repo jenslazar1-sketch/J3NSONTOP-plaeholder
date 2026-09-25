@@ -13,6 +13,7 @@ import 'package:j3nsontop_multitool/features/home/home_favorites.dart';
 import 'package:j3nsontop_multitool/features/home/home_hero.dart' show kSkullLaughNotice;
 import 'package:j3nsontop_multitool/features/home/home_status.dart';
 import 'package:j3nsontop_multitool/features/intro/skull_art.dart';
+import 'package:j3nsontop_multitool/features/palette/command_palette.dart';
 import 'package:path/path.dart' as p;
 
 import '../../helpers/harness.dart';
@@ -218,7 +219,7 @@ void main() {
 
       await tester.tap(find.bySemanticsLabel(RegExp(r'^Command palette\.')));
       await tester.pumpAndSettle();
-      expect(find.text('Search tools and actions, or > for commands'), findsOneWidget);
+      expect(find.text(CommandPalette.hintText), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
 
