@@ -1,0 +1,414 @@
+# Continuous integration for J3NSONTOP BIGGEST MULTITOOL MADE.
+#
+# Runs on every push, every pull request and on demand. Uses NO secrets:
+# every artifact it produces is a clearly labelled test build (debug-signed
+# Android APK, unsigned Windows binaries, unsigned iOS compile check).
+# Signed builds come from release.yml. Documentation: docs/CI.md.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.5'
+  JAVA_VERSION: '17'
+  XCODE_APP: /Applications/Xcode_26.6.app
+  ARTIFACT_PREFIX: J3NSONTOP-Multitool
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate:
+    name: Validate (format, analyze, tests, Linux build + smoke)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      full_version: ${{ steps.version.outputs.full_version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read version from pubspec.yaml
+        id: version
+        run: bash scripts/ci/version_outputs.sh
+
+      - name: Install Linux desktop build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            xvfb libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Check formatting
+        run: |
+          dirs=()
+          for d in lib test integration_test tool; do
+            if [ -d "$d" ]; then dirs+=("$d"); fi
+          done
+          echo "dart format check: ${dirs[*]}"
+          dart format --output=none --set-exit-if-changed "${dirs[@]}"
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Unit and widget tests
+        run: flutter test --reporter expanded --file-reporter "json:$RUNNER_TEMP/unit-tests.json"
+
+      - name: Test summary
+        if: ${{ !cancelled() }}
+        run: python3 scripts/ci/test_report.py "$RUNNER_TEMP/unit-tests.json" "Unit and widget tests"
+
+      - name: Integration tests (Linux desktop, xvfb)
+        run: bash scripts/ci/integration_tests.sh linux "Linux desktop" --xvfb
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Smoke test the Linux release bundle (headless)
+        run: bash scripts/ci/linux_smoke.sh build/linux/x64/release/bundle 120
+
+      - name: Upload test and smoke reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: validate-reports
+          path: |
+            ${{ runner.temp }}/unit-tests.json
+            ${{ runner.temp }}/integration-*.json
+            ${{ runner.temp }}/smoke.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  android-test-apk:
+    name: Android test APK (debug-signed)
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      ARTIFACT_NAME: J3NSONTOP-Multitool-${{ needs.validate.outputs.version }}-android-test-apk
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build test APK (debug-signed, verified with apksigner/aapt2)
+        run: bash scripts/build_android.sh --mode test --out-dir dist
+
+      - name: Upload test APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            dist/*.apk
+            dist/*.apk.sha256
+            dist/SHA256SUMS
+            dist/android-build-info.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  android-emulator-smoke:
+    name: Android emulator smoke (API 34, x86_64)
+    needs: [validate, android-test-apk]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download test APK
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: J3NSONTOP-Multitool-${{ needs.validate.outputs.version }}-android-test-apk
+          path: apk
+
+      - name: Look for integration tests
+        id: it
+        run: |
+          if [ -n "$(find integration_test -name '*_test.dart' 2>/dev/null)" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No integration tests in integration_test/ - only the install/launch smoke test runs."
+          fi
+
+      - name: Set up Java (for integration tests)
+        if: steps.it.outputs.present == 'true'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Cache Gradle (for integration tests)
+        if: steps.it.outputs.present == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Set up Flutter (for integration tests)
+        if: steps.it.outputs.present == 'true'
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        if: steps.it.outputs.present == 'true'
+        run: flutter pub get --enforce-lockfile
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install, launch and relaunch on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          disk-size: 4G
+          emulator-boot-timeout: 900
+          script: bash scripts/ci/android_emulator_smoke.sh apk emulator-smoke
+
+      - name: Upload screenshots and logcat
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-emulator-smoke
+          path: emulator-smoke/
+          if-no-files-found: warn
+          retention-days: 14
+
+  windows:
+    name: Windows x64 (build, verify, package)
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 50
+    env:
+      VERSION: ${{ needs.validate.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        shell: pwsh
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build, bundle MSVC runtime, verify, ZIP + installer
+        shell: pwsh
+        run: ./scripts/build_windows.ps1 -OutDir dist
+
+      - name: Upload portable ZIP
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-portable
+          path: |
+            dist/*-windows-x64-portable.zip
+            dist/*-windows-x64-portable.zip.sha256
+            dist/windows-build-info.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-setup
+          path: |
+            dist/*-windows-x64-setup.exe
+            dist/*-windows-x64-setup.exe.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  windows-clean-smoke:
+    name: Windows clean-machine smoke (no Flutter)
+    needs: [validate, windows]
+    runs-on: windows-2025
+    timeout-minutes: 25
+    env:
+      VERSION: ${{ needs.validate.outputs.version }}
+    steps:
+      # Only the repository scripts are needed; Flutter/Visual Studio are NOT
+      # set up here, so the packaged app has to run on its own.
+      - name: Check out (scripts only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download portable ZIP
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-portable
+          path: artifacts/portable
+
+      - name: Download installer
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-setup
+          path: artifacts/setup
+
+      - name: Smoke test portable + install/uninstall
+        shell: pwsh
+        run: ./scripts/ci/windows_smoke.ps1 -ArtifactsDir artifacts -OutDir windows-smoke -TimeoutSeconds 120
+
+      - name: Upload smoke reports and installer logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-clean-smoke
+          path: windows-smoke/
+          if-no-files-found: warn
+          retention-days: 14
+
+  ios-unsigned:
+    name: iOS unsigned compile check
+    needs: validate
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      VERSION: ${{ needs.validate.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build unsigned Runner.app (compile check, NOT installable)
+        run: bash scripts/build_ios.sh --unsigned --out-dir dist
+
+      - name: Upload unsigned compile check
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-ios-UNSIGNED-compile-check
+          path: |
+            dist/*-ios-UNSIGNED-compile-check.zip
+            dist/*-ios-UNSIGNED-compile-check.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+  ios-simulator-smoke:
+    name: iOS Simulator smoke
+    needs: validate
+    runs-on: macos-26
+    timeout-minutes: 50
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Boot simulator, run integration tests or launch smoke test
+        run: bash scripts/ci/ios_simulator_smoke.sh ios-simulator-smoke
+
+      - name: Upload screenshots and logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-simulator-smoke
+          path: ios-simulator-smoke/
+          if-no-files-found: warn
+          retention-days: 14

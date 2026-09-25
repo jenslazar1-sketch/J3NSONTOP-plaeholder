@@ -45,14 +45,14 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "j3nsontop_multitool");
+    gtk_header_bar_set_title(header_bar, "J3NSONTOP Multitool");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "j3nsontop_multitool");
+    gtk_window_set_title(window, "J3NSONTOP Multitool");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
+  gtk_window_set_default_size(window, 1360, 860);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(

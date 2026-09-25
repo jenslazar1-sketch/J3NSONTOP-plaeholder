@@ -1,0 +1,59 @@
+# Normalise line endings in the repository; check out with the endings each
+# tool expects, independent of the developer's core.autocrlf setting.
+* text=auto
+
+# Shell / Ruby / Python scripts run on Linux and macOS (and Git Bash): LF only.
+*.sh text eol=lf
+*.bash text eol=lf
+*.rb text eol=lf
+*.py text eol=lf
+
+# Windows scripts and installer sources: CRLF.
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.iss text eol=crlf
+
+# Dart sources: LF everywhere so `dart format --set-exit-if-changed` behaves
+# identically on Windows, macOS and Linux.
+*.dart text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+pubspec.lock text eol=lf
+
+# Xcode project files are merged as text but must keep LF.
+*.pbxproj text eol=lf
+*.plist text eol=lf
+*.xcconfig text eol=lf
+
+# Binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.m4a binary
+*.zip binary
+*.jar binary
+*.jks binary
+*.keystore binary
+*.p12 binary
+*.mobileprovision binary
+*.pfx binary
+*.exe binary
+*.dll binary
+*.so binary
+*.apk binary
+*.aab binary
+*.ipa binary

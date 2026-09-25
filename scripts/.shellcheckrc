@@ -1,0 +1,3 @@
+# ShellCheck configuration for the build scripts: resolve `source` paths
+# relative to the script that sources them.
+source-path=SCRIPTDIR

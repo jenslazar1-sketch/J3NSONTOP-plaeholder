@@ -3,6 +3,8 @@
 #include <dwmapi.h>
 #include <flutter_windows.h>
 
+#include <algorithm>
+
 #include "resource.h"
 
 namespace {
@@ -51,6 +53,30 @@ void EnableFullDpiSupportIfAvailable(HWND hwnd) {
     enable_non_client_dpi_scaling(hwnd);
   }
   FreeLibrary(user32_module);
+}
+
+using AdjustWindowRectExForDpiFn = BOOL __stdcall(LPRECT rect,
+                                                  DWORD style,
+                                                  BOOL menu,
+                                                  DWORD ex_style,
+                                                  UINT dpi);
+
+// Grows |rect| from a client rectangle to the matching window rectangle
+// (including borders and title bar) for |dpi|. AdjustWindowRectExForDpi is
+// only available on Windows 10 1607 and later, so it is loaded dynamically;
+// older systems fall back to the system-DPI AdjustWindowRectEx.
+void AdjustWindowRectForDpi(RECT* rect, DWORD style, DWORD ex_style, UINT dpi) {
+  HMODULE user32_module = GetModuleHandle(L"user32.dll");
+  if (user32_module != nullptr) {
+    auto adjust_window_rect_for_dpi =
+        reinterpret_cast<AdjustWindowRectExForDpiFn*>(
+            GetProcAddress(user32_module, "AdjustWindowRectExForDpi"));
+    if (adjust_window_rect_for_dpi != nullptr &&
+        adjust_window_rect_for_dpi(rect, style, FALSE, ex_style, dpi)) {
+      return;
+    }
+  }
+  AdjustWindowRectEx(rect, style, FALSE, ex_style);
 }
 
 }  // namespace
@@ -134,11 +160,28 @@ bool Win32Window::Create(const std::wstring& title,
   UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
   double scale_factor = dpi / 96.0;
 
-  HWND window = CreateWindow(
-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
-      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
-      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
-      nullptr, nullptr, GetModuleHandle(nullptr), this);
+  int x = Scale(origin.x, scale_factor);
+  int y = Scale(origin.y, scale_factor);
+  int width = Scale(size.width, scale_factor);
+  int height = Scale(size.height, scale_factor);
+
+  // Keep the initial window inside the monitor's work area (small or highly
+  // scaled displays) and centre it there.
+  MONITORINFO monitor_info = {};
+  monitor_info.cbSize = sizeof(monitor_info);
+  if (GetMonitorInfo(monitor, &monitor_info)) {
+    const RECT& work_area = monitor_info.rcWork;
+    const int work_width = work_area.right - work_area.left;
+    const int work_height = work_area.bottom - work_area.top;
+    width = std::min(width, work_width);
+    height = std::min(height, work_height);
+    x = work_area.left + (work_width - width) / 2;
+    y = work_area.top + (work_height - height) / 2;
+  }
+
+  HWND window = CreateWindow(window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
+                             x, y, width, height, nullptr, nullptr,
+                             GetModuleHandle(nullptr), this);
 
   if (!window) {
     return false;
@@ -195,6 +238,28 @@ Win32Window::MessageHandler(HWND hwnd,
       SetWindowPos(hwnd, nullptr, newRectSize->left, newRectSize->top, newWidth,
                    newHeight, SWP_NOZORDER | SWP_NOACTIVATE);
 
+      return 0;
+    }
+    case WM_GETMINMAXINFO: {
+      if (min_client_size_.width == 0 && min_client_size_.height == 0) {
+        break;
+      }
+      // The minimum is defined for the client area in logical pixels; Windows
+      // expects the outer window size in physical pixels for the window's
+      // current monitor, so scale by its DPI and add the non-client frame.
+      auto* min_max_info = reinterpret_cast<MINMAXINFO*>(lparam);
+      const UINT dpi = FlutterDesktopGetDpiForMonitor(
+          MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
+      const double scale_factor = dpi / 96.0;
+      RECT frame = {0, 0, Scale(min_client_size_.width, scale_factor),
+                    Scale(min_client_size_.height, scale_factor)};
+      AdjustWindowRectForDpi(
+          &frame, static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_STYLE)),
+          static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_EXSTYLE)), dpi);
+      min_max_info->ptMinTrackSize.x =
+          std::max(min_max_info->ptMinTrackSize.x, frame.right - frame.left);
+      min_max_info->ptMinTrackSize.y =
+          std::max(min_max_info->ptMinTrackSize.y, frame.bottom - frame.top);
       return 0;
     }
     case WM_SIZE: {
@@ -261,6 +326,10 @@ HWND Win32Window::GetHandle() {
 
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
+}
+
+void Win32Window::SetMinimumSize(const Size& min_client_size) {
+  min_client_size_ = min_client_size;
 }
 
 bool Win32Window::OnCreate() {
