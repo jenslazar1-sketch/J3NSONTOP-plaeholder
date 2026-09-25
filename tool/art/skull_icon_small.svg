@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  J3NSONTOP BIGGEST MULTITOOL MADE - small app icon (32 px and below).
+  Dark rounded tile with a dark red bloom and the bold skull_small.svg on top.
+  No grid or scanlines: at this size they only turn into noise.
+  Original artwork, see docs/ASSETS.md.
+
+  tool/art/render_icons.py renders it as is (rounded tile, transparent
+  corners: Windows 16/24/32 px) and with class="full-bleed" (opaque square:
+  iOS 20 and 29 px icons, which iOS masks itself).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>J3NSONTOP app icon (small)</title>
+  <style>
+    .full-bleed .tile { rx: 0px; ry: 0px; }
+  </style>
+  <defs>
+    <radialGradient id="bloom" cx="16" cy="15" r="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#750c20" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#750c20" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="tile" width="32" height="32" rx="6" ry="6" fill="#050507"/>
+  <rect class="tile" width="32" height="32" rx="6" ry="6" fill="url(#bloom)"/>
+  <image href="skull_small.svg" x="0" y="0" width="32" height="32"/>
+</svg>

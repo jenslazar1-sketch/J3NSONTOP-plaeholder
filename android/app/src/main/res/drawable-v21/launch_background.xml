@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Launch screen shown until Flutter draws its first frame (Android 5-11;
+     Android 12+ uses the windowSplashScreen* attributes in values-v31).
+     Near-black background with the glowing skull centred at its natural size
+     (drawable-<density>/splash_skull.png, rendered by tool/art/render_icons.py). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="?android:colorBackground" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
+    <item android:drawable="@color/splash_background" />
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+            android:src="@drawable/splash_skull" />
+    </item>
 </layer-list>

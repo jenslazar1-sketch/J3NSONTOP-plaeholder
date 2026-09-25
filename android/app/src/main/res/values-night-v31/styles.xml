@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31) system splash screen, Dark Mode on. Needed because
+         values-night outranks values-v31 when both match.
+         splash_icon is a 288 dp canvas whose skull (glow included) fits the
+         192 dp circle; see tool/art/render_icons.py and docs/ASSETS.md.
+         NormalTheme is inherited unchanged from values-night/styles.xml. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
+    </style>
+</resources>

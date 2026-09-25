@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  J3NSONTOP BIGGEST MULTITOOL MADE - app icon foreground: the laughing skull on a transparent canvas.
+  Original artwork made for this project (see docs/ASSETS.md). It echoes the
+  ASCII skull in lib/features/intro/skull_art.dart: angular sockets that slant
+  down toward the nose, glowing eyes, the inverted-V nose /_^_\, the hairline
+  crack on the upper right of the dome, the |_|_| upper teeth and a separate
+  jaw hanging open mid-laugh.
+  Palette: background #050507, neon #FF163B, dark red #750C20, text #F4F4F7.
+  Rendered to every platform asset by tool/art/render_icons.py.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>J3NSONTOP laughing skull</title>
+  <defs>
+    <radialGradient id="bone" cx="512" cy="300" r="620" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#48101d"/>
+      <stop offset="0.55" stop-color="#1c070d"/>
+      <stop offset="1" stop-color="#0d0508"/>
+    </radialGradient>
+    <linearGradient id="tooth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff5c74"/>
+      <stop offset="1" stop-color="#ff163b"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff1f3"/>
+      <stop offset="0.18" stop-color="#ff6b82"/>
+      <stop offset="0.45" stop-color="#ff163b" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#ff163b" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="scanlines" width="16" height="14" patternUnits="userSpaceOnUse">
+      <rect width="16" height="5" fill="#ff163b" fill-opacity="0.07"/>
+    </pattern>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="haze" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="42"/>
+    </filter>
+    <filter id="soften" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+
+    <!-- Geometry (1024 grid, mirror axis x=512). Right socket = mirrored left. -->
+    <path id="cranium-fill" d="M512 104C712 104 868 244 868 430C868 510 864 560 852 600C834 652 804 694 764 700H708V778H316V700H260C220 694 190 652 172 600C160 560 156 510 156 430C156 244 312 104 512 104Z"/>
+    <path id="cranium-line" d="M512 104C712 104 868 244 868 430C868 510 864 560 852 600C834 652 804 694 764 700H260C220 694 190 652 172 600C160 560 156 510 156 430C156 244 312 104 512 104ZM316 700V778M708 700V778"/>
+    <path id="jaw-fill" d="M316 822V880C316 918 360 942 432 942H592C664 942 708 918 708 880V822Z"/>
+    <path id="jaw-line" d="M316 822V880C316 918 360 942 432 942H592C664 942 708 918 708 880V822M316 876H708"/>
+    <path id="socket" d="M246 448L452 532L474 568L472 606C471 626 458 636 438 636L300 636C256 636 228 608 228 566L228 482C228 460 234 452 246 448Z"/>
+    <path id="nose" d="M512 596L568 682L530 682L512 660L494 682L456 682Z"/>
+    <path id="crack" d="M624 128L644 194L612 248L662 302L704 306L730 372"/>
+    <path id="teeth-upper"
+          d="M345 708H385.67Q388.67 708 388.67 711V760Q388.67 776 372.67 776H358Q342 776 342 760V711Q342 708 345 708Z
+             M403.67 708H444.33Q447.33 708 447.33 711V760Q447.33 776 431.33 776H416.67Q400.67 776 400.67 760V711Q400.67 708 403.67 708Z
+             M462.33 708H503Q506 708 506 711V760Q506 776 490 776H475.33Q459.33 776 459.33 760V711Q459.33 708 462.33 708Z
+             M521 708H561.67Q564.67 708 564.67 711V760Q564.67 776 548.67 776H534Q518 776 518 760V711Q518 708 521 708Z
+             M579.67 708H620.33Q623.33 708 623.33 711V760Q623.33 776 607.33 776H592.67Q576.67 776 576.67 760V711Q576.67 708 579.67 708Z
+             M638.33 708H679Q682 708 682 711V760Q682 776 666 776H651.33Q635.33 776 635.33 760V711Q635.33 708 638.33 708Z"/>
+    <path id="teeth-lower"
+          d="M358 824H372.67Q388.67 824 388.67 840V865Q388.67 868 385.67 868H345Q342 868 342 865V840Q342 824 358 824Z
+             M416.67 824H431.33Q447.33 824 447.33 840V865Q447.33 868 444.33 868H403.67Q400.67 868 400.67 865V840Q400.67 824 416.67 824Z
+             M475.33 824H490Q506 824 506 840V865Q506 868 503 868H462.33Q459.33 868 459.33 865V840Q459.33 824 475.33 824Z
+             M534 824H548.67Q564.67 824 564.67 840V865Q564.67 868 561.67 868H521Q518 868 518 865V840Q518 824 534 824Z
+             M592.67 824H607.33Q623.33 824 623.33 840V865Q623.33 868 620.33 868H579.67Q576.67 868 576.67 865V840Q576.67 824 592.67 824Z
+             M651.33 824H666Q682 824 682 840V865Q682 868 679 868H638.33Q635.33 868 635.33 865V840Q635.33 824 651.33 824Z"/>
+
+    <!-- Every neon tube in one group so glow, tube and hot core stay in sync. -->
+    <g id="tubes" fill="none" stroke-linejoin="round" stroke-linecap="round">
+      <use href="#cranium-line"/>
+      <use href="#jaw-line"/>
+      <use href="#socket"/>
+      <use href="#socket" transform="translate(1024 0) scale(-1 1)"/>
+      <use href="#nose"/>
+    </g>
+    <g id="teeth">
+      <use href="#teeth-upper"/>
+      <use href="#teeth-lower"/>
+    </g>
+  </defs>
+
+  <g id="skull" transform="translate(0 -12)">
+    <!-- 1. ambient haze behind everything -->
+    <g filter="url(#haze)" opacity="0.32" fill="#ff163b" stroke="#ff163b" stroke-width="40">
+      <use href="#tubes"/>
+      <use href="#teeth"/>
+    </g>
+    <!-- 2. bone: dark red body with faint CRT scanlines -->
+    <use href="#cranium-fill" fill="url(#bone)"/>
+    <use href="#jaw-fill" fill="url(#bone)"/>
+    <use href="#cranium-fill" fill="url(#scanlines)"/>
+    <use href="#jaw-fill" fill="url(#scanlines)"/>
+    <!-- 3. voids: sockets and nose -->
+    <use href="#socket" fill="#030304"/>
+    <use href="#socket" fill="#030304" transform="translate(1024 0) scale(-1 1)"/>
+    <use href="#nose" fill="#030304"/>
+    <!-- 4. glowing eyes -->
+    <circle cx="354" cy="560" r="104" fill="url(#eye)"/>
+    <circle cx="670" cy="560" r="104" fill="url(#eye)"/>
+    <!-- 5. neon glow pass -->
+    <g filter="url(#glow)" opacity="0.75" fill="#ff163b" stroke="#ff163b" stroke-width="38">
+      <use href="#tubes"/>
+      <use href="#crack" fill="none" stroke-width="16"/>
+      <use href="#teeth" stroke="none"/>
+    </g>
+    <!-- 6. teeth -->
+    <use href="#teeth" fill="url(#tooth)"/>
+    <!-- 7. neon tubes -->
+    <g stroke="#ff163b" stroke-width="32">
+      <use href="#tubes"/>
+      <use href="#crack" fill="none" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <!-- 8. hot core of the tubes -->
+    <g stroke="#ffb3c0" stroke-width="5" opacity="0.5" filter="url(#soften)">
+      <use href="#tubes"/>
+    </g>
+  </g>
+</svg>

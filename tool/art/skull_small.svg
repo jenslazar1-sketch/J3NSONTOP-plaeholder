@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  J3NSONTOP BIGGEST MULTITOOL MADE - small-size skull (32 px and below).
+  Bold neon silhouette drawn on a 32 unit pixel grid (edges sit on whole or
+  even units, so 16 and 32 px renders stay crisp): angular sockets slanting
+  toward the nose with two white-hot eyes, the inverted-V nose, three upper
+  and three lower teeth, the open jaw and the crack on the upper right.
+  Transparent canvas. Original artwork, see docs/ASSETS.md.
+  Used by skull_icon_small.svg and assets/images/skull_logo_64.png;
+  rendered by tool/art/render_icons.py.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>J3NSONTOP skull (small)</title>
+  <defs>
+    <linearGradient id="bone" x1="0" y1="2" x2="0" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff3d5a"/>
+      <stop offset="0.6" stop-color="#ff163b"/>
+      <stop offset="1" stop-color="#e3102f"/>
+    </linearGradient>
+    <radialGradient id="eye-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff163b" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ff163b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.9"/>
+    </filter>
+
+    <!-- Geometry (32 grid, mirror axis x=16). -->
+    <path id="cranium" d="M16 2C22.6 2 28 6.9 28 13V15C28 17.6 27 19.5 25.5 20H24V24H8V20H6.5C5 19.5 4 17.6 4 15V13C4 6.9 9.4 2 16 2Z"/>
+    <path id="jaw" d="M8 26H24V28C24 29.1 23.1 30 22 30H10C8.9 30 8 29.1 8 28Z"/>
+    <path id="socket" d="M6.4 10.8L14 13.9V17C14 17.6 13.6 18 13 18H8C6.9 18 6 17.1 6 16V11.4C6 11 6.1 10.7 6.4 10.8Z"/>
+    <path id="nose" d="M16 16.5L18 19.5H14Z"/>
+    <path id="teeth-gaps" d="M12 20H14V24H12ZM18 20H20V24H18ZM12 26H14V28H12ZM18 26H20V28H18Z"/>
+    <path id="crack" d="M19.6 2.3L20.6 5L19.4 6.6L21.6 8.6L23.2 8.8"/>
+
+    <mask id="cuts" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+      <rect width="32" height="32" fill="#fff"/>
+      <use href="#teeth-gaps" fill="#000"/>
+      <use href="#crack" fill="none" stroke="#000" stroke-width="1" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+
+  <!-- restrained outer glow -->
+  <g filter="url(#glow)" opacity="0.55" fill="#ff163b">
+    <use href="#cranium"/>
+    <use href="#jaw"/>
+  </g>
+  <!-- solid neon bone; teeth gaps and crack cut out -->
+  <g mask="url(#cuts)" fill="url(#bone)">
+    <use href="#cranium"/>
+    <use href="#jaw"/>
+  </g>
+  <!-- voids -->
+  <g fill="#050507">
+    <use href="#socket"/>
+    <use href="#socket" transform="translate(32 0) scale(-1 1)"/>
+    <use href="#nose"/>
+  </g>
+  <!-- white-hot eyes -->
+  <circle cx="10" cy="15.3" r="2.8" fill="url(#eye-glow)"/>
+  <circle cx="22" cy="15.3" r="2.8" fill="url(#eye-glow)"/>
+  <circle cx="10" cy="15.3" r="1.1" fill="#fff4f6"/>
+  <circle cx="22" cy="15.3" r="1.1" fill="#fff4f6"/>
+</svg>
