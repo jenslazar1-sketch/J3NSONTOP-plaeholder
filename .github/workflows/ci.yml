@@ -15,9 +15,12 @@ on:
 permissions:
   contents: read
 
+# Pull requests cancel superseded runs. Branch pushes let the in-flight run
+# finish (so every platform build completes) and GitHub keeps only the newest
+# pending run queued behind it.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   FLUTTER_VERSION: '3.47.5'

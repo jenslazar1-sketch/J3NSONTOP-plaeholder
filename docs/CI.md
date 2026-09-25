@@ -9,7 +9,8 @@ Two GitHub Actions workflows live in `.github/workflows/`:
 
 Common rules: `permissions: contents: read`, one run per workflow and ref at a
 time (`concurrency: ${{ github.workflow }}-${{ github.ref }}`; CI cancels an
-older run of the same branch, Release never cancels), `timeout-minutes` on
+older run only for pull requests; branch pushes let the running build finish and
+queue the newest commit; Release never cancels), `timeout-minutes` on
 every job, actions pinned to commit SHAs ([TOOLCHAIN.md](TOOLCHAIN.md)), the
 Flutter SDK and pub cache cached by `subosito/flutter-action` (pub cache keyed
 by `pubspec.lock`), Gradle caches keyed by the Gradle files + `pubspec.lock`,

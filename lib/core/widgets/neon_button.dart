@@ -172,7 +172,7 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
         border: Border.all(color: border, width: _focus ? 2 : 1),
         boxShadow: glow,
       ),
-      alignment: Alignment.center,
+      width: widget.expand ? double.infinity : null,
       child: AnimatedBuilder(
         animation: _glitch,
         child: label,

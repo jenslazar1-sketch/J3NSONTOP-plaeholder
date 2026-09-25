@@ -12,6 +12,7 @@ import 'core/storage/app_stores.dart';
 import 'core/theme/j3_colors.dart';
 import 'core/theme/j3_typography.dart';
 import 'core/tools/tool_registry.dart';
+import 'features/settings/licenses.dart';
 
 /// Startup performs only real work: resolve the data directory, load the
 /// versioned JSON stores (with recovery), build the tool registry, then run.
@@ -19,6 +20,7 @@ import 'core/tools/tool_registry.dart';
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorLog.instance.install();
+  registerAppLicenses();
   final launch = LaunchArgs.parse(args);
   try {
     final paths = await AppPaths.resolve(overrideRoot: launch.dataDir);

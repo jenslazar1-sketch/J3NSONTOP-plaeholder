@@ -16,13 +16,17 @@ class OptionSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: SwitchListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: J3Space.xs),
-        title: Text(label, style: J3Type.body),
-        subtitle: description == null ? null : Text(description!, style: J3Type.caption),
-        value: value,
-        onChanged: onChanged,
+    // Transparent Material so the tile's ink works inside decorated panels.
+    return Material(
+      type: MaterialType.transparency,
+      child: MergeSemantics(
+        child: SwitchListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: J3Space.xs),
+          title: Text(label, style: J3Type.body),
+          subtitle: description == null ? null : Text(description!, style: J3Type.caption),
+          value: value,
+          onChanged: onChanged,
+        ),
       ),
     );
   }

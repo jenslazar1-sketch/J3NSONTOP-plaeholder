@@ -110,7 +110,9 @@ class OperationTile extends ConsumerWidget {
               Expanded(
                 child: Text(op.title, style: J3Type.label, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
-              StatusBadge(kind: kind, text: op.status.label, dense: true),
+              Flexible(
+                child: StatusBadge(kind: kind, text: op.status.label, dense: true),
+              ),
             ],
           ),
           const SizedBox(height: 2),

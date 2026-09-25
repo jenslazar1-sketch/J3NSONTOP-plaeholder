@@ -516,7 +516,6 @@ class RecentActivityPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ops = ref.watch(activityProvider.select((s) => s.operations)).take(limit).toList();
-    final narrow = MediaQuery.sizeOf(context).width < 480;
     return NeonPanel(
       kicker: '// RECENT ACTIVITY',
       title: 'Last operations',
@@ -541,14 +540,7 @@ class RecentActivityPanel extends ConsumerWidget {
             for (final op in ops)
               Padding(
                 padding: const EdgeInsets.only(bottom: J3Space.xs),
-                // The shared tile keeps its status badge on one line; on
-                // phones cap the text scale so it cannot overflow.
-                child: narrow
-                    ? MediaQuery.withClampedTextScaling(
-                        maxScaleFactor: 1.5,
-                        child: OperationTile(op: op, compact: true),
-                      )
-                    : OperationTile(op: op, compact: true),
+                child: OperationTile(op: op, compact: true),
               ),
           const SizedBox(height: J3Space.xs),
           Align(
