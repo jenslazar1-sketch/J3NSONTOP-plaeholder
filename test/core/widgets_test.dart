@@ -268,10 +268,14 @@ void main() {
   testWidgets('workspace browser stays inside the workspace and picks a file', (tester) async {
     final container = env.container();
     addTearDown(container.dispose);
-    final ws = await container.read(workspacesProvider.notifier).addAppOwned('WS');
-    await Directory(p.join(ws.rootPath, 'sub')).create();
-    await File(p.join(ws.rootPath, 'sub', 'a.json')).writeAsString('{}');
-    await File(p.join(ws.rootPath, 'b.txt')).writeAsString('x');
+    // Real file IO must run outside the fake-async test zone.
+    final ws = (await tester.runAsync(() async {
+      final w = await container.read(workspacesProvider.notifier).addAppOwned('WS');
+      await Directory(p.join(w.rootPath, 'sub')).create();
+      await File(p.join(w.rootPath, 'sub', 'a.json')).writeAsString('{}');
+      await File(p.join(w.rootPath, 'b.txt')).writeAsString('x');
+      return w;
+    }))!;
     String? picked;
     await tester.pumpWidget(
       UncontrolledProviderScope(
