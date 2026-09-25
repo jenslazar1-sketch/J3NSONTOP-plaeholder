@@ -1,0 +1,62 @@
+# Neon Dungeon - controls
+# Key names follow SDL ("Left Shift"); gamepad buttons use Xbox names.
+# A list means "any of these keys". Edit only while the game is closed.
+version: 2
+layout: qwerty
+
+# Shared look settings. Defined once with an anchor (&look) and reused
+# below with aliases (*look) - YAML-to-JSON conversion expands both copies.
+look_defaults: &look
+  sensitivity: 1.25
+  invert_y: false
+  deadzone: 0.15 # stick deadzone, 0..1
+
+keyboard:
+  movement:
+    up: [W, Up]
+    down: [S, Down]
+    left: [A, Left]
+    right: [D, Right]
+  actions:
+    attack: Mouse1
+    block: Mouse2
+    dodge: Space
+    sprint: "Left Shift"
+    interact: E
+    use_potion: Q
+    inventory: Tab
+    map: M
+    pause: Escape
+  hotbar:
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+  look: *look
+
+gamepad:
+  enabled: true
+  vibration: 0.8
+  movement: LeftStick
+  camera: RightStick
+  actions:
+    attack: X
+    block: LB
+    dodge: A
+    sprint: LS
+    interact: Y
+    use_potion: RB
+    inventory: Back
+    map: DPadUp
+    pause: Start
+  look: *look
+
+macros:
+  quick_heal:
+    description: |
+      Drinks the weakest healing potion in the inventory,
+      then switches back to the equipped weapon.
+    steps: [use_potion, wait_200ms, equip_last]
+  panic_button: ~ # unbound

@@ -1,0 +1,13 @@
+{
+  "id": "neon-dungeon",
+  "name": "Neon Dungeon",
+  "version": "1.4.2",
+  "build": "2026.09.01-r1842",
+  "releaseDate": "2026-09-01",
+  "engine": "NeonGL 4.6 (fictional)",
+  "modding": {
+    "packageFormat": "j3mod",
+    "dataRoot": "data"
+  },
+  "fictional": true
+}

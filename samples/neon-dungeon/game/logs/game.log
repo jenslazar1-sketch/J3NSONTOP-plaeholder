@@ -1,0 +1,298 @@
+[2026-09-01 12:00:00.000] [INFO] [boot] Neon Dungeon 1.4.2 (build 2026.09.01-r1842) starting
+[2026-09-01 12:00:00.008] [DEBUG] [boot] Command line: --lang=en --data=./game
+[2026-09-01 12:00:00.012] [TRACE] [boot] Heap reserved: 512 MiB, job threads: 6
+[2026-09-01 12:00:00.042] [INFO] [config] Loaded config/settings.ini (4 sections, 27 keys)
+[2026-09-01 12:00:00.043] [DEBUG] [config] Display: 1920x1080 borderless @ 144 Hz, vsync on, ui_scale 1.25
+[2026-09-01 12:00:00.044] [WARN] [config] settings.ini [Gameplay] 'seed' is empty, using a random dungeon seed
+[2026-09-01 12:00:00.048] [INFO] [config] Loaded config/graphics.json (preset high, bloom on, scanlines on)
+[2026-09-01 12:00:00.058] [INFO] [config] Loaded config/controls.yaml (keyboard + gamepad, alias *look used 2x)
+[2026-09-01 12:00:00.065] [INFO] [config] Loaded config/balance.toml ("Vanilla", 5 enemy types)
+[2026-09-01 12:00:00.176] [INFO] [render] Renderer: NeonGL 4.6 on Neon GFX 3000 (driver 31.0.15)
+[2026-09-01 12:00:00.189] [DEBUG] [render] Swapchain created: 1920x1080, 3 buffers, format RGBA8
+[2026-09-01 12:00:00.207] [DEBUG] [render] Compiled 42 shaders in 318 ms (12 from cache)
+[2026-09-01 12:00:00.227] [INFO] [audio] Audio device: Default (48000 Hz, stereo, 256 frame buffer)
+[2026-09-01 12:00:00.254] [DEBUG] [input] Gamepad connected: Xbox-compatible controller #0
+[2026-09-01 12:00:00.547] [INFO] [assets] Indexed 1284 assets in 312 ms
+[2026-09-01 12:00:00.557] [DEBUG] [assets] Atlas sprites/hero_walk.png: 8 frames of 32x32
+[2026-09-01 12:00:00.567] [INFO] [mods] Mods folder scanned: 0 packages enabled (vanilla)
+[2026-09-01 12:00:00.596] [INFO] [save] Save slots: 1 = valid, 2 = empty, 3 = damaged
+[2026-09-01 12:00:00.599] [ERROR] [save] Failed to read saves/slot3.json: unexpected end of JSON input at line 41, column 3
+    at JsonReader.expect (core/json_reader.nd:188)
+    at SaveSystem.readSlot (save/save_system.nd:212)
+    at SaveSystem.scanSlots (save/save_system.nd:97)
+    at Game.boot (core/game.nd:64)
+[2026-09-01 12:00:00.611] [INFO] [save] Loaded saves/slot1.json (J3NSONTOP, necromancer, level 14, floor 6)
+[2026-09-01 12:00:00.813] [INFO] [ui] Main menu shown
+[2026-09-01 12:00:04.696] [INFO] [ui] Continue pressed
+[2026-09-01 12:00:04.805] [INFO] [world] Entering floor 6: The Humming Crypt (seed 0x5EED0006)
+[2026-09-01 12:00:05.941] [DEBUG] [world] Spawned mimic#101 at (13,24)
+[2026-09-01 12:00:07.540] [DEBUG] [world] Spawned slime#102 at (6,28)
+[2026-09-01 12:00:08.329] [DEBUG] [world] Spawned wraith#103 at (33,34)
+[2026-09-01 12:00:10.061] [WARN] [render] Frame 3204 took 48.6 ms (budget 6.9 ms)
+[2026-09-01 12:00:13.887] [INFO] [combat] slime#102 defeated (+19 XP)
+[2026-09-01 12:00:16.044] [DEBUG] [world] Spawned bat#104 at (27,6)
+[2026-09-01 12:00:16.125] [DEBUG] [world] Spawned bat#105 at (42,23)
+[2026-09-01 12:00:16.681] [WARN] [render] Frame 3956 took 53.5 ms (budget 6.9 ms)
+[2026-09-01 12:00:19.050] [WARN] [render] Frame 4545 took 37.2 ms (budget 6.9 ms)
+[2026-09-01 12:00:22.253] [WARN] [render] Frame 4618 took 63.6 ms (budget 6.9 ms)
+[2026-09-01 12:00:24.911] [TRACE] [input] move axis = (-0.7, 0.8)
+[2026-09-01 12:00:28.589] [DEBUG] [audio] play sfx/hit_flesh.ogg (voice 11)
+[2026-09-01 12:00:30.389] [INFO] [loot] Picked up dungeon-key x2
+[2026-09-01 12:00:34.494] [DEBUG] [assets] cache hit sprites/items/sword.png
+[2026-09-01 12:00:38.420] [INFO] [combat] mimic#101 defeated (+32 XP)
+[2026-09-01 12:00:42.475] [INFO] [world] Entered room 2 of floor 6
+[2026-09-01 12:00:45.217] [DEBUG] [ai] wraith#103 state chase -> attack
+[2026-09-01 12:00:48.184] [TRACE] [input] move axis = (0.1, 0.2)
+[2026-09-01 12:00:52.077] [TRACE] [render] frame 6964: 5.7 ms, 265 draw calls
+[2026-09-01 12:00:53.246] [DEBUG] [audio] play sfx/potion_drink.ogg (voice 32)
+[2026-09-01 12:00:54.378] [DEBUG] [ai] bat#104 state idle -> patrol
+[2026-09-01 12:00:57.984] [DEBUG] [ai] wraith#103 state chase -> patrol
+[2026-09-01 12:00:58.467] [WARN] [render] Frame 8109 took 39.3 ms (budget 6.9 ms)
+[2026-09-01 12:01:01.821] [INFO] [combat] wraith#103 defeated (+20 XP)
+[2026-09-01 12:01:02.124] [DEBUG] [world] Spawned ghoul#106 at (36,39)
+[2026-09-01 12:01:04.279] [DEBUG] [audio] play sfx/hit_bone.ogg (voice 24)
+[2026-09-01 12:01:07.944] [DEBUG] [assets] cache hit sprites/hero_walk.png
+[2026-09-01 12:01:11.355] [DEBUG] [ai] bat#105 state patrol -> stunned
+[2026-09-01 12:01:12.980] [INFO] [loot] Picked up torch x1
+[2026-09-01 12:01:17.168] [INFO] [combat] ghoul#106 hit for 19
+[2026-09-01 12:01:17.289] [DEBUG] [ai] bat#104 state idle -> chase
+[2026-09-01 12:01:17.614] [DEBUG] [audio] play sfx/hit_flesh.ogg (voice 8)
+[2026-09-01 12:01:19.823] [DEBUG] [audio] play sfx/hit_flesh.ogg (voice 32)
+[2026-09-01 12:01:20.820] [TRACE] [physics] tick 11405: 81 bodies, 11 contacts
+[2026-09-01 12:01:22.338] [DEBUG] [world] Spawned mimic#107 at (53,21)
+[2026-09-01 12:01:24.877] [DEBUG] [ai] mimic#107 state patrol -> stunned
+[2026-09-01 12:01:26.872] [INFO] [world] Entered room 3 of floor 6
+[2026-09-01 12:01:28.411] [WARN] [ai] Path search for bat#105 gave up after 2452 nodes
+[2026-09-01 12:01:31.657] [INFO] [combat] bat#105 hit for 21
+[2026-09-01 12:01:33.815] [INFO] [combat] ghoul#106 defeated (+4 XP)
+[2026-09-01 12:01:36.622] [INFO] [combat] mimic#107 hit for 9
+[2026-09-01 12:01:39.209] [ERROR] [audio] Failed to decode sfx/lich_laugh.ogg: invalid Vorbis header
+    at VorbisDecoder.open (audio/vorbis.nd:77)
+    at SoundBank.load (audio/sound_bank.nd:140)
+    at AudioSystem.preload (audio/audio_system.nd:58)
+[2026-09-01 12:01:39.709] [INFO] [combat] mimic#107 hit for 22
+[2026-09-01 12:01:40.091] [WARN] [ai] Path search for bat#105 gave up after 3931 nodes
+[2026-09-01 12:01:44.238] [INFO] [loot] Picked up bomb x3
+[2026-09-01 12:01:44.760] [DEBUG] [world] Spawned wraith#108 at (57,6)
+[2026-09-01 12:01:47.787] [DEBUG] [audio] play sfx/door_open.ogg (voice 21)
+[2026-09-01 12:01:49.109] [INFO] [combat] bat#105 hit for 3
+[2026-09-01 12:01:50.332] [DEBUG] [assets] cache hit textures/fx/spark_03.png
+[2026-09-01 12:01:52.837] [DEBUG] [assets] cache hit textures/fx/spark_03.png
+[2026-09-01 12:01:53.584] [WARN] [audio] Buffer underrun (321 samples)
+[2026-09-01 12:01:56.178] [TRACE] [physics] tick 16584: 63 bodies, 13 contacts
+[2026-09-01 12:01:59.670] [INFO] [loot] Picked up lucky-coin x1
+[2026-09-01 12:02:00.760] [WARN] [render] Frame 17184 took 62.4 ms (budget 6.9 ms)
+[2026-09-01 12:02:04.056] [DEBUG] [world] Spawned skeleton#109 at (2,8)
+[2026-09-01 12:02:05.576] [DEBUG] [audio] play sfx/potion_drink.ogg (voice 2)
+[2026-09-01 12:02:07.908] [INFO] [save] Autosave to slot 1 (262 ms)
+[2026-09-01 12:02:10.160] [INFO] [combat] skeleton#109 hit for 22
+[2026-09-01 12:02:11.313] [WARN] [audio] Buffer underrun (294 samples)
+[2026-09-01 12:02:13.165] [INFO] [combat] skeleton#109 defeated (+40 XP)
+[2026-09-01 12:02:13.237] [INFO] [combat] bat#104 hit for 15
+[2026-09-01 12:02:15.151] [TRACE] [render] frame 18856: 4.3 ms, 358 draw calls
+[2026-09-01 12:02:18.819] [DEBUG] [world] Spawned skeleton#110 at (51,9)
+[2026-09-01 12:02:21.648] [INFO] [combat] wraith#108 hit for 15
+[2026-09-01 12:02:22.135] [INFO] [loot] Picked up bomb x1
+[2026-09-01 12:02:22.180] [INFO] [combat] bat#105 hit for 21
+[2026-09-01 12:02:23.652] [INFO] [world] Entered room 4 of floor 6
+[2026-09-01 12:02:24.477] [WARN] [render] Frame 21359 took 39.4 ms (budget 6.9 ms)
+[2026-09-01 12:02:26.940] [TRACE] [render] frame 21866: 3.6 ms, 217 draw calls
+[2026-09-01 12:02:31.014] [TRACE] [physics] tick 22023: 23 bodies, 11 contacts
+[2026-09-01 12:02:32.034] [INFO] [combat] mimic#107 hit for 18
+[2026-09-01 12:02:34.617] [TRACE] [render] frame 22581: 6.3 ms, 319 draw calls
+[2026-09-01 12:02:36.173] [TRACE] [physics] tick 22932: 57 bodies, 5 contacts
+[2026-09-01 12:02:39.083] [DEBUG] [assets] cache hit textures/tiles/crypt_floor.png
+[2026-09-01 12:02:42.375] [INFO] [combat] mimic#107 hit for 24
+[2026-09-01 12:02:43.652] [INFO] [combat] bat#104 defeated (+32 XP)
+[2026-09-01 12:02:44.987] [TRACE] [physics] tick 24088: 81 bodies, 0 contacts
+[2026-09-01 12:02:45.143] [DEBUG] [assets] cache hit data/ui/hud.json
+[2026-09-01 12:02:47.376] [INFO] [combat] wraith#108 hit for 6
+[2026-09-01 12:02:48.333] [DEBUG] [assets] cache hit data/ui/hud.json
+[2026-09-01 12:02:49.787] [DEBUG] [audio] play sfx/door_open.ogg (voice 18)
+[2026-09-01 12:02:53.826] [DEBUG] [world] Spawned slime#111 at (20,13)
+[2026-09-01 12:02:57.086] [INFO] [combat] wraith#108 hit for 15
+[2026-09-01 12:02:57.316] [WARN] [ai] Path search for wraith#108 gave up after 2104 nodes
+[2026-09-01 12:02:59.926] [WARN] [ai] Path search for slime#111 gave up after 3381 nodes
+[2026-09-01 12:03:03.663] [INFO] [save] Autosave to slot 1 (280 ms)
+[2026-09-01 12:03:04.599] [INFO] [combat] wraith#108 hit for 6
+[2026-09-01 12:03:06.789] [TRACE] [physics] tick 27215: 80 bodies, 3 contacts
+[2026-09-01 12:03:10.411] [TRACE] [input] move axis = (0.2, -0.6)
+[2026-09-01 12:03:11.591] [WARN] [ai] Path search for bat#105 gave up after 3318 nodes
+[2026-09-01 12:03:12.485] [DEBUG] [world] Spawned mimic#112 at (55,15)
+[2026-09-01 12:03:13.901] [DEBUG] [world] Spawned bat#113 at (15,30)
+[2026-09-01 12:03:14.234] [DEBUG] [audio] play sfx/step_stone.ogg (voice 30)
+[2026-09-01 12:03:17.132] [INFO] [combat] wraith#108 defeated (+4 XP)
+[2026-09-01 12:03:21.126] [INFO] [world] Entered room 5 of floor 6
+[2026-09-01 12:03:24.222] [INFO] [combat] mimic#112 hit for 16
+[2026-09-01 12:03:28.334] [INFO] [combat] mimic#112 defeated (+39 XP)
+[2026-09-01 12:03:30.859] [TRACE] [render] frame 30617: 4.7 ms, 305 draw calls
+[2026-09-01 12:03:32.136] [TRACE] [input] move axis = (1.0, 0.4)
+[2026-09-01 12:03:33.600] [INFO] [loot] Picked up bomb x2
+[2026-09-01 12:03:35.707] [INFO] [combat] slime#111 defeated (+31 XP)
+[2026-09-01 12:03:36.873] [WARN] [audio] Buffer underrun (361 samples)
+[2026-09-01 12:03:38.609] [DEBUG] [assets] cache hit data/ui/hud.json
+[2026-09-01 12:03:41.197] [INFO] [combat] bat#113 defeated (+15 XP)
+[2026-09-01 12:03:42.175] [INFO] [combat] mimic#107 hit for 20
+[2026-09-01 12:03:43.420] [DEBUG] [assets] cache hit sprites/items/potion.png
+[2026-09-01 12:03:46.565] [INFO] [world] Entered room 6 of floor 6
+[2026-09-01 12:03:46.911] [INFO] [combat] bat#105 hit for 4
+[2026-09-01 12:03:51.060] [WARN] [render] Frame 33566 took 36.8 ms (budget 6.9 ms)
+[2026-09-01 12:03:54.987] [TRACE] [render] frame 33971: 6.2 ms, 204 draw calls
+[2026-09-01 12:03:56.984] [TRACE] [render] frame 34213: 5.5 ms, 292 draw calls
+[2026-09-01 12:04:00.204] [DEBUG] [ai] bat#105 state patrol -> flee
+[2026-09-01 12:04:04.196] [INFO] [combat] mimic#107 hit for 15
+[2026-09-01 12:04:07.252] [DEBUG] [ai] bat#105 state idle -> chase
+[2026-09-01 12:04:09.998] [INFO] [save] Autosave to slot 1 (345 ms)
+[2026-09-01 12:04:10.967] [DEBUG] [world] Spawned slime#114 at (24,24)
+[2026-09-01 12:04:14.473] [DEBUG] [audio] play sfx/coin.ogg (voice 3)
+[2026-09-01 12:04:17.356] [INFO] [combat] skeleton#110 hit for 10
+[2026-09-01 12:04:17.729] [DEBUG] [ai] slime#114 state stunned -> patrol
+[2026-09-01 12:04:19.805] [DEBUG] [world] Spawned skeleton-archer#115 at (23,22)
+[2026-09-01 12:04:21.772] [ERROR] [script] Unhandled error in scripts/traps/room_12.nds: attempt to index nil value 'lever'
+    at room_12.onEnter (scripts/traps/room_12.nds:23)
+    at ScriptVm.call (script/vm.nd:301)
+    at World.enterRoom (world/world.nd:412)
+[2026-09-01 12:04:23.395] [DEBUG] [ai] bat#105 state patrol -> attack
+[2026-09-01 12:04:25.670] [DEBUG] [ai] mimic#107 state attack -> idle
+[2026-09-01 12:04:25.964] [INFO] [combat] skeleton-archer#115 hit for 19
+[2026-09-01 12:04:29.831] [TRACE] [physics] tick 38481: 62 bodies, 3 contacts
+[2026-09-01 12:04:29.892] [INFO] [loot] Picked up bomb x3
+[2026-09-01 12:04:33.133] [WARN] [save] Autosave took 812 ms (limit 500 ms); disk may be slow
+[2026-09-01 12:04:33.781] [WARN] [audio] Buffer underrun (100 samples)
+[2026-09-01 12:04:34.559] [DEBUG] [world] Spawned mimic#116 at (10,5)
+[2026-09-01 12:04:35.687] [DEBUG] [audio] play sfx/door_open.ogg (voice 32)
+[2026-09-01 12:04:39.547] [INFO] [combat] mimic#107 defeated (+27 XP)
+[2026-09-01 12:04:41.667] [DEBUG] [world] Spawned ghoul#117 at (31,34)
+[2026-09-01 12:04:44.601] [TRACE] [render] frame 41283: 4.9 ms, 326 draw calls
+[2026-09-01 12:04:47.436] [INFO] [loot] Picked up bomb x2
+[2026-09-01 12:04:48.638] [INFO] [loot] Picked up torch x3
+[2026-09-01 12:04:52.365] [INFO] [save] Autosave to slot 1 (332 ms)
+[2026-09-01 12:04:56.069] [DEBUG] [world] Spawned ghoul#118 at (40,18)
+[2026-09-01 12:04:59.276] [TRACE] [render] frame 43124: 5.0 ms, 209 draw calls
+[2026-09-01 12:04:59.456] [TRACE] [render] frame 43342: 3.4 ms, 281 draw calls
+[2026-09-01 12:05:03.625] [TRACE] [physics] tick 43827: 87 bodies, 5 contacts
+[2026-09-01 12:05:04.992] [DEBUG] [assets] cache hit sprites/hero_walk.png
+[2026-09-01 12:05:08.994] [INFO] [combat] ghoul#117 defeated (+32 XP)
+[2026-09-01 12:05:12.685] [INFO] [loot] Picked up mana-potion x1
+[2026-09-01 12:05:14.485] [DEBUG] [world] Spawned ghoul#119 at (48,30)
+[2026-09-01 12:05:18.223] [DEBUG] [audio] play sfx/door_open.ogg (voice 27)
+[2026-09-01 12:05:19.818] [DEBUG] [audio] play sfx/hit_bone.ogg (voice 15)
+[2026-09-01 12:05:23.536] [DEBUG] [ai] ghoul#119 state stunned -> attack
+[2026-09-01 12:05:23.652] [WARN] [audio] Buffer underrun (287 samples)
+[2026-09-01 12:05:27.294] [TRACE] [physics] tick 46687: 47 bodies, 14 contacts
+[2026-09-01 12:05:30.097] [INFO] [save] Autosave to slot 1 (251 ms)
+[2026-09-01 12:05:31.162] [TRACE] [render] frame 47233: 4.1 ms, 366 draw calls
+[2026-09-01 12:05:32.378] [INFO] [loot] Picked up dungeon-key x3
+[2026-09-01 12:05:36.082] [DEBUG] [audio] play sfx/step_stone.ogg (voice 27)
+[2026-09-01 12:05:40.006] [INFO] [combat] ghoul#118 defeated (+7 XP)
+[2026-09-01 12:05:41.207] [WARN] [assets] Missing texture textures/fx/spark_07.png, using fallback
+[2026-09-01 12:05:43.228] [INFO] [combat] slime#114 defeated (+17 XP)
+[2026-09-01 12:05:46.454] [DEBUG] [assets] cache hit textures/tiles/crypt_floor.png
+[2026-09-01 12:05:47.902] [WARN] [audio] Buffer underrun (199 samples)
+[2026-09-01 12:05:50.460] [INFO] [combat] skeleton#110 hit for 19
+[2026-09-01 12:05:54.480] [WARN] [render] Frame 50124 took 64.2 ms (budget 6.9 ms)
+[2026-09-01 12:05:54.789] [INFO] [combat] skeleton#110 defeated (+27 XP)
+[2026-09-01 12:05:58.972] [TRACE] [render] frame 50713: 6.9 ms, 189 draw calls
+[2026-09-01 12:06:02.489] [INFO] [combat] skeleton-archer#115 hit for 18 (CRIT)
+[2026-09-01 12:06:04.216] [INFO] [combat] mimic#116 defeated (+4 XP)
+[2026-09-01 12:06:07.768] [TRACE] [input] move axis = (0.8, 0.4)
+[2026-09-01 12:06:08.867] [INFO] [combat] ghoul#119 defeated (+36 XP)
+[2026-09-01 12:06:12.425] [DEBUG] [world] Spawned skeleton#120 at (11,2)
+[2026-09-01 12:06:14.192] [INFO] [combat] skeleton#120 hit for 4
+[2026-09-01 12:06:15.525] [WARN] [render] Frame 51974 took 53.6 ms (budget 6.9 ms)
+[2026-09-01 12:06:16.513] [INFO] [combat] skeleton-archer#115 hit for 6
+[2026-09-01 12:06:16.979] [INFO] [world] Entered room 7 of floor 6
+[2026-09-01 12:06:17.904] [DEBUG] [ai] skeleton-archer#115 state stunned -> attack
+[2026-09-01 12:06:19.196] [TRACE] [physics] tick 53588: 58 bodies, 13 contacts
+[2026-09-01 12:06:21.016] [TRACE] [render] frame 53934: 3.0 ms, 268 draw calls
+[2026-09-01 12:06:24.687] [DEBUG] [assets] cache hit textures/tiles/crypt_floor.png
+[2026-09-01 12:06:27.696] [TRACE] [physics] tick 54344: 54 bodies, 12 contacts
+[2026-09-01 12:06:30.550] [DEBUG] [ai] bat#105 state stunned -> patrol
+[2026-09-01 12:06:31.680] [DEBUG] [assets] cache hit textures/fx/spark_03.png
+[2026-09-01 12:06:31.736] [WARN] [ai] Path search for bat#105 gave up after 3480 nodes
+[2026-09-01 12:06:35.709] [DEBUG] [world] Spawned ghoul#121 at (47,38)
+[2026-09-01 12:06:38.009] [DEBUG] [ai] bat#105 state flee -> patrol
+[2026-09-01 12:06:41.761] [INFO] [combat] bat#105 defeated (+14 XP)
+[2026-09-01 12:06:44.089] [DEBUG] [ai] skeleton#120 state stunned -> idle
+[2026-09-01 12:06:47.605] [WARN] [ai] Path search for ghoul#121 gave up after 3890 nodes
+[2026-09-01 12:06:48.388] [INFO] [combat] ghoul#121 hit for 21
+[2026-09-01 12:06:49.688] [WARN] [render] Frame 58019 took 57.1 ms (budget 6.9 ms)
+[2026-09-01 12:06:53.061] [TRACE] [render] frame 58176: 4.8 ms, 287 draw calls
+[2026-09-01 12:06:53.244] [WARN] [assets] Missing texture textures/fx/spark_07.png, using fallback
+[2026-09-01 12:06:54.207] [TRACE] [render] frame 58610: 4.1 ms, 352 draw calls
+[2026-09-01 12:06:57.831] [DEBUG] [ai] skeleton#120 state flee -> chase
+[2026-09-01 12:07:01.844] [DEBUG] [ai] ghoul#121 state stunned -> chase
+[2026-09-01 12:07:05.759] [WARN] [render] Frame 59318 took 58.0 ms (budget 6.9 ms)
+[2026-09-01 12:07:08.969] [TRACE] [physics] tick 59878: 59 bodies, 9 contacts
+[2026-09-01 12:07:12.699] [DEBUG] [audio] play sfx/hit_bone.ogg (voice 20)
+[2026-09-01 12:07:16.161] [DEBUG] [ai] ghoul#121 state attack -> chase
+[2026-09-01 12:07:16.385] [WARN] [audio] Buffer underrun (486 samples)
+[2026-09-01 12:07:18.915] [WARN] [assets] Missing texture textures/fx/spark_09.png, using fallback
+[2026-09-01 12:07:19.991] [WARN] [render] Frame 61690 took 31.0 ms (budget 6.9 ms)
+[2026-09-01 12:07:20.212] [INFO] [combat] ghoul#121 hit for 23
+[2026-09-01 12:07:20.253] [INFO] [combat] ghoul#121 defeated (+24 XP)
+[2026-09-01 12:07:21.674] [DEBUG] [world] Spawned ghoul#122 at (13,22)
+[2026-09-01 12:07:24.852] [DEBUG] [world] Spawned skeleton-archer#123 at (53,16)
+[2026-09-01 12:07:26.297] [INFO] [combat] skeleton#120 hit for 15
+[2026-09-01 12:07:28.842] [TRACE] [physics] tick 63208: 26 bodies, 3 contacts
+[2026-09-01 12:07:30.146] [DEBUG] [assets] cache hit textures/tiles/crypt_floor.png
+[2026-09-01 12:07:34.015] [WARN] [render] Frame 63829 took 40.5 ms (budget 6.9 ms)
+[2026-09-01 12:07:36.564] [INFO] [combat] skeleton#120 hit for 11
+[2026-09-01 12:07:37.749] [INFO] [world] Entered room 8 of floor 6
+[2026-09-01 12:07:41.903] [INFO] [combat] ghoul#122 defeated (+20 XP)
+[2026-09-01 12:07:42.245] [DEBUG] [ai] skeleton-archer#115 state attack -> idle
+[2026-09-01 12:07:43.754] [DEBUG] [world] Spawned mimic#124 at (58,6)
+[2026-09-01 12:07:46.204] [INFO] [combat] skeleton-archer#115 hit for 18
+[2026-09-01 12:07:47.147] [TRACE] [physics] tick 66744: 28 bodies, 6 contacts
+[2026-09-01 12:07:48.398] [INFO] [world] Entered room 9 of floor 6
+[2026-09-01 12:07:50.836] [DEBUG] [audio] play sfx/step_stone.ogg (voice 4)
+[2026-09-01 12:07:54.218] [DEBUG] [assets] cache hit data/ui/hud.json
+[2026-09-01 12:07:56.240] [DEBUG] [assets] cache hit sprites/items/sword.png
+[2026-09-01 12:07:58.200] [TRACE] [physics] tick 68347: 53 bodies, 5 contacts
+[2026-09-01 12:07:58.729] [DEBUG] [ai] skeleton#120 state patrol -> chase
+[2026-09-01 12:08:00.666] [INFO] [world] Entered room 10 of floor 6
+[2026-09-01 12:08:04.122] [INFO] [combat] mimic#124 defeated (+37 XP)
+[2026-09-01 12:08:05.338] [TRACE] [physics] tick 69555: 25 bodies, 10 contacts
+[2026-09-01 12:08:07.818] [WARN] [audio] Buffer underrun (209 samples)
+[2026-09-01 12:08:09.095] [DEBUG] [ai] skeleton#120 state chase -> patrol
+[2026-09-01 12:08:11.137] [DEBUG] [ai] skeleton-archer#123 state idle -> attack
+[2026-09-01 12:08:14.932] [INFO] [combat] skeleton#120 defeated (+36 XP)
+[2026-09-01 12:08:16.822] [DEBUG] [world] Spawned bat#125 at (30,32)
+[2026-09-01 12:08:20.405] [WARN] [audio] Buffer underrun (268 samples)
+[2026-09-01 12:08:21.365] [INFO] [combat] skeleton-archer#123 hit for 5
+[2026-09-01 12:08:23.009] [INFO] [combat] bat#125 defeated (+31 XP)
+[2026-09-01 12:08:25.696] [DEBUG] [world] Spawned bat#126 at (11,29)
+[2026-09-01 12:08:26.907] [TRACE] [render] frame 73590: 3.3 ms, 208 draw calls
+[2026-09-01 12:08:31.074] [INFO] [loot] Picked up dungeon-key x1
+[2026-09-01 12:08:32.515] [DEBUG] [ai] skeleton-archer#123 state stunned -> chase
+[2026-09-01 12:08:36.357] [INFO] [combat] skeleton-archer#115 defeated (+13 XP)
+[2026-09-01 12:08:38.871] [DEBUG] [world] Spawned mimic#127 at (26,21)
+[2026-09-01 12:08:41.182] [DEBUG] [world] Spawned slime#128 at (29,2)
+[2026-09-01 12:08:43.535] [TRACE] [physics] tick 75187: 20 bodies, 9 contacts
+[2026-09-01 12:08:44.425] [WARN] [render] Frame 75331 took 30.3 ms (budget 6.9 ms)
+[2026-09-01 12:08:44.526] [INFO] [combat] skeleton-archer#123 defeated (+17 XP)
+[2026-09-01 12:08:46.454] [TRACE] [render] frame 75608: 5.9 ms, 328 draw calls
+[2026-09-01 12:08:47.616] [TRACE] [render] frame 75976: 5.6 ms, 245 draw calls
+[2026-09-01 12:08:50.324] [INFO] [combat] bat#126 hit for 4
+[2026-09-01 12:08:53.903] [INFO] [combat] mimic#127 defeated (+25 XP)
+[2026-09-01 12:08:55.595] [DEBUG] [world] Spawned mimic#129 at (24,38)
+[2026-09-01 12:08:58.646] [DEBUG] [assets] cache hit textures/tiles/crypt_floor.png
+[2026-09-01 12:09:00.829] [INFO] [save] Autosave to slot 1 (213 ms)
+[2026-09-01 12:09:01.005] [DEBUG] [assets] cache hit sprites/items/sword.png
+[2026-09-01 12:09:02.075] [DEBUG] [audio] play sfx/hit_bone.ogg (voice 21)
+[2026-09-01 12:09:04.675] [INFO] [combat] mimic#129 defeated (+8 XP)
+[2026-09-01 12:09:07.706] [DEBUG] [world] Spawned skeleton#130 at (57,32)
+[2026-09-01 12:09:08.841] [DEBUG] [ai] skeleton#130 state stunned -> flee
+[2026-09-01 12:09:11.112] [TRACE] [physics] tick 79365: 24 bodies, 6 contacts
+[2026-09-01 12:09:14.873] [INFO] [combat] slime#128 hit for 23
+[2026-09-01 12:09:15.373] [DEBUG] [ai] slime#128 state attack -> patrol
+[2026-09-01 12:09:16.865] [WARN] [render] GPU did not respond for 2000 ms, attempting recovery
+[2026-09-01 12:09:19.242] [ERROR] [render] Device reset failed: NGL_DEVICE_LOST (0x887A0005)
+[2026-09-01 12:09:19.246] [FATAL] [render] GPU device lost (reason: TDR timeout) while presenting frame 79936
+    at RenderDevice.present (render/device.nd:512)
+    at Renderer.endFrame (render/renderer.nd:233)
+    at Game.frame (core/game.nd:130)
+    at Game.run (core/game.nd:88)
+    at main (core/main.nd:12)
+[2026-09-01 12:09:19.266] [FATAL] [boot] Crash report written to logs/crash-2026-09-01.log
+[2026-09-01 12:09:19.282] [INFO] [boot] Shutting down (exit code 3)

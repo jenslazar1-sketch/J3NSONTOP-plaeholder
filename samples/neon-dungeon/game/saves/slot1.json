@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "slot": 1,
+  "savedAt": "2026-09-01T11:58:42Z",
+  "player": {
+    "name": "J3NSONTOP",
+    "class": "necromancer",
+    "level": 14,
+    "xp": 18250,
+    "health": 86,
+    "gold": 1337,
+    "position": {
+      "x": 42.5,
+      "y": 17.25,
+      "floor": 6
+    },
+    "hardcore": false
+  },
+  "inventory": [
+    {
+      "id": "neon-blade",
+      "count": 1,
+      "equipped": true
+    },
+    {
+      "id": "tower-shield",
+      "count": 1,
+      "equipped": true
+    },
+    {
+      "id": "small-potion",
+      "count": 5
+    },
+    {
+      "id": "mana-potion",
+      "count": 3
+    },
+    {
+      "id": "dungeon-key",
+      "count": 2
+    },
+    {
+      "id": "red-gem",
+      "count": 1
+    },
+    {
+      "id": "laughing-skull",
+      "count": 1
+    }
+  ],
+  "progress": {
+    "floorsCleared": 5,
+    "bossesDefeated": [
+      "slime-king",
+      "bone-warden"
+    ],
+    "difficulty": "normal",
+    "playTimeSeconds": 25310
+  }
+}

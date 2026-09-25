@@ -1,0 +1,21 @@
+id,name,type,damage,price,rarity
+rusty-sword,Rusty Sword,weapon,6,15,common
+iron-sword,Iron Sword,weapon,10,60,common
+neon-blade,Neon Blade,weapon,18,420,rare
+bone-club,Bone Club,weapon,8,25,common
+short-bow,"Bow, Short",weapon,7,45,common
+long-bow,"Bow, Long",weapon,11,110,uncommon
+wooden-shield,Wooden Shield,shield,0,20,common
+tower-shield,"Shield, Tower",shield,0,180,uncommon
+small-potion,Small Potion,consumable,0,10,common
+large-potion,Large Potion,consumable,0,35,uncommon
+mana-potion,Mana Potion,consumable,0,30,common
+elixir,Elixir of the Deep,consumable,0,250,rare
+bomb,Bomb,consumable,40,50,uncommon
+torch,Torch,tool,2,5,common
+dungeon-key,Dungeon Key,key,0,0,common
+skull-key,Skull Key,key,0,0,rare
+red-gem,Red Gem,gem,0,500,rare
+void-gem,Void Gem,gem,0,1200,legendary
+lucky-coin,Lucky Coin,trinket,0,77,uncommon
+laughing-skull,"The ""Laughing"" Skull",trinket,0,666,legendary
