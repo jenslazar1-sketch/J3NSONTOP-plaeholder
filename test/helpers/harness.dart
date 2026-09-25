@@ -63,7 +63,10 @@ class TestEnv {
   /// removes the temp data dir, retrying briefly if a late write races us.
   Future<void> dispose() async {
     for (var attempt = 0; attempt < 5; attempt++) {
-      await Future.wait(stores.all.map((s) => s.flush()));
+      // Saves started inside a widget test's fake-async zone may never
+      // complete once that zone is gone, so never wait on them unbounded.
+      await Future.wait(stores.all.map((s) => s.flush()))
+          .timeout(const Duration(milliseconds: 500), onTimeout: () => []);
       try {
         if (await dir.exists()) await dir.delete(recursive: true);
         return;

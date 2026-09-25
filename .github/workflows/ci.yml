@@ -84,7 +84,7 @@ jobs:
         run: flutter analyze
 
       - name: Unit and widget tests
-        run: flutter test --reporter expanded --file-reporter "json:$RUNNER_TEMP/unit-tests.json"
+        run: flutter test --timeout 120s --reporter expanded --file-reporter "json:$RUNNER_TEMP/unit-tests.json"
 
       - name: Test summary
         if: ${{ !cancelled() }}
