@@ -167,6 +167,10 @@ class JsonDocumentStore {
     );
   }
 
+  /// Completes when every save queued so far has finished (successfully or
+  /// not). Used before shutdown and by tests before deleting data dirs.
+  Future<void> flush() => _saveChain;
+
   /// Saves [data] atomically. Calls are serialised in order.
   Future<void> save(Map<String, dynamic> data) {
     final envelope = <String, dynamic>{

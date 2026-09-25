@@ -59,8 +59,18 @@ class TestEnv {
     overrides: overrides(modules: modules, platform: platform, fileAccess: fileAccess),
   );
 
+  /// Waits for pending store saves (activity history, settings...) and then
+  /// removes the temp data dir, retrying briefly if a late write races us.
   Future<void> dispose() async {
-    if (await dir.exists()) await dir.delete(recursive: true);
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await Future.wait(stores.all.map((s) => s.flush()));
+      try {
+        if (await dir.exists()) await dir.delete(recursive: true);
+        return;
+      } on FileSystemException {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
   }
 }
 

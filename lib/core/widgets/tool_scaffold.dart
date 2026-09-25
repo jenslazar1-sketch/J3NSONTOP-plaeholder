@@ -55,15 +55,20 @@ class ToolScaffold extends ConsumerWidget {
     final fav = ref.watch(userDataProvider.select((u) => u.favorites.contains(toolId)));
     final fx = context.effects;
 
+    final media = MediaQuery.of(context);
+    // Short or narrow viewports (phones, landscape, large text) get a compact
+    // header: smaller title and the description behind an info toggle.
+    final compact = media.size.height < 700 || media.size.width < J3Breakpoints.compact;
+
     final header = Padding(
-      padding: const EdgeInsets.only(bottom: J3Space.lg),
+      padding: EdgeInsets.only(bottom: compact ? J3Space.sm : J3Space.lg),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (tool != null)
             Container(
-              width: 44,
-              height: 44,
+              width: compact ? 36 : 44,
+              height: compact ? 36 : 44,
               margin: const EdgeInsets.only(right: J3Space.md, top: 2),
               decoration: BoxDecoration(
                 color: J3Colors.surfaceRaised,
@@ -73,23 +78,14 @@ class ToolScaffold extends ConsumerWidget {
                     ? [BoxShadow(color: fx.accentColor.withValues(alpha: 0.25), blurRadius: fx.glowBlur(12))]
                     : null,
               ),
-              child: Icon(tool.icon, color: fx.accentText, size: 22),
+              child: Icon(tool.icon, color: fx.accentText, size: compact ? 18 : 22),
             ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '// ${(tool?.section.label ?? 'TOOL').toUpperCase()}',
-                  style: J3Type.kicker.copyWith(color: fx.accentText),
-                ),
-                const SizedBox(height: 2),
-                GlitchText(tool?.name ?? toolId, style: J3Type.headline, maxLines: 2),
-                if (tool != null) ...[
-                  const SizedBox(height: J3Space.xs),
-                  Text(tool.description, style: J3Type.bodySecondary),
-                ],
-              ],
+            child: _HeaderText(
+              kicker: '// ${(tool?.section.label ?? 'TOOL').toUpperCase()}',
+              title: tool?.name ?? toolId,
+              description: tool?.description,
+              compact: compact,
             ),
           ),
           ...headerActions,
@@ -177,4 +173,58 @@ class ToolScaffold extends ConsumerWidget {
   static List<Widget> _gap(List<Widget> items) => [
     for (var i = 0; i < items.length; i++) ...[if (i > 0) const SizedBox(height: J3Space.lg), items[i]],
   ];
+}
+
+/// Tool title block. In compact mode the description is collapsed behind an
+/// info toggle so the tool itself gets the screen space.
+class _HeaderText extends StatefulWidget {
+  const _HeaderText({required this.kicker, required this.title, required this.description, required this.compact});
+
+  final String kicker;
+  final String title;
+  final String? description;
+  final bool compact;
+
+  @override
+  State<_HeaderText> createState() => _HeaderTextState();
+}
+
+class _HeaderTextState extends State<_HeaderText> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final fx = context.effects;
+    final showDescription = widget.description != null && (!widget.compact || _expanded);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.kicker,
+          style: J3Type.kicker.copyWith(color: fx.accentText),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Flexible(
+              child: GlitchText(widget.title, style: widget.compact ? J3Type.title : J3Type.headline, maxLines: 2),
+            ),
+            if (widget.compact && widget.description != null)
+              IconButton(
+                tooltip: _expanded ? 'Hide description' : 'Show description',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => setState(() => _expanded = !_expanded),
+                icon: Icon(_expanded ? Icons.expand_less : Icons.info_outline, size: 18),
+              ),
+          ],
+        ),
+        if (showDescription) ...[
+          const SizedBox(height: J3Space.xs),
+          Text(widget.description!, style: J3Type.bodySecondary),
+        ],
+      ],
+    );
+  }
 }
