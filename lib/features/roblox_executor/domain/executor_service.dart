@@ -171,15 +171,8 @@ const List<DllBackend> builtInBackends = [
     executeFn: 'Execute',
     settingsFn: '',
   ),
-  DllBackend(
-    name: 'Xeno',
-    mode: BackendMode.process,
-  ),
-  DllBackend(
-    name: 'Custom EXE',
-    mode: BackendMode.process,
-    executeArgsTemplate: '{script_path}',
-  ),
+  DllBackend(name: 'Xeno', mode: BackendMode.process),
+  DllBackend(name: 'Custom EXE', mode: BackendMode.process, executeArgsTemplate: '{script_path}'),
 ];
 
 enum ExecutorStatus { unloaded, ready, attaching, attached, error }
@@ -381,28 +374,34 @@ class ExecutorController extends Notifier<ExecutorState> {
 
     if (backend.exePath != null && backend.exePath!.isNotEmpty) {
       final file = File(backend.exePath!);
-      diagnostics.add(DllDiagnostic(
-        label: 'Injector EXE',
-        passed: file.existsSync(),
-        detail: file.existsSync()
-            ? '${backend.exePath} (${(file.statSync().size / 1024).toStringAsFixed(1)} KB)'
-            : 'Not found: ${backend.exePath}',
-      ));
+      diagnostics.add(
+        DllDiagnostic(
+          label: 'Injector EXE',
+          passed: file.existsSync(),
+          detail: file.existsSync()
+              ? '${backend.exePath} (${(file.statSync().size / 1024).toStringAsFixed(1)} KB)'
+              : 'Not found: ${backend.exePath}',
+        ),
+      );
     } else {
-      diagnostics.add(const DllDiagnostic(
-        label: 'Injector EXE',
-        passed: true,
-        detail: 'Not configured — injection handled externally',
-      ));
+      diagnostics.add(
+        const DllDiagnostic(
+          label: 'Injector EXE',
+          passed: true,
+          detail: 'Not configured — injection handled externally',
+        ),
+      );
     }
 
     if (backend.autoexecDir != null && backend.autoexecDir!.isNotEmpty) {
       final dir = Directory(backend.autoexecDir!);
-      diagnostics.add(DllDiagnostic(
-        label: 'Autoexec folder',
-        passed: dir.existsSync(),
-        detail: dir.existsSync() ? backend.autoexecDir! : 'Not found: ${backend.autoexecDir}',
-      ));
+      diagnostics.add(
+        DllDiagnostic(
+          label: 'Autoexec folder',
+          passed: dir.existsSync(),
+          detail: dir.existsSync() ? backend.autoexecDir! : 'Not found: ${backend.autoexecDir}',
+        ),
+      );
     }
 
     for (final d in diagnostics) {
@@ -410,11 +409,7 @@ class ExecutorController extends Notifier<ExecutorState> {
       addOutput('$icon ${d.label}: ${d.detail ?? (d.passed ? "OK" : "FAIL")}');
     }
 
-    state = state.copyWith(
-      status: ExecutorStatus.ready,
-      diagnostics: diagnostics,
-      loadedDllPath: backend.exePath,
-    );
+    state = state.copyWith(status: ExecutorStatus.ready, diagnostics: diagnostics, loadedDllPath: backend.exePath);
 
     addOutput('[+] Process backend "${backend.name}" ready');
     return true;
@@ -679,10 +674,7 @@ class ExecutorController extends Notifier<ExecutorState> {
     }
 
     if (!File(backend.exePath!).existsSync()) {
-      state = state.copyWith(
-        status: ExecutorStatus.error,
-        error: 'Injector EXE not found: ${backend.exePath}',
-      );
+      state = state.copyWith(status: ExecutorStatus.error, error: 'Injector EXE not found: ${backend.exePath}');
       addOutput('[!] EXE not found: ${backend.exePath}');
       return;
     }
@@ -692,17 +684,20 @@ class ExecutorController extends Notifier<ExecutorState> {
 
     final args = backend.injectArgs.trim().isEmpty ? <String>[] : backend.injectArgs.trim().split(RegExp(r'\s+'));
 
-    Process.run(backend.exePath!, args).timeout(const Duration(seconds: 30)).then((result) {
-      final stdout = result.stdout.toString().trim();
-      final stderr = result.stderr.toString().trim();
-      if (stdout.isNotEmpty) addOutput('[*] $stdout');
-      if (stderr.isNotEmpty) addOutput('[!] $stderr');
-      state = state.copyWith(status: ExecutorStatus.attached);
-      addOutput('[+] Injector finished (exit: ${result.exitCode})');
-    }).catchError((Object e) {
-      state = state.copyWith(status: ExecutorStatus.error, error: 'Injector failed: $e');
-      addOutput('[!] Injector failed: $e');
-    });
+    Process.run(backend.exePath!, args)
+        .timeout(const Duration(seconds: 30))
+        .then((result) {
+          final stdout = result.stdout.toString().trim();
+          final stderr = result.stderr.toString().trim();
+          if (stdout.isNotEmpty) addOutput('[*] $stdout');
+          if (stderr.isNotEmpty) addOutput('[!] $stderr');
+          state = state.copyWith(status: ExecutorStatus.attached);
+          addOutput('[+] Injector finished (exit: ${result.exitCode})');
+        })
+        .catchError((Object e) {
+          state = state.copyWith(status: ExecutorStatus.error, error: 'Injector failed: $e');
+          addOutput('[!] Injector failed: $e');
+        });
   }
 
   void _dllAttach() {
@@ -794,15 +789,18 @@ class ExecutorController extends Notifier<ExecutorState> {
 
       addOutput('[*] Launching: ${backend.exePath} ${args.join(' ')}');
 
-      Process.run(backend.exePath!, args).timeout(const Duration(seconds: 30)).then((result) {
-        final stdout = result.stdout.toString().trim();
-        final stderr = result.stderr.toString().trim();
-        if (stdout.isNotEmpty) addOutput('[+] $stdout');
-        if (stderr.isNotEmpty) addOutput('[!] $stderr');
-        addOutput('[+] Script executed (exit: ${result.exitCode})');
-      }).catchError((Object e) {
-        addOutput('[!] Execute failed: $e');
-      });
+      Process.run(backend.exePath!, args)
+          .timeout(const Duration(seconds: 30))
+          .then((result) {
+            final stdout = result.stdout.toString().trim();
+            final stderr = result.stderr.toString().trim();
+            if (stdout.isNotEmpty) addOutput('[+] $stdout');
+            if (stderr.isNotEmpty) addOutput('[!] $stderr');
+            addOutput('[+] Script executed (exit: ${result.exitCode})');
+          })
+          .catchError((Object e) {
+            addOutput('[!] Execute failed: $e');
+          });
     } else {
       addOutput('[+] Script saved to: $scriptPath');
       addOutput('[*] No EXE configured — load the file in your executor manually');

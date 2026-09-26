@@ -213,10 +213,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
           const SizedBox(width: J3Space.xs),
           Text(
             isProcess ? 'PROCESS MODE' : 'DLL MODE',
-            style: J3Type.kicker.copyWith(
-              color: isProcess ? J3Colors.info : J3Colors.neonText,
-              letterSpacing: 1,
-            ),
+            style: J3Type.kicker.copyWith(color: isProcess ? J3Colors.info : J3Colors.neonText, letterSpacing: 1),
           ),
           const SizedBox(width: J3Space.sm),
           Expanded(
@@ -378,10 +375,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
       children: [
         Row(
           children: [
-            Text(
-              isProcess ? 'TEST PATHS' : 'TEST BINDINGS',
-              style: J3Type.kicker.copyWith(color: J3Colors.neonText),
-            ),
+            Text(isProcess ? 'TEST PATHS' : 'TEST BINDINGS', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
             const Spacer(),
             NeonButton(
               label: 'Test',
