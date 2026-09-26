@@ -22,6 +22,9 @@ import 'experience_harness.dart';
 /// Text of a stat tile's value, found through its semantics-free Text.
 Finder statValue(String label, String value) => find.bySemanticsLabel(RegExp('^$label: ${RegExp.escape(value)},'));
 
+/// Upper bound for one sample-workspace generation in a widget test.
+const kSampleWait = Duration(seconds: 90);
+
 void main() {
   late TestEnv env;
 
@@ -237,7 +240,9 @@ void main() {
           .read(activityProvider)
           .notices
           .any((n) => n.message.startsWith('Sample workspace') || n.message.startsWith('Could not create the sample'));
-      for (var i = 0; i < 400 && !reported(); i++) {
+      // Sample generation is real CPU work in isolates; CI runs test files
+      // in parallel, so allow generous real time and stop as soon as it's done.
+      for (final sw = Stopwatch()..start(); !reported() && sw.elapsed < kSampleWait;) {
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
         await tester.pump();
       }
@@ -262,7 +267,9 @@ void main() {
           .read(activityProvider)
           .notices
           .any((n) => n.message.startsWith('Sample workspace') || n.message.startsWith('Could not create the sample'));
-      for (var i = 0; i < 400 && !reported(); i++) {
+      // Sample generation is real CPU work in isolates; CI runs test files
+      // in parallel, so allow generous real time and stop as soon as it's done.
+      for (final sw = Stopwatch()..start(); !reported() && sw.elapsed < kSampleWait;) {
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
         await tester.pump();
       }

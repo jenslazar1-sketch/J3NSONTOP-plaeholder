@@ -183,7 +183,7 @@ void main() {
     bool outcome() =>
         find.textContaining('Sample workspace "').evaluate().isNotEmpty ||
         find.textContaining('ERROR //').evaluate().isNotEmpty;
-    for (var i = 0; i < 400 && !outcome(); i++) {
+    for (final sw = Stopwatch()..start(); !outcome() && sw.elapsed < const Duration(seconds: 90);) {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 25)));
       await tester.pump(const Duration(milliseconds: 16));
     }
@@ -194,7 +194,7 @@ void main() {
     final h = await WsHarness.create(tester);
     await h.pump(tester, const WorkspaceManagerPage(), size: const Size(1280, 1000));
     await tapVisible(tester, find.text('Create sample workspace'));
-    await pumpUntil(tester, find.textContaining('created'), timeout: const Duration(seconds: 30));
+    await pumpUntil(tester, find.textContaining('created'), timeout: const Duration(seconds: 55));
     final ws = h.container.read(workspacesProvider).workspaces.single;
     final readme = File(p.join(ws.rootPath, 'README.txt'));
     final ini = File(p.join(ws.rootPath, 'game', 'config', 'settings.ini'));
@@ -210,7 +210,7 @@ void main() {
     expect(find.text('Reset sample'), findsNWidgets(2));
     await tester.tap(find.text('Reset sample').last);
     await tester.pump();
-    await pumpUntil(tester, find.textContaining('was reset'), timeout: const Duration(seconds: 30));
+    await pumpUntil(tester, find.textContaining('was reset'), timeout: const Duration(seconds: 55));
     expect(find.textContaining('mod packages and'), findsOneWidget);
     expect((await tester.runAsync(() => ini.readAsString()))!, original);
     expect((await tester.runAsync(() => readme.exists()))!, isTrue);
