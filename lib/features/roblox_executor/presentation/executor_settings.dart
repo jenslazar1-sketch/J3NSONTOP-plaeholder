@@ -16,11 +16,18 @@ class ExecutorSettingsDialog extends ConsumerStatefulWidget {
 
 class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog> {
   late DllBackend _backend;
+  // DLL controllers
   final _dllPathController = TextEditingController();
   final _isAttachedController = TextEditingController();
   final _attachController = TextEditingController();
   final _executeController = TextEditingController();
   final _settingsController = TextEditingController();
+  // Process controllers
+  final _exePathController = TextEditingController();
+  final _injectArgsController = TextEditingController();
+  final _executeArgsController = TextEditingController();
+  final _autoexecDirController = TextEditingController();
+
   Map<String, bool>? _testResults;
 
   @override
@@ -36,6 +43,10 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
     _attachController.text = _backend.attachFn;
     _executeController.text = _backend.executeFn;
     _settingsController.text = _backend.settingsFn;
+    _exePathController.text = _backend.exePath ?? '';
+    _injectArgsController.text = _backend.injectArgs;
+    _executeArgsController.text = _backend.executeArgsTemplate;
+    _autoexecDirController.text = _backend.autoexecDir ?? '';
   }
 
   @override
@@ -45,6 +56,10 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
     _attachController.dispose();
     _executeController.dispose();
     _settingsController.dispose();
+    _exePathController.dispose();
+    _injectArgsController.dispose();
+    _executeArgsController.dispose();
+    _autoexecDirController.dispose();
     super.dispose();
   }
 
@@ -54,11 +69,16 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
     attachFn: _attachController.text,
     executeFn: _executeController.text,
     settingsFn: _settingsController.text,
+    exePath: _exePathController.text.isEmpty ? null : _exePathController.text,
+    injectArgs: _injectArgsController.text,
+    executeArgsTemplate: _executeArgsController.text,
+    autoexecDir: _autoexecDirController.text.isEmpty ? null : _autoexecDirController.text,
   );
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(executorProvider);
+    final isProcess = _backend.mode == BackendMode.process;
 
     return Dialog(
       backgroundColor: J3Colors.surface,
@@ -67,7 +87,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
         side: const BorderSide(color: J3Colors.border),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 640),
+        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 700),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,10 +101,20 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                   children: [
                     const SizedBox(height: J3Space.sm),
                     _backendPicker(),
+                    const SizedBox(height: J3Space.sm),
+                    _modeBadge(),
                     const SizedBox(height: J3Space.md),
-                    _dllPathField(),
-                    const SizedBox(height: J3Space.md),
-                    _functionFields(),
+                    if (isProcess) ...[
+                      _exePathField(),
+                      const SizedBox(height: J3Space.md),
+                      _processFields(),
+                      const SizedBox(height: J3Space.md),
+                      _autoexecField(),
+                    ] else ...[
+                      _dllPathField(),
+                      const SizedBox(height: J3Space.md),
+                      _functionFields(),
+                    ],
                     const SizedBox(height: J3Space.md),
                     _testBindingsSection(state),
                     const SizedBox(height: J3Space.md),
@@ -131,13 +161,26 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
           children: builtInBackends.map((b) {
             final selected = _backend.name == b.name;
             return ChoiceChip(
-              label: Text(b.name, style: J3Type.codeSmall.copyWith(fontSize: 11)),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (b.mode == BackendMode.process) ...[
+                    const Icon(Icons.terminal, size: 10, color: J3Colors.neonText),
+                    const SizedBox(width: 3),
+                  ],
+                  Text(b.name, style: J3Type.codeSmall.copyWith(fontSize: 11)),
+                ],
+              ),
               selected: selected,
               selectedColor: J3Colors.darkRed,
               visualDensity: VisualDensity.compact,
               onSelected: (_) {
                 setState(() {
-                  _backend = b.copyWith(customDllPath: _backend.customDllPath);
+                  _backend = b.copyWith(
+                    customDllPath: _backend.customDllPath,
+                    exePath: _backend.exePath,
+                    autoexecDir: _backend.autoexecDir,
+                  );
                   _syncControllers();
                   _testResults = null;
                 });
@@ -145,6 +188,99 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
             );
           }).toList(),
         ),
+      ],
+    );
+  }
+
+  Widget _modeBadge() {
+    final isProcess = _backend.mode == BackendMode.process;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: J3Space.sm, vertical: J3Space.xs),
+      decoration: BoxDecoration(
+        color: isProcess ? J3Colors.info.withValues(alpha: 0.1) : J3Colors.neon.withValues(alpha: 0.1),
+        borderRadius: J3Radius.small,
+        border: Border.all(
+          color: isProcess ? J3Colors.info.withValues(alpha: 0.3) : J3Colors.neon.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isProcess ? Icons.terminal : Icons.extension,
+            size: 14,
+            color: isProcess ? J3Colors.info : J3Colors.neonText,
+          ),
+          const SizedBox(width: J3Space.xs),
+          Text(
+            isProcess ? 'PROCESS MODE' : 'DLL MODE',
+            style: J3Type.kicker.copyWith(
+              color: isProcess ? J3Colors.info : J3Colors.neonText,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(width: J3Space.sm),
+          Expanded(
+            child: Text(
+              isProcess
+                  ? 'Launches an EXE to inject and writes scripts to files'
+                  : 'Loads a DLL via FFI and calls exported functions',
+              style: J3Type.caption,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _exePathField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('INJECTOR EXE PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Path to the injector executable (e.g. DLLLoader64.exe). '
+          'Leave blank if injection is handled by another app.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.xs),
+        _inputField(_exePathController, 'C:\\path\\to\\injector.exe'),
+      ],
+    );
+  }
+
+  Widget _processFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('PROCESS ARGUMENTS', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Configure command-line arguments for injection and execution. '
+          'Use {script_path} as a placeholder for the script file path.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.sm),
+        _labeledField('Inject args', _injectArgsController, '--inject'),
+        const SizedBox(height: J3Space.xs),
+        _labeledField('Execute args', _executeArgsController, '{script_path}'),
+      ],
+    );
+  }
+
+  Widget _autoexecField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('AUTOEXEC FOLDER', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Drop scripts into this folder for automatic execution. '
+          'Many executors watch a folder for new .lua files.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.xs),
+        _inputField(_autoexecDirController, 'C:\\path\\to\\autoexec'),
       ],
     );
   }
@@ -235,12 +371,17 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
   }
 
   Widget _testBindingsSection(ExecutorState state) {
+    final isProcess = _backend.mode == BackendMode.process;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text('TEST BINDINGS', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+            Text(
+              isProcess ? 'TEST PATHS' : 'TEST BINDINGS',
+              style: J3Type.kicker.copyWith(color: J3Colors.neonText),
+            ),
             const Spacer(),
             NeonButton(
               label: 'Test',
@@ -259,7 +400,12 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
         ),
         const SizedBox(height: J3Space.xs),
         if (_testResults == null)
-          Text('Click Test to load the DLL and check function bindings.', style: J3Type.caption)
+          Text(
+            isProcess
+                ? 'Click Test to verify paths and folder access.'
+                : 'Click Test to load the DLL and check function bindings.',
+            style: J3Type.caption,
+          )
         else ...[
           for (final entry in _testResults!.entries)
             Padding(
@@ -278,7 +424,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                   ),
                   const SizedBox(width: J3Space.sm),
                   Text(
-                    entry.value ? 'BOUND' : 'NOT FOUND',
+                    entry.value ? (isProcess ? 'OK' : 'BOUND') : 'NOT FOUND',
                     style: J3Type.caption.copyWith(color: entry.value ? J3Colors.success : J3Colors.error),
                   ),
                 ],

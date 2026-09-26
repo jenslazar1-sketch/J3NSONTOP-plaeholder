@@ -35,64 +35,98 @@ void _freeNativeUtf8(Pointer<Uint8> ptr) {
 
 final DynamicLibrary _stdlib = DynamicLibrary.process();
 
+enum BackendMode { dll, process }
+
 class DllBackend {
   const DllBackend({
     required this.name,
+    this.mode = BackendMode.dll,
     this.dllFileName = '',
     this.isAttachedFn = 'IsAttached',
     this.attachFn = 'Attach',
     this.executeFn = 'Execute',
     this.settingsFn = 'SetSettings',
     this.customDllPath,
+    this.exePath,
+    this.injectArgs = '',
+    this.executeArgsTemplate = '{script_path}',
+    this.autoexecDir,
   });
 
   final String name;
+  final BackendMode mode;
   final String dllFileName;
   final String isAttachedFn;
   final String attachFn;
   final String executeFn;
   final String settingsFn;
   final String? customDllPath;
+  final String? exePath;
+  final String injectArgs;
+  final String executeArgsTemplate;
+  final String? autoexecDir;
 
   DllBackend copyWith({
     String? name,
+    BackendMode? mode,
     String? dllFileName,
     String? isAttachedFn,
     String? attachFn,
     String? executeFn,
     String? settingsFn,
     String? customDllPath,
+    String? exePath,
+    String? injectArgs,
+    String? executeArgsTemplate,
+    String? autoexecDir,
   }) {
     return DllBackend(
       name: name ?? this.name,
+      mode: mode ?? this.mode,
       dllFileName: dllFileName ?? this.dllFileName,
       isAttachedFn: isAttachedFn ?? this.isAttachedFn,
       attachFn: attachFn ?? this.attachFn,
       executeFn: executeFn ?? this.executeFn,
       settingsFn: settingsFn ?? this.settingsFn,
       customDllPath: customDllPath ?? this.customDllPath,
+      exePath: exePath ?? this.exePath,
+      injectArgs: injectArgs ?? this.injectArgs,
+      executeArgsTemplate: executeArgsTemplate ?? this.executeArgsTemplate,
+      autoexecDir: autoexecDir ?? this.autoexecDir,
     );
   }
 
   Map<String, String> toJson() => {
     'name': name,
+    'mode': mode.name,
     'dllFileName': dllFileName,
     'isAttachedFn': isAttachedFn,
     'attachFn': attachFn,
     'executeFn': executeFn,
     'settingsFn': settingsFn,
+    'injectArgs': injectArgs,
+    'executeArgsTemplate': executeArgsTemplate,
     // ignore: use_null_aware_elements
     if (customDllPath != null) 'customDllPath': customDllPath!,
+    // ignore: use_null_aware_elements
+    if (exePath != null) 'exePath': exePath!,
+    // ignore: use_null_aware_elements
+    if (autoexecDir != null) 'autoexecDir': autoexecDir!,
   };
 
   factory DllBackend.fromJson(Map<String, dynamic> j) => DllBackend(
     name: j['name'] as String? ?? 'Custom',
+    mode: j['mode'] == 'process' ? BackendMode.process : BackendMode.dll,
     dllFileName: j['dllFileName'] as String? ?? '',
     isAttachedFn: j['isAttachedFn'] as String? ?? 'IsAttached',
     attachFn: j['attachFn'] as String? ?? 'Attach',
     executeFn: j['executeFn'] as String? ?? 'Execute',
     settingsFn: j['settingsFn'] as String? ?? 'SetSettings',
     customDllPath: j['customDllPath'] as String?,
+    exePath: j['exePath'] as String?,
+    injectArgs: j['injectArgs'] as String? ?? '',
+    executeArgsTemplate: j['executeArgsTemplate'] as String? ?? '{script_path}',
+    autoexecDir: j['autoexecDir'] as String?,
   );
 }
 
@@ -136,6 +170,15 @@ const List<DllBackend> builtInBackends = [
     attachFn: 'Attach',
     executeFn: 'Execute',
     settingsFn: '',
+  ),
+  DllBackend(
+    name: 'Xeno',
+    mode: BackendMode.process,
+  ),
+  DllBackend(
+    name: 'Custom EXE',
+    mode: BackendMode.process,
+    executeArgsTemplate: '{script_path}',
   ),
 ];
 
@@ -205,8 +248,12 @@ class ExecutorController extends Notifier<ExecutorState> {
   void setBackend(DllBackend backend) {
     unloadDll();
     state = state.copyWith(activeBackend: backend, status: ExecutorStatus.unloaded);
-    addOutput('[*] Backend switched to: ${backend.name}');
+    addOutput('[*] Backend switched to: ${backend.name} (${backend.mode.name} mode)');
   }
+
+  // ---------------------------------------------------------------------------
+  // DLL candidate search
+  // ---------------------------------------------------------------------------
 
   List<String> _findDllCandidates(DllBackend backend) {
     final exe = Platform.resolvedExecutable;
@@ -228,6 +275,10 @@ class ExecutorController extends Notifier<ExecutorState> {
 
     return paths;
   }
+
+  // ---------------------------------------------------------------------------
+  // PE / file diagnostics
+  // ---------------------------------------------------------------------------
 
   List<DllDiagnostic> _diagnose(String path) {
     final results = <DllDiagnostic>[];
@@ -313,7 +364,63 @@ class ExecutorController extends Notifier<ExecutorState> {
     return results;
   }
 
+  // ---------------------------------------------------------------------------
+  // Load — DLL or Process
+  // ---------------------------------------------------------------------------
+
   bool loadDll() {
+    if (state.activeBackend.mode == BackendMode.process) {
+      return _loadProcess();
+    }
+    return _loadDllBackend();
+  }
+
+  bool _loadProcess() {
+    final backend = state.activeBackend;
+    final diagnostics = <DllDiagnostic>[];
+
+    if (backend.exePath != null && backend.exePath!.isNotEmpty) {
+      final file = File(backend.exePath!);
+      diagnostics.add(DllDiagnostic(
+        label: 'Injector EXE',
+        passed: file.existsSync(),
+        detail: file.existsSync()
+            ? '${backend.exePath} (${(file.statSync().size / 1024).toStringAsFixed(1)} KB)'
+            : 'Not found: ${backend.exePath}',
+      ));
+    } else {
+      diagnostics.add(const DllDiagnostic(
+        label: 'Injector EXE',
+        passed: true,
+        detail: 'Not configured — injection handled externally',
+      ));
+    }
+
+    if (backend.autoexecDir != null && backend.autoexecDir!.isNotEmpty) {
+      final dir = Directory(backend.autoexecDir!);
+      diagnostics.add(DllDiagnostic(
+        label: 'Autoexec folder',
+        passed: dir.existsSync(),
+        detail: dir.existsSync() ? backend.autoexecDir! : 'Not found: ${backend.autoexecDir}',
+      ));
+    }
+
+    for (final d in diagnostics) {
+      final icon = d.passed ? '[+]' : '[!]';
+      addOutput('$icon ${d.label}: ${d.detail ?? (d.passed ? "OK" : "FAIL")}');
+    }
+
+    state = state.copyWith(
+      status: ExecutorStatus.ready,
+      diagnostics: diagnostics,
+      loadedDllPath: backend.exePath,
+    );
+
+    addOutput('[+] Process backend "${backend.name}" ready');
+    return true;
+  }
+
+  bool _loadDllBackend() {
     if (_lib != null) return true;
     if (!Platform.isWindows) {
       state = state.copyWith(status: ExecutorStatus.error, error: 'Windows only');
@@ -444,6 +551,10 @@ class ExecutorController extends Notifier<ExecutorState> {
     return true;
   }
 
+  // ---------------------------------------------------------------------------
+  // FFI binding helpers
+  // ---------------------------------------------------------------------------
+
   _IntDart? _bindInt(String name) {
     if (name.isEmpty || _lib == null) return null;
     try {
@@ -474,6 +585,10 @@ class ExecutorController extends Notifier<ExecutorState> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Unload
+  // ---------------------------------------------------------------------------
+
   void unloadDll() {
     _lib = null;
     _isAttached = null;
@@ -483,7 +598,15 @@ class ExecutorController extends Notifier<ExecutorState> {
     state = state.copyWith(status: ExecutorStatus.unloaded, loadedDllPath: null, boundFunctions: [], diagnostics: []);
   }
 
+  // ---------------------------------------------------------------------------
+  // Test bindings
+  // ---------------------------------------------------------------------------
+
   Map<String, bool> testBindings() {
+    if (state.activeBackend.mode == BackendMode.process) {
+      return _testProcessBindings();
+    }
+
     final backend = state.activeBackend;
     final results = <String, bool>{};
 
@@ -507,6 +630,27 @@ class ExecutorController extends Notifier<ExecutorState> {
     return results;
   }
 
+  Map<String, bool> _testProcessBindings() {
+    final backend = state.activeBackend;
+    final results = <String, bool>{};
+
+    if (backend.exePath != null && backend.exePath!.isNotEmpty) {
+      results['Injector EXE exists'] = File(backend.exePath!).existsSync();
+    }
+
+    if (backend.autoexecDir != null && backend.autoexecDir!.isNotEmpty) {
+      results['Autoexec folder exists'] = Directory(backend.autoexecDir!).existsSync();
+    }
+
+    results['Temp folder writable'] = Directory.systemTemp.existsSync();
+
+    return results;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Attach — DLL or Process
+  // ---------------------------------------------------------------------------
+
   bool get isAttached {
     if (_isAttached == null) return false;
     try {
@@ -517,6 +661,51 @@ class ExecutorController extends Notifier<ExecutorState> {
   }
 
   void attach() {
+    if (state.activeBackend.mode == BackendMode.process) {
+      _processAttach();
+      return;
+    }
+    _dllAttach();
+  }
+
+  void _processAttach() {
+    final backend = state.activeBackend;
+
+    if (backend.exePath == null || backend.exePath!.isEmpty) {
+      state = state.copyWith(status: ExecutorStatus.attached);
+      addOutput('[+] Process mode — no injector EXE configured');
+      addOutput('[*] Assuming injection is handled externally');
+      return;
+    }
+
+    if (!File(backend.exePath!).existsSync()) {
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Injector EXE not found: ${backend.exePath}',
+      );
+      addOutput('[!] EXE not found: ${backend.exePath}');
+      return;
+    }
+
+    state = state.copyWith(status: ExecutorStatus.attaching);
+    addOutput('[*] Launching injector: ${backend.exePath}');
+
+    final args = backend.injectArgs.trim().isEmpty ? <String>[] : backend.injectArgs.trim().split(RegExp(r'\s+'));
+
+    Process.run(backend.exePath!, args).timeout(const Duration(seconds: 30)).then((result) {
+      final stdout = result.stdout.toString().trim();
+      final stderr = result.stderr.toString().trim();
+      if (stdout.isNotEmpty) addOutput('[*] $stdout');
+      if (stderr.isNotEmpty) addOutput('[!] $stderr');
+      state = state.copyWith(status: ExecutorStatus.attached);
+      addOutput('[+] Injector finished (exit: ${result.exitCode})');
+    }).catchError((Object e) {
+      state = state.copyWith(status: ExecutorStatus.error, error: 'Injector failed: $e');
+      addOutput('[!] Injector failed: $e');
+    });
+  }
+
+  void _dllAttach() {
     if (_attach == null && _execute != null) {
       state = state.copyWith(status: ExecutorStatus.attached);
       addOutput('[+] No attach function — direct execution mode enabled');
@@ -545,7 +734,82 @@ class ExecutorController extends Notifier<ExecutorState> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Execute — DLL or Process
+  // ---------------------------------------------------------------------------
+
   void execute(String script) {
+    if (state.activeBackend.mode == BackendMode.process) {
+      _processExecute(script);
+      return;
+    }
+    _dllExecute(script);
+  }
+
+  void _processExecute(String script) {
+    if (state.status != ExecutorStatus.attached) {
+      addOutput('[!] Not attached. Click Attach first.');
+      return;
+    }
+
+    state = state.copyWith(lastScript: script);
+    addOutput('[>] Executing script (${script.length} chars)...');
+
+    final backend = state.activeBackend;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileName = 'j3_exec_$timestamp.lua';
+
+    String scriptPath;
+    if (backend.autoexecDir != null && backend.autoexecDir!.isNotEmpty) {
+      final dir = Directory(backend.autoexecDir!);
+      if (!dir.existsSync()) {
+        try {
+          dir.createSync(recursive: true);
+        } catch (e) {
+          addOutput('[!] Cannot create autoexec folder: $e');
+          return;
+        }
+      }
+      scriptPath = '${backend.autoexecDir}${Platform.pathSeparator}$fileName';
+    } else {
+      scriptPath = '${Directory.systemTemp.path}${Platform.pathSeparator}$fileName';
+    }
+
+    try {
+      File(scriptPath).writeAsStringSync(script);
+    } catch (e) {
+      addOutput('[!] Failed to write script file: $e');
+      return;
+    }
+
+    if (backend.autoexecDir != null && backend.autoexecDir!.isNotEmpty) {
+      addOutput('[+] Script written to autoexec: $scriptPath');
+      addOutput('[*] Your executor will pick it up automatically');
+      return;
+    }
+
+    if (backend.exePath != null && backend.exePath!.isNotEmpty) {
+      final argsStr = backend.executeArgsTemplate.replaceAll('{script_path}', scriptPath);
+      final args = argsStr.trim().isEmpty ? <String>[] : argsStr.trim().split(RegExp(r'\s+'));
+
+      addOutput('[*] Launching: ${backend.exePath} ${args.join(' ')}');
+
+      Process.run(backend.exePath!, args).timeout(const Duration(seconds: 30)).then((result) {
+        final stdout = result.stdout.toString().trim();
+        final stderr = result.stderr.toString().trim();
+        if (stdout.isNotEmpty) addOutput('[+] $stdout');
+        if (stderr.isNotEmpty) addOutput('[!] $stderr');
+        addOutput('[+] Script executed (exit: ${result.exitCode})');
+      }).catchError((Object e) {
+        addOutput('[!] Execute failed: $e');
+      });
+    } else {
+      addOutput('[+] Script saved to: $scriptPath');
+      addOutput('[*] No EXE configured — load the file in your executor manually');
+    }
+  }
+
+  void _dllExecute(String script) {
     if (_execute == null) {
       addOutput('[!] DLL not loaded — no execute function bound');
       return;
@@ -568,6 +832,10 @@ class ExecutorController extends Notifier<ExecutorState> {
       _freeNativeUtf8(ptr);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Settings & output
+  // ---------------------------------------------------------------------------
 
   void applySettings(String settings) {
     if (_setSettings == null) {
