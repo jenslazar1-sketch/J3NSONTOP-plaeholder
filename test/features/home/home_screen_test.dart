@@ -249,6 +249,29 @@ void main() {
       );
     });
 
+    testWidgets('create sample workspace keeps an active workspace and says so', (tester) async {
+      setSurface(tester, const Size(1400, 2600));
+      await tester.pumpWidget(buildExperienceApp(env));
+      await settleIo(tester);
+      final mine = (await tester.runAsync(
+        () => containerOf(tester).read(workspacesProvider.notifier).addAppOwned('My project'),
+      ))!;
+      await tester.pump();
+      await tester.tap(find.bySemanticsLabel(RegExp(r'^Create sample workspace\.')));
+      bool reported() => containerOf(tester)
+          .read(activityProvider)
+          .notices
+          .any((n) => n.message.startsWith('Sample workspace') || n.message.startsWith('Could not create the sample'));
+      for (var i = 0; i < 400 && !reported(); i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+        await tester.pump();
+      }
+      final notices = containerOf(tester).read(activityProvider).notices.map((n) => n.message).toList();
+      expect(containerOf(tester).read(activeWorkspaceProvider)?.id, mine.id);
+      expect(notices, contains(endsWith('your current workspace stays active (switch in Workspaces)')));
+      expect(notices, isNot(contains(endsWith('is ready and active'))));
+    });
+
     testWidgets('five quick taps make the skull laugh and post a notice', (tester) async {
       setSurface(tester, const Size(1400, 2600));
       await tester.pumpWidget(buildExperienceApp(env, effects: motionEffects));

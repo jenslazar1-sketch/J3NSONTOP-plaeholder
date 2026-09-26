@@ -97,16 +97,25 @@ final List<ConfigPreset> builtInPresets = [
     builtIn: true,
     target: kSampleGraphicsPath,
     description:
-        'EXAMPLE for the sample game (Neon Dungeon) graphics.json: lowest quality, no post effects, '
-        'half render scale, 30 FPS cap.',
+        'EXAMPLE for the sample game (Neon Dungeon) graphics.json: lowest quality, post effects off, '
+        'half render scale, 30 FPS cap, no vsync.',
     patch: {
-      'quality': 'low',
-      'vsync': false,
-      'fov': 75,
-      'maxFps': 30,
-      'resolution': {'scale': 0.5},
-      'shadows': {'enabled': false, 'resolution': 256},
-      'postfx': {'bloom': false, 'motionBlur': false, 'chromaticAberration': false, 'scanlines': false, 'ssao': false},
+      'resolution': {'renderScale': 0.5},
+      'display': {'vsync': false, 'fpsLimit': 30},
+      'quality': {
+        'preset': 'low',
+        'textures': 'low',
+        'shadows': 'off',
+        'particles': 0.25,
+        'anisotropy': 0,
+        'antialiasing': 'off',
+      },
+      'postfx': {
+        'bloom': {'enabled': false},
+        'scanlines': {'enabled': false},
+        'chromaticAberration': {'enabled': false},
+        'vignette': {'enabled': false},
+      },
     },
   ),
   const ConfigPreset(
@@ -116,15 +125,24 @@ final List<ConfigPreset> builtInPresets = [
     target: kSampleGraphicsPath,
     description:
         'EXAMPLE for the sample game (Neon Dungeon) graphics.json: maximum quality, all post effects on, '
-        'native render scale, uncapped frame rate with vsync.',
+        'native render scale, vsync with no extra FPS cap (fpsLimit 0).',
     patch: {
-      'quality': 'ultra',
-      'vsync': true,
-      'fov': 100,
-      'maxFps': 0,
-      'resolution': {'scale': 1.0},
-      'shadows': {'enabled': true, 'resolution': 4096},
-      'postfx': {'bloom': true, 'motionBlur': true, 'chromaticAberration': true, 'scanlines': true, 'ssao': true},
+      'resolution': {'renderScale': 1.0},
+      'display': {'vsync': true, 'fpsLimit': 0},
+      'quality': {
+        'preset': 'ultra',
+        'textures': 'ultra',
+        'shadows': 'high',
+        'particles': 1.0,
+        'anisotropy': 16,
+        'antialiasing': 'taa',
+      },
+      'postfx': {
+        'bloom': {'enabled': true},
+        'scanlines': {'enabled': true},
+        'chromaticAberration': {'enabled': true, 'strength': 0.3},
+        'vignette': {'enabled': true},
+      },
     },
   ),
 ];

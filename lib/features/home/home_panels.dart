@@ -234,7 +234,13 @@ class _QuickActionsPanelState extends ConsumerState<QuickActionsPanel> {
     final activity = ref.read(activityProvider.notifier);
     try {
       final ws = await createSampleWorkspace(ref);
-      activity.notify(NoticeKind.success, 'Sample workspace "${ws.name}" is ready and active');
+      final active = ref.read(activeWorkspaceProvider)?.id == ws.id;
+      activity.notify(
+        NoticeKind.success,
+        active
+            ? 'Sample workspace "${ws.name}" is ready and active'
+            : 'Sample workspace "${ws.name}" is ready; your current workspace stays active (switch in Workspaces)',
+      );
     } catch (e) {
       activity.notify(NoticeKind.error, 'Could not create the sample workspace: $e');
     } finally {

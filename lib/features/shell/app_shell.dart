@@ -98,7 +98,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         ),
         endDrawer: const Drawer(width: 340, child: ActivityPanel()),
         body: content,
-        bottomNavigationBar: _BottomNav(current: current, onSelect: _go),
+        bottomNavigationBar: _BottomNav(location: widget.location, current: current, onSelect: _go),
       );
     } else {
       body = Scaffold(
@@ -587,39 +587,62 @@ class _CompactAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 }
 
+/// Phone tabs, in order.
+const List<String> kBottomNavRoutes = ['/', '/workspaces', '/mods', '/tools', '/activity'];
+
+/// The phone tab that owns [location], or null when no tab does (Settings,
+/// About): then no tab is highlighted.
+@visibleForTesting
+int? bottomNavIndexFor(String location, NavDestination? current) {
+  final path = Uri.tryParse(location)?.path ?? location;
+  final direct = kBottomNavRoutes.indexOf(current?.route ?? path);
+  if (direct >= 0) return direct;
+  final tools = kBottomNavRoutes.indexOf('/tools');
+  if (path == '/tools' || path.startsWith('/tool/')) return tools;
+  // Sections without their own tab (Config Lab, Asset Lab, ...) live under Tools.
+  if (current?.section != null) return tools;
+  return null;
+}
+
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.current, required this.onSelect});
+  const _BottomNav({required this.location, required this.current, required this.onSelect});
+  final String location;
   final NavDestination? current;
   final ValueChanged<String> onSelect;
 
-  static const _routes = ['/', '/workspaces', '/mods', '/tools', '/activity'];
+  static const _items = [
+    (Icons.dashboard_outlined, Icons.dashboard, 'Home'),
+    (Icons.folder_open_outlined, Icons.folder_open, 'Workspaces'),
+    (Icons.extension_outlined, Icons.extension, 'Mods'),
+    (Icons.apps_outlined, Icons.apps, 'Tools'),
+    (Icons.monitor_heart_outlined, Icons.monitor_heart, 'Activity'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final route = current?.route;
-    var index = _routes.indexOf(route ?? '');
-    // Sections without their own tab highlight "Tools".
-    if (index < 0 && current != null && current!.section != null) index = 3;
-    if (index < 0) index = route == '/settings' ? -1 : 0;
-    return NavigationBar(
-      selectedIndex: index < 0 ? 0 : index,
-      onDestinationSelected: (i) => onSelect(_routes[i]),
+    final selected = bottomNavIndexFor(location, current);
+    final none = selected == null;
+    Widget bar = NavigationBar(
+      // NavigationBar needs an index; with no owning tab the theme below
+      // renders index 0 exactly like the others.
+      selectedIndex: selected ?? 0,
+      onDestinationSelected: (i) => onSelect(kBottomNavRoutes[i]),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Home'),
-        NavigationDestination(
-          icon: Icon(Icons.folder_open_outlined),
-          selectedIcon: Icon(Icons.folder_open),
-          label: 'Workspaces',
-        ),
-        NavigationDestination(icon: Icon(Icons.extension_outlined), selectedIcon: Icon(Icons.extension), label: 'Mods'),
-        NavigationDestination(icon: Icon(Icons.apps_outlined), selectedIcon: Icon(Icons.apps), label: 'Tools'),
-        NavigationDestination(
-          icon: Icon(Icons.monitor_heart_outlined),
-          selectedIcon: Icon(Icons.monitor_heart),
-          label: 'Activity',
-        ),
+      destinations: [
+        for (final (icon, selectedIcon, label) in _items)
+          NavigationDestination(icon: Icon(icon), selectedIcon: Icon(none ? icon : selectedIcon), label: label),
       ],
     );
+    if (none) {
+      bar = NavigationBarTheme(
+        data: NavigationBarTheme.of(context).copyWith(
+          indicatorColor: Colors.transparent,
+          labelTextStyle: WidgetStatePropertyAll(J3Type.caption.copyWith(color: J3Colors.textMuted)),
+          iconTheme: const WidgetStatePropertyAll(IconThemeData(color: J3Colors.textMuted)),
+        ),
+        child: bar,
+      );
+    }
+    return bar;
   }
 }

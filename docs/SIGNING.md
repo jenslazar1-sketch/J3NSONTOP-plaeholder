@@ -48,6 +48,17 @@ receive any secret.
 
 ## Android
 
+### Test builds (no secrets)
+
+CI test APKs, `scripts/build_android.sh --mode test` and `flutter run` are
+signed with the **public test key** committed in
+[`android/test-signing/`](../android/test-signing/README.md) (password
+`android`, certificate `CN=Android Debug`). Because every machine and CI run
+uses the same key, testers can install a newer test APK over an older one
+and keep their data. The key protects nothing: never distribute an APK
+signed with it. A release-signed build cannot update a test build (different
+key), so testers uninstall the test build first.
+
 ### 1. Create the upload/release keystore (once)
 
 `keytool` ships with every JDK. On Windows, Android Studio's copy is at

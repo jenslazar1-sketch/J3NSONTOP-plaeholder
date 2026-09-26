@@ -15,6 +15,7 @@ import '../../../../core/utils/safe_path.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../../core/workspace/workspace.dart';
 import '../../../../core/workspace/workspace_controller.dart';
+import '../../../mods/presentation/mods_controller.dart';
 import '../../../sample/sample_workspace.dart';
 import '../../data/file_ops.dart';
 import '../../data/workspace_transfer.dart';
@@ -324,6 +325,38 @@ class ManagerActions {
         e is UnimplementedError ? StateError('The sample generator is not available in this build (${e.message})') : e,
         'Creating the sample workspace',
       );
+    }
+  }
+
+  /// Regenerates a sample workspace's files, mod library, profiles and
+  /// journals as on first run (after the user confirms).
+  Future<void> resetSample(Workspace w) async {
+    if (w.kind != WorkspaceKind.sample) return;
+    final ok = await showJ3Confirm(
+      context,
+      title: 'Reset "${w.name}"?',
+      message:
+          'Every file of this sample workspace is regenerated as on first run. Your edits to its files, mod '
+          'packages imported into it, its profiles and its operation journals and backups are replaced.\n\n'
+          'Only this sample copy in app storage is touched.',
+      confirmLabel: 'Reset sample',
+      destructive: true,
+    );
+    if (!ok) return;
+    _state.clearMessages();
+    try {
+      final stats = await SampleWorkspaceService(_c.read).reset(w.id);
+      _c.invalidate(workspaceHealthProvider(w.id));
+      _c.invalidate(modsProvider);
+      _state.report(
+        ManagerReport(
+          kind: StatusKind.success,
+          title: 'Sample workspace "${w.name}" was reset',
+          message: 'Restored ${stats.files} files, ${stats.packages} mod packages and ${stats.profiles} profiles.',
+        ),
+      );
+    } catch (e) {
+      _fail(e, 'Resetting the sample workspace');
     }
   }
 

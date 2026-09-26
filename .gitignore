@@ -50,6 +50,8 @@ app.*.map.json
 # Signing material must never be committed (see docs/SIGNING.md)
 *.jks
 *.keystore
+# Public TEST signing key (docs/SIGNING.md, "Test builds"); not a secret.
+!/android/test-signing/j3-test.keystore
 android/key.properties
 *.p12
 *.mobileprovision

@@ -22,8 +22,9 @@ plugins {
 //       A missing or incomplete configuration FAILS the build and lists what
 //       is missing. Used for every build that is meant to be distributed.
 //   -Pj3ForceDebugSigning=true
-//       Always sign release builds with the Android debug key (TEST build),
-//       even if a release key is configured. Used for CI test APKs.
+//       Always sign release builds with the debug/test key (TEST build),
+//       even if a release key is configured. Used for CI test APKs. The debug
+//       key is the shared public test key in android/test-signing/.
 //   neither
 //       Use the release key when it is fully configured, otherwise fall back
 //       to the debug key. Such an APK is a TEST build: it cannot be updated
@@ -138,6 +139,21 @@ android {
     }
 
     signingConfigs {
+        // Shared, PUBLIC test key (docs/SIGNING.md, "Test builds"): debug and
+        // CI test builds from every machine are signed with the same key, so a
+        // newer test APK installs over an older one and keeps the tester's
+        // data. Its certificate is "CN=Android Debug", which the build scripts
+        // refuse for release builds. Never use it for anything distributed.
+        val testKeystore = rootProject.file("test-signing/j3-test.keystore")
+        if (testKeystore.isFile) {
+            getByName("debug") {
+                storeFile = testKeystore
+                storeType = "pkcs12"
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
         if (useReleaseKey) {
             create("release") {
                 storeFile = keystoreFile

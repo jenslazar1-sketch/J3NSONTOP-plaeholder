@@ -190,6 +190,33 @@ void main() {
     expect(outcome(), isTrue);
   });
 
+  testWidgets('reset sample restores edited and deleted files after confirmation', (tester) async {
+    final h = await WsHarness.create(tester);
+    await h.pump(tester, const WorkspaceManagerPage(), size: const Size(1280, 1000));
+    await tapVisible(tester, find.text('Create sample workspace'));
+    await pumpUntil(tester, find.textContaining('created'), timeout: const Duration(seconds: 30));
+    final ws = h.container.read(workspacesProvider).workspaces.single;
+    final readme = File(p.join(ws.rootPath, 'README.txt'));
+    final ini = File(p.join(ws.rootPath, 'game', 'config', 'settings.ini'));
+    final original = (await tester.runAsync(() => ini.readAsString()))!;
+    await tester.runAsync(() async {
+      await ini.writeAsString('broken by a tester');
+      await readme.delete();
+    });
+
+    await tapVisible(tester, find.text('Reset sample'));
+    expect(find.textContaining('is regenerated as on first run'), findsOneWidget);
+    // The dialog's confirm button is the last "Reset sample" on screen.
+    expect(find.text('Reset sample'), findsNWidgets(2));
+    await tester.tap(find.text('Reset sample').last);
+    await tester.pump();
+    await pumpUntil(tester, find.textContaining('was reset'), timeout: const Duration(seconds: 30));
+    expect(find.textContaining('mod packages and'), findsOneWidget);
+    expect((await tester.runAsync(() => ini.readAsString()))!, original);
+    expect((await tester.runAsync(() => readme.exists()))!, isTrue);
+    expect(h.container.read(workspacesProvider).workspaces, hasLength(1));
+  });
+
   testWidgets('mobile shows the link-folder alternative instead of the button', (tester) async {
     final h = await WsHarness.create(tester, platform: AppPlatform.android);
     await h.pump(tester, const WorkspaceManagerPage(), size: const Size(400, 900));

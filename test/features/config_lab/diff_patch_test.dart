@@ -5,6 +5,7 @@ import 'package:j3nsontop_multitool/features/config_lab/domain/json_value.dart';
 import 'package:j3nsontop_multitool/features/config_lab/domain/merge_patch.dart';
 import 'package:j3nsontop_multitool/features/config_lab/domain/presets.dart';
 import 'package:j3nsontop_multitool/features/config_lab/domain/semantic_diff.dart';
+import 'package:j3nsontop_multitool/features/sample/domain/sample_texts.dart';
 
 Object? _j(String s) => decodeJsonStrict(s);
 
@@ -174,12 +175,27 @@ void main() {
         '{"quality":"high","vsync":true,"postfx":{"bloom":true,"grain":true},"resolution":{"width":1920}}',
       );
       final potato = applyMergePatch(doc, builtInPresets.first.patch)! as Map<String, Object?>;
-      expect(potato['quality'], 'low');
       expect((potato['postfx']! as Map<String, Object?>)['grain'], true);
       expect((potato['resolution']! as Map<String, Object?>)['width'], 1920);
       final diff = semanticDiff(doc, potato);
-      expect(diff.changed, greaterThan(0));
+      expect(diff.changed + diff.typeChanged, greaterThan(0));
       expect(diff.added, greaterThan(0));
+    });
+
+    test('built-ins fit the real sample graphics.json: only existing values change, no type changes', () {
+      final sample = _j(graphicsJson());
+      for (final preset in builtInPresets) {
+        final out = applyMergePatch(sample, preset.patch);
+        final diff = semanticDiff(sample, out);
+        expect(diff.added, 0, reason: '${preset.name} adds keys the sample does not have');
+        expect(diff.removed, 0, reason: preset.name);
+        expect(diff.typeChanged, 0, reason: '${preset.name} changes value types');
+        expect(diff.changed, greaterThan(3), reason: preset.name);
+      }
+      final potato = applyMergePatch(sample, builtInPresets.first.patch)! as Map<String, Object?>;
+      expect((potato['display']! as Map<String, Object?>)['fpsLimit'], 30);
+      expect((potato['resolution']! as Map<String, Object?>)['renderScale'], 0.5);
+      expect(((potato['postfx']! as Map<String, Object?>)['bloom']! as Map<String, Object?>)['intensity'], 0.65);
     });
   });
 }

@@ -11,6 +11,7 @@ import 'package:j3nsontop_multitool/features/config_lab/presentation/compare/com
 import 'package:j3nsontop_multitool/features/config_lab/presentation/document_io.dart';
 import 'package:j3nsontop_multitool/features/config_lab/presentation/presets/presets_controller.dart';
 import 'package:j3nsontop_multitool/features/config_lab/presentation/presets/presets_page.dart';
+import 'package:j3nsontop_multitool/features/sample/domain/sample_texts.dart';
 import 'package:path/path.dart' as p;
 
 import '../../helpers/harness.dart';
@@ -114,19 +115,21 @@ void main() {
       final c = await pumpLabPage(tester, env, const PresetsPage());
       await tester.enterText(
         find.widgetWithText(TextField, 'Target JSON document'),
-        '{\n    "quality": "high",\n    "vsync": true\n}\n',
+        '{\n    "display": {\n        "vsync": true,\n        "fpsLimit": 144\n    },\n'
+        '    "quality": {\n        "preset": "high"\n    }\n}\n',
       );
       await tester.pump();
       await tester.tap(find.text('Preview changes'));
       await waitFor(tester, () => c.read(presetsProvider).preview != null);
       expect(find.textContaining('"Potato mode":'), findsOneWidget);
-      expect(find.textContaining(r'~ $.quality: "high" -> "low"'), findsOneWidget);
+      expect(find.textContaining(r'~ $.quality.preset: "high" -> "low"'), findsOneWidget);
+      expect(find.textContaining(r'~ $.display.fpsLimit: 144 -> 30'), findsOneWidget);
       await tester.tap(find.text('Apply to editor only'));
       await tester.pump();
       final applied = decodeJsonStrict(draftText(c, kPresetsTargetKey).text)! as Map<String, Object?>;
-      expect(applied['quality'], 'low');
-      expect(applied['vsync'], false);
-      expect(draftText(c, kPresetsTargetKey).text, startsWith('{\n    "quality": "low",'));
+      expect((applied['quality']! as Map)['preset'], 'low');
+      expect((applied['display']! as Map)['vsync'], false);
+      expect(draftText(c, kPresetsTargetKey).text, startsWith('{\n    "display": {\n        "vsync": false,'));
     });
 
     testWidgets('create a preset (persisted, versioned) and import presets', (tester) async {
@@ -165,9 +168,7 @@ void main() {
 
     testWidgets('sample graphics.json: apply and save with backup', (tester) async {
       final c = await pumpLabPage(tester, env, const PresetsPage());
-      final ws = await createWorkspace(tester, c, {
-        'game/config/graphics.json': '{\n  "quality": "high",\n  "postfx": {"bloom": true}\n}\n',
-      });
+      final ws = await createWorkspace(tester, c, {'game/config/graphics.json': graphicsJson()});
       await tester.tap(find.text('Open sample graphics.json'));
       await waitFor(tester, () => draftText(c, kPresetsTargetKey).text.isNotEmpty);
       await tester.tap(find.text('Ultra'));
@@ -179,9 +180,13 @@ void main() {
       await tester.tap(find.text('Save with backup'));
       await waitFor(tester, () => c.read(docSourceProvider(kPresetsDocKey)).lastSave != null);
       final saved = decodeJsonStrict(File(p.join(ws.rootPath, 'game/config/graphics.json')).readAsStringSync());
-      expect((saved! as Map)['quality'], 'ultra');
+      // The real sample keeps its structure: nested values change, objects stay objects.
+      final doc = saved! as Map<String, Object?>;
+      expect((doc['quality']! as Map)['preset'], 'ultra');
+      expect((doc['display']! as Map)['fpsLimit'], 0);
+      expect(((doc['postfx']! as Map)['bloom']! as Map)['intensity'], 0.65);
       final backup = c.read(docSourceProvider(kPresetsDocKey)).lastSave!.backupPath!;
-      expect(File(backup).readAsStringSync(), contains('"high"'));
+      expect(File(backup).readAsStringSync(), contains('"preset": "high"'));
     });
 
     testWidgets('small screen with large text', (tester) async {

@@ -315,6 +315,9 @@ Terminal commands are `TerminalCommand` classes registered the same way
 
 ## Testing
 
+Manual testing (install steps for every platform, a 120-case checklist and the
+bug-report flow): [docs/TESTING.md](docs/TESTING.md).
+
 ```
 flutter analyze
 flutter test                                   # unit + widget tests

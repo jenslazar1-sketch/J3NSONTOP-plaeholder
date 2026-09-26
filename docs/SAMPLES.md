@@ -1,8 +1,9 @@
 # Sample workspace: NEON DUNGEON
 
 On first run the app creates a disposable **sample workspace** (kind `sample`)
-with real files so every tool can be tried immediately. It can be reset or
-removed at any time. The same content is exported to `samples/` in the repo by
+with real files so every tool can be tried immediately. It can be reset
+(Workspaces > sample card > **Reset sample**, after a confirmation) or removed
+at any time. The same content is exported to `samples/` in the repo by
 `dart run tool/export_samples.dart`.
 
 "Neon Dungeon" is a fictional game invented for these samples.

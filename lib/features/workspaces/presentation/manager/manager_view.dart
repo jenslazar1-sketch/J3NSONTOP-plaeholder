@@ -311,6 +311,12 @@ class WorkspaceCard extends ConsumerWidget {
                 onPressed: busy || health.value != WorkspaceHealth.ok ? null : () => actions.exportZip(w),
               ),
               NeonButton.ghost(label: 'Rename', icon: Icons.edit_outlined, onPressed: () => actions.rename(w)),
+              if (w.kind == WorkspaceKind.sample)
+                NeonButton.ghost(
+                  label: 'Reset sample',
+                  icon: Icons.restart_alt,
+                  onPressed: busy ? null : () => actions.resetSample(w),
+                ),
               NeonIconButton(
                 icon: Icons.copy_rounded,
                 tooltip: 'Copy folder path',
