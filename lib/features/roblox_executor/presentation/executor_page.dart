@@ -10,6 +10,7 @@ import '../../../core/theme/j3_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/executor_service.dart';
 import '../domain/script_library.dart';
+import 'executor_settings.dart';
 
 class ExecutorPage extends ConsumerStatefulWidget {
   const ExecutorPage({super.key});
@@ -147,6 +148,13 @@ class _ExecutorPageState extends ConsumerState<ExecutorPage> {
           Expanded(
             child: Text(statusText, style: J3Type.codeSmall.copyWith(color: statusColor)),
           ),
+          NeonButton.ghost(
+            label: 'Settings',
+            icon: Icons.settings,
+            dense: true,
+            onPressed: () => showDialog(context: context, builder: (_) => const ExecutorSettingsDialog()),
+          ),
+          const SizedBox(width: J3Space.xs),
           if (state.status == ExecutorStatus.error && state.error != null && state.error!.contains('not found'))
             NeonButton.ghost(label: 'Setup Guide', icon: Icons.help_outline, dense: true, onPressed: _showSetupGuide),
           if (state.status == ExecutorStatus.unloaded || state.status == ExecutorStatus.error)
@@ -163,8 +171,11 @@ class _ExecutorPageState extends ConsumerState<ExecutorPage> {
               dense: true,
               onPressed: () => ref.read(executorProvider.notifier).attach(),
             ),
-          if (state.status == ExecutorStatus.attached)
+          if (state.status == ExecutorStatus.attached) ...[
+            Text(state.activeBackend.name, style: J3Type.caption),
+            const SizedBox(width: J3Space.sm),
             Text('LIVE', style: J3Type.kicker.copyWith(color: J3Colors.success, letterSpacing: 2)),
+          ],
         ],
       ),
     );
