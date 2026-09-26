@@ -402,7 +402,14 @@ jobs:
 
       - name: Delete keychain and provisioning profile
         if: always()
-        run: bash scripts/ci/ios_signing_cleanup.sh
+        run: |
+          # The secret check runs before the checkout; if the job stopped
+          # there, nothing was set up and the script is not on the runner.
+          if [ -f scripts/ci/ios_signing_cleanup.sh ]; then
+            bash scripts/ci/ios_signing_cleanup.sh
+          else
+            echo "Nothing to clean up: the job stopped before the repository was checked out."
+          fi
 
   # ---------------------------------------------------------------- Windows --
   windows:
