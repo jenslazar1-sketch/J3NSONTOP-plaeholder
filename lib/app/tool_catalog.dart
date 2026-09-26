@@ -6,6 +6,7 @@ import '../features/dev_tools/dev_tools_module.dart';
 import '../features/file_tools/file_tools_module.dart';
 import '../features/frida_tools/frida_module.dart';
 import '../features/mods/mods_module.dart';
+import '../features/roblox_executor/roblox_module.dart';
 import '../features/terminal/terminal_module.dart';
 import '../features/workspaces/workspaces_module.dart';
 
@@ -19,6 +20,7 @@ List<FeatureModule> allFeatureModules() => [
   fileToolsModule,
   devToolsModule,
   fridaModule,
+  robloxModule,
   terminalModule,
 ];
 

@@ -163,6 +163,7 @@ tool can be tried immediately. The same content is in [`samples/`](samples/).
 | Developer Tools | Gadget Injector | `frida.gadget` | Inject Frida gadget into APK and IPA files for persistent instrumentation. |
 | Developer Tools | Frida Scripts | `frida.scripts` | Pre-built Frida script library: discovery, hooking, memory, modding and spawner templates. |
 | Developer Tools | Live AI Mod Engine | `frida.livemod` | AI-powered live game modding: scan, hook and modify running games with generated Frida scripts. |
+| Developer Tools | Roblox Executor | `dev.roblox_executor` | Free Roblox script executor — attach, execute Lua scripts, built-in script hub. No key system. |
 | System | Terminal | `system.terminal` | Typed commands for this app's own tools. Not a system shell. |
 
 ### Terminal commands
