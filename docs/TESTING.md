@@ -21,8 +21,8 @@ every platform. Its builds are the test builds:
 
 1. Sign in to GitHub, open the repository's **Actions** tab and choose the
    **CI** workflow.
-2. Open the newest run with a green check for the branch you were asked to
-   test (for example `main`).
+2. Open the newest run with a green check on the repository's default
+   branch (or the branch you were asked to test).
 3. Scroll to **Artifacts** and download the one for your platform. Artifacts
    are ZIP files and are deleted after 30 days; ask for a new run if they are
    gone.
