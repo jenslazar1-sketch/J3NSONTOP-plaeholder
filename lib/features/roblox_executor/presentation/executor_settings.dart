@@ -78,7 +78,6 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(executorProvider);
-    final isProcess = _backend.mode == BackendMode.process;
 
     return Dialog(
       backgroundColor: J3Colors.surface,
@@ -104,17 +103,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                     const SizedBox(height: J3Space.sm),
                     _modeBadge(),
                     const SizedBox(height: J3Space.md),
-                    if (isProcess) ...[
-                      _exePathField(),
-                      const SizedBox(height: J3Space.md),
-                      _processFields(),
-                      const SizedBox(height: J3Space.md),
-                      _autoexecField(),
-                    ] else ...[
-                      _dllPathField(),
-                      const SizedBox(height: J3Space.md),
-                      _functionFields(),
-                    ],
+                    ..._modeFields(),
                     const SizedBox(height: J3Space.md),
                     _testBindingsSection(state),
                     const SizedBox(height: J3Space.md),
@@ -129,6 +118,21 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
         ),
       ),
     );
+  }
+
+  List<Widget> _modeFields() {
+    return switch (_backend.mode) {
+      BackendMode.dll => [_dllPathField(), const SizedBox(height: J3Space.md), _functionFields()],
+      BackendMode.process => [
+        _exePathField(),
+        const SizedBox(height: J3Space.md),
+        _processFields(),
+        const SizedBox(height: J3Space.md),
+        _autoexecField(),
+      ],
+      BackendMode.cloudy => [_cloudyDllPathField(), const SizedBox(height: J3Space.md), _cloudyDepsInfo()],
+      BackendMode.cloudyPipe => [_cloudyPipeExeField(), const SizedBox(height: J3Space.md), _cloudyPipeInfo()],
+    };
   }
 
   Widget _header() {
@@ -168,6 +172,10 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                     const Icon(Icons.terminal, size: 10, color: J3Colors.neonText),
                     const SizedBox(width: 3),
                   ],
+                  if (b.mode == BackendMode.cloudy || b.mode == BackendMode.cloudyPipe) ...[
+                    const Icon(Icons.cloud, size: 10, color: J3Colors.info),
+                    const SizedBox(width: 3),
+                  ],
                   Text(b.name, style: J3Type.codeSmall.copyWith(fontSize: 11)),
                 ],
               ),
@@ -193,41 +201,101 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
   }
 
   Widget _modeBadge() {
-    final isProcess = _backend.mode == BackendMode.process;
+    final (IconData icon, Color color, String label, String desc) = switch (_backend.mode) {
+      BackendMode.dll => (
+        Icons.extension,
+        J3Colors.neonText,
+        'DLL MODE',
+        'Loads a DLL via FFI and calls exported functions',
+      ),
+      BackendMode.process => (
+        Icons.terminal,
+        J3Colors.info,
+        'PROCESS MODE',
+        'Launches an EXE to inject and writes scripts to files',
+      ),
+      BackendMode.cloudy => (
+        Icons.cloud,
+        J3Colors.info,
+        'CLOUDY DLL',
+        'Loads Cloudy.dll — Initialize, GetClients, ExecuteAsync',
+      ),
+      BackendMode.cloudyPipe => (
+        Icons.swap_horiz,
+        J3Colors.warning,
+        'CLOUDY PIPE',
+        'Injects via EXE, executes scripts through named pipe',
+      ),
+    };
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: J3Space.sm, vertical: J3Space.xs),
       decoration: BoxDecoration(
-        color: isProcess ? J3Colors.info.withValues(alpha: 0.1) : J3Colors.neon.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: J3Radius.small,
-        border: Border.all(
-          color: isProcess ? J3Colors.info.withValues(alpha: 0.3) : J3Colors.neon.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(
-            isProcess ? Icons.terminal : Icons.extension,
-            size: 14,
-            color: isProcess ? J3Colors.info : J3Colors.neonText,
-          ),
+          Icon(icon, size: 14, color: color),
           const SizedBox(width: J3Space.xs),
-          Text(
-            isProcess ? 'PROCESS MODE' : 'DLL MODE',
-            style: J3Type.kicker.copyWith(color: isProcess ? J3Colors.info : J3Colors.neonText, letterSpacing: 1),
-          ),
+          Text(label, style: J3Type.kicker.copyWith(color: color, letterSpacing: 1)),
           const SizedBox(width: J3Space.sm),
-          Expanded(
-            child: Text(
-              isProcess
-                  ? 'Launches an EXE to inject and writes scripts to files'
-                  : 'Loads a DLL via FFI and calls exported functions',
-              style: J3Type.caption,
-            ),
-          ),
+          Expanded(child: Text(desc, style: J3Type.caption)),
         ],
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // DLL mode fields
+  // ---------------------------------------------------------------------------
+
+  Widget _dllPathField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('DLL PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text('Leave blank to auto-search near the app executable, or set a custom path.', style: J3Type.caption),
+        const SizedBox(height: J3Space.xs),
+        _inputField(_dllPathController, 'C:\\path\\to\\exploit.dll'),
+        if (_backend.dllFileName.isNotEmpty) ...[
+          const SizedBox(height: J3Space.xs),
+          Text('Auto-search filename: ${_backend.dllFileName}', style: J3Type.caption),
+        ],
+      ],
+    );
+  }
+
+  Widget _functionFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('FUNCTION NAMES', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Configure the exported function names your DLL uses. '
+          'Different APIs export different names.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.sm),
+        _labeledField('IsAttached', _isAttachedController, 'IsAttached'),
+        const SizedBox(height: J3Space.xs),
+        _labeledField('Attach', _attachController, 'Attach'),
+        const SizedBox(height: J3Space.xs),
+        _labeledField('Execute *', _executeController, 'Execute'),
+        const SizedBox(height: J3Space.xs),
+        _labeledField('SetSettings', _settingsController, 'SetSettings'),
+        const SizedBox(height: J3Space.xs),
+        Text('* Execute is required. Others are optional.', style: J3Type.caption),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Process mode fields
+  // ---------------------------------------------------------------------------
 
   Widget _exePathField() {
     return Column(
@@ -282,47 +350,124 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
     );
   }
 
-  Widget _dllPathField() {
+  // ---------------------------------------------------------------------------
+  // Cloudy DLL mode fields
+  // ---------------------------------------------------------------------------
+
+  Widget _cloudyDllPathField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('DLL PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        Text('CLOUDY.DLL PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
         const SizedBox(height: J3Space.xs),
-        Text('Leave blank to auto-search near the app executable, or set a custom path.', style: J3Type.caption),
+        Text(
+          'Path to Cloudy.dll. Auto-searches in the bin\\ subfolder next to the app. '
+          'Set a custom path if your Cloudy.dll is elsewhere.',
+          style: J3Type.caption,
+        ),
         const SizedBox(height: J3Space.xs),
-        _inputField(_dllPathController, 'C:\\path\\to\\exploit.dll'),
-        if (_backend.dllFileName.isNotEmpty) ...[
-          const SizedBox(height: J3Space.xs),
-          Text('Auto-search filename: ${_backend.dllFileName}', style: J3Type.caption),
-        ],
+        _inputField(_dllPathController, 'C:\\path\\to\\bin\\Cloudy.dll'),
+        const SizedBox(height: J3Space.xs),
+        Text('Auto-search: Cloudy.dll (app dir, bin\\, data\\)', style: J3Type.caption),
       ],
     );
   }
 
-  Widget _functionFields() {
+  Widget _cloudyDepsInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('FUNCTION NAMES', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        Text('CLOUDY API INFO', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
         const SizedBox(height: J3Space.xs),
-        Text(
-          'Configure the exported function names your DLL uses. '
-          'Different APIs export different names.',
-          style: J3Type.caption,
+        Container(
+          padding: const EdgeInsets.all(J3Space.sm),
+          decoration: BoxDecoration(
+            color: J3Colors.info.withValues(alpha: 0.05),
+            borderRadius: J3Radius.small,
+            border: Border.all(color: J3Colors.info.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Functions (auto-bound):', style: J3Type.codeSmall.copyWith(color: J3Colors.info)),
+              const SizedBox(height: J3Space.xs),
+              Text('  Initialize()  — starts the API', style: J3Type.caption),
+              Text('  GetClients()  — lists connected Roblox processes', style: J3Type.caption),
+              Text('  ExecuteAsync() — sends script to client(s)', style: J3Type.caption),
+              const SizedBox(height: J3Space.sm),
+              Text(
+                'Required dependency DLLs (same folder):',
+                style: J3Type.codeSmall.copyWith(color: J3Colors.warning),
+              ),
+              const SizedBox(height: J3Space.xs),
+              Text('  libcrypto-3-x64.dll', style: J3Type.caption),
+              Text('  libssl-3-x64.dll', style: J3Type.caption),
+              Text('  xxhash.dll', style: J3Type.caption),
+              Text('  zstd.dll', style: J3Type.caption),
+            ],
+          ),
         ),
-        const SizedBox(height: J3Space.sm),
-        _labeledField('IsAttached', _isAttachedController, 'IsAttached'),
-        const SizedBox(height: J3Space.xs),
-        _labeledField('Attach', _attachController, 'Attach'),
-        const SizedBox(height: J3Space.xs),
-        _labeledField('Execute *', _executeController, 'Execute'),
-        const SizedBox(height: J3Space.xs),
-        _labeledField('SetSettings', _settingsController, 'SetSettings'),
-        const SizedBox(height: J3Space.xs),
-        Text('* Execute is required. Others are optional.', style: J3Type.caption),
       ],
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Cloudy Pipe mode fields
+  // ---------------------------------------------------------------------------
+
+  Widget _cloudyPipeExeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('INJECTOR.EXE PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Path to the Cloudy Injector.exe. This injects the Cloudy module into Roblox. '
+          'Leave blank if injection is handled externally.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.xs),
+        _inputField(_exePathController, 'C:\\path\\to\\Injector.exe'),
+      ],
+    );
+  }
+
+  Widget _cloudyPipeInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('CLOUDY PIPE INFO', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Container(
+          padding: const EdgeInsets.all(J3Space.sm),
+          decoration: BoxDecoration(
+            color: J3Colors.warning.withValues(alpha: 0.05),
+            borderRadius: J3Radius.small,
+            border: Border.all(color: J3Colors.warning.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('How it works:', style: J3Type.codeSmall.copyWith(color: J3Colors.warning)),
+              const SizedBox(height: J3Space.xs),
+              Text('1. Attach launches Injector.exe to inject into Roblox', style: J3Type.caption),
+              Text('2. Execute sends scripts through a Windows named pipe', style: J3Type.caption),
+              Text(r'3. Pipe name: \\.\pipe\CLDYexecution', style: J3Type.caption),
+              const SizedBox(height: J3Space.sm),
+              Text('Required files (next to Injector.exe):', style: J3Type.codeSmall.copyWith(color: J3Colors.warning)),
+              const SizedBox(height: J3Space.xs),
+              Text('  Module.dll', style: J3Type.caption),
+              Text('  fmt.dll', style: J3Type.caption),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared widgets
+  // ---------------------------------------------------------------------------
 
   Widget _labeledField(String label, TextEditingController ctrl, String hint) {
     return Row(
@@ -368,14 +513,31 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
   }
 
   Widget _testBindingsSection(ExecutorState state) {
-    final isProcess = _backend.mode == BackendMode.process;
+    final testLabel = switch (_backend.mode) {
+      BackendMode.dll => 'TEST BINDINGS',
+      BackendMode.process => 'TEST PATHS',
+      BackendMode.cloudy => 'TEST CLOUDY API',
+      BackendMode.cloudyPipe => 'TEST PIPE SETUP',
+    };
+
+    final testHint = switch (_backend.mode) {
+      BackendMode.dll => 'Click Test to load the DLL and check function bindings.',
+      BackendMode.process => 'Click Test to verify paths and folder access.',
+      BackendMode.cloudy => 'Click Test to load Cloudy.dll and verify API exports.',
+      BackendMode.cloudyPipe => 'Click Test to verify kernel32 and Injector.exe.',
+    };
+
+    final okLabel = switch (_backend.mode) {
+      BackendMode.dll => 'BOUND',
+      _ => 'OK',
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(isProcess ? 'TEST PATHS' : 'TEST BINDINGS', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+            Text(testLabel, style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
             const Spacer(),
             NeonButton(
               label: 'Test',
@@ -394,12 +556,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
         ),
         const SizedBox(height: J3Space.xs),
         if (_testResults == null)
-          Text(
-            isProcess
-                ? 'Click Test to verify paths and folder access.'
-                : 'Click Test to load the DLL and check function bindings.',
-            style: J3Type.caption,
-          )
+          Text(testHint, style: J3Type.caption)
         else ...[
           for (final entry in _testResults!.entries)
             Padding(
@@ -418,7 +575,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                   ),
                   const SizedBox(width: J3Space.sm),
                   Text(
-                    entry.value ? (isProcess ? 'OK' : 'BOUND') : 'NOT FOUND',
+                    entry.value ? okLabel : 'NOT FOUND',
                     style: J3Type.caption.copyWith(color: entry.value ? J3Colors.success : J3Colors.error),
                   ),
                 ],
