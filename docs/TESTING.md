@@ -120,7 +120,7 @@ Build and run from source as described in [BUILD.md](BUILD.md)
   [samples/README.md](../samples/README.md).
 - **Reset when needed.** Cases change files on purpose. **Workspaces > NEON
   DUNGEON (sample) > Reset sample** restores everything as on first run.
-- **Note your build label.** About > Build label (for example `ci21-730205b`)
+- **Note your build label.** About > Build label (for example `ci16-ad22533`)
   names the exact build. Put it in every report.
 - **Test like a user**, including the unhappy paths: cancel dialogs, rotate
   the phone, switch apps, use large system text, go offline for the HTTP tool.

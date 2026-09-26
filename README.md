@@ -20,30 +20,36 @@ with an animated, laughing ASCII skull.
 
 ## Status
 
-Version 1.0.0. Last full verification: commit `596e486`, CI run
-[#12](https://github.com/jenslazar1-sketch/J3NSONTOP-plaeholder/actions/runs/36197512580)
-— all 7 jobs passed.
+Version 1.0.0, ready for testing. **Testers: start with
+[docs/TESTING.md](docs/TESTING.md)** (downloads, install steps, a 120-case
+checklist and how to report problems).
+
+Last full verification: commit `ad22533`, CI run
+[#16](https://github.com/jenslazar1-sketch/J3NSONTOP-plaeholder/actions/runs/36228807116)
+(build label `ci16-ad22533`) — all 7 jobs passed.
 
 | Check | Result |
 | --- | --- |
 | Formatting, analyzer | clean |
-| Unit and widget tests | 1307 passed |
+| Unit and widget tests | 1318 passed |
 | Integration tests, Linux desktop (xvfb) | 3 of 3 passed |
-| Linux release bundle smoke test | 10 of 10 steps (every section and all 43 tools render) |
-| Android test APK | built, apksigner-verified (debug key), 16 KB page alignment OK |
+| Linux release bundle smoke test | passed (every section and all 43 tools render) |
+| Android test APK | built, apksigner-verified (shared public test key), 16 KB page alignment OK |
 | Android emulator, API 34 x86_64 | test APK installs, stays running, survives a relaunch; integration tests 3 of 3 |
 | Windows x64 | portable ZIP and setup EXE built and verified |
 | Windows clean machine (no Flutter) | portable smoke test and install/uninstall passed |
 | iOS unsigned compile check | Runner.app compiles (not installable, not an IPA) |
-| iOS Simulator, iPhone 17 Pro, iOS 26.5 | app installs, stays running, survives a relaunch; integration tests 3 of 3 |
+| iOS Simulator, iPhone 17 Pro, iOS 26.5 | app installs, stays running, survives a relaunch; integration tests 3 of 3; that app is packaged for testers |
 
-Artifacts of that run (kept 30 days; SHA-256 of the files inside):
+Test builds of that run (Actions > run #16 > Artifacts; kept 30 days;
+SHA-256 of the files inside):
 
 | File | SHA-256 |
 | --- | --- |
-| `J3NSONTOP-Multitool-1.0.0-android-test-debugsigned.apk` | `0b53ff7846d836905f8384b886327045e0390570ae7a934c37570293112d9984` |
-| `J3NSONTOP-Multitool-1.0.0-windows-x64-portable.zip` | `6c77c198ec2a10f321b93955edc5c8f8c18569ed7ffadfd627d3f2360d0bee1e` |
-| `J3NSONTOP-Multitool-1.0.0-windows-x64-setup.exe` | `0728a0bf779de3404e0f82e57b1f4afb698364dc58d28b65a5857ee520d62d3f` |
+| `J3NSONTOP-Multitool-1.0.0-android-test-debugsigned.apk` | `f9de9d11f66b2a9236385b5ef5aedabd44e3f2d5d8feb3bec3f0d562409e0162` |
+| `J3NSONTOP-Multitool-1.0.0-windows-x64-portable.zip` | `4069aa4a03b56a0a892959e7dbb2c5ac4bd833c3d7697dc66f4f1196aa23fc6a` |
+| `J3NSONTOP-Multitool-1.0.0-windows-x64-setup.exe` | `1fd8337044fa1a26626e6bfe0495b38406a18faa254702b09af92b90233892be` |
+| `J3NSONTOP-Multitool-1.0.0-ios-simulator-debug.zip` (Simulator only, x86_64 + arm64) | `3c5751ef96600b74067d5f0f0f990e1f2305c62b5ff7042c200804207199ce91` |
 
 Not produced yet: a release-signed Android APK/AAB and a signed IPA need
 the secrets listed under [Signing](#signing) and are built by the manual
