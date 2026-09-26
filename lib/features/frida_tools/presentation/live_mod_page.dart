@@ -21,8 +21,6 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
   final _valueController = TextEditingController();
   AiModAction _action = AiModAction.scan;
   String? _generatedScript;
-  List<String> _discoveredClasses = [];
-  List<String> _discoveredModules = [];
   String? _selectedClass;
 
   @override
@@ -85,7 +83,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
               children: [
                 TextField(
                   controller: _targetController,
-                  style: J3Type.mono.copyWith(fontSize: 12),
+                  style: J3Type.codeSmall,
                   decoration: _inputDecor('Package name (e.g. com.game.app)'),
                 ),
                 const SizedBox(height: J3Space.sm),
@@ -112,7 +110,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                   spacing: J3Space.xs,
                   runSpacing: J3Space.xs,
                   children: AiModAction.values.map((a) => ChoiceChip(
-                    label: Text(_actionLabel(a), style: J3Type.mono.copyWith(fontSize: 10)),
+                    label: Text(_actionLabel(a), style: J3Type.codeSmall.copyWith(fontSize: 10)),
                     selected: _action == a,
                     onSelected: (_) => setState(() { _action = a; _generateScript(); }),
                     selectedColor: J3Colors.darkRed,
@@ -122,7 +120,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                 const SizedBox(height: J3Space.md),
                 TextField(
                   controller: _promptController,
-                  style: J3Type.mono.copyWith(fontSize: 11),
+                  style: J3Type.codeSmall,
                   maxLines: 3,
                   decoration: _inputDecor('Describe what to mod (e.g. "infinite coins", "god mode", "unlock all levels")'),
                   onChanged: (_) => _generateScript(),
@@ -131,7 +129,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                   const SizedBox(height: J3Space.sm),
                   TextField(
                     controller: _valueController,
-                    style: J3Type.mono.copyWith(fontSize: 12),
+                    style: J3Type.codeSmall,
                     decoration: _inputDecor('New value (e.g. 999999)'),
                     onChanged: (_) => _generateScript(),
                   ),
@@ -166,7 +164,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                         final cls = modState.discoveredClasses[i];
                         return ListTile(
                           dense: true,
-                          title: Text(cls, style: J3Type.mono.copyWith(fontSize: 10)),
+                          title: Text(cls, style: J3Type.codeSmall.copyWith(fontSize: 10)),
                           selected: _selectedClass == cls,
                           selectedTileColor: J3Colors.surfaceRaised,
                           onTap: () {
@@ -239,7 +237,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
             padding: const EdgeInsets.all(J3Space.sm),
             child: SelectableText(
               _generatedScript ?? '// AI mod engine ready\n// Select an action and describe your mod to generate a Frida script',
-              style: J3Type.mono.copyWith(fontSize: 11, color: _generatedScript != null ? J3Colors.text : J3Colors.textMuted),
+              style: J3Type.codeSmall.copyWith(color: _generatedScript != null ? J3Colors.text : J3Colors.textMuted),
             ),
           ),
         ),
@@ -284,7 +282,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                           : line.startsWith('[+]') ? J3Colors.success
                           : line.startsWith('[>]') ? J3Colors.neonText
                           : J3Colors.text;
-                      return SelectableText(line, style: J3Type.mono.copyWith(fontSize: 11, color: color));
+                      return SelectableText(line, style: J3Type.codeSmall.copyWith(color: color));
                     },
                   ),
           ),
@@ -303,7 +301,7 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
 
   InputDecoration _inputDecor(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.textMuted),
+    hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
     isDense: true,
     contentPadding: const EdgeInsets.all(J3Space.sm),
     filled: true,

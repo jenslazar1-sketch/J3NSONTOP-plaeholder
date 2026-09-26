@@ -1,8 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'frida_service.dart';
 
 enum AiModAction { scan, hook, modify, watch, analyze }
 
@@ -31,8 +27,7 @@ class LiveModSession {
   final List<String> discoveredModules = [];
   final List<String> log = [];
 
-  bool _scanning = false;
-  bool get isScanning => _scanning;
+  bool get isScanning => false;
 
   String generateScanScript() {
     return '''

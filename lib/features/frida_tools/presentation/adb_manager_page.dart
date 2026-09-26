@@ -61,7 +61,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
         if (_selected == null && devices.isNotEmpty) _selected = devices.first;
         _loading = false;
       });
-      if (_selected != null) _loadDeviceInfo();
+      if (_selected != null) unawaited(_loadDeviceInfo());
     } catch (e) {
       setState(() { _error = '$e'; _loading = false; });
     }
@@ -162,7 +162,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
               child: DropdownButton<AdbDevice>(
                 value: _selected,
                 dropdownColor: J3Colors.surface,
-                style: J3Type.mono,
+                style: J3Type.code,
                 underline: const SizedBox.shrink(),
                 isExpanded: true,
                 items: _devices.map((d) => DropdownMenuItem(value: d, child: Text('${d.displayName} (${d.serial})'))).toList(),
@@ -243,7 +243,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
       child: Row(
         children: [
           SizedBox(width: 100, child: Text(label, style: J3Type.caption.copyWith(color: J3Colors.textMuted))),
-          Expanded(child: Text(value, style: J3Type.mono)),
+          Expanded(child: Text(value, style: J3Type.code)),
         ],
       ),
     );
@@ -263,7 +263,9 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
           ),
         ),
         Expanded(
-          child: _packages.isEmpty
+          child: _loading
+              ? const Center(child: CircularProgressIndicator(color: J3Colors.neon))
+              : _packages.isEmpty
               ? const EmptyState(title: 'Tap Load to list installed packages')
               : ListView.builder(
                   itemCount: _packages.length,
@@ -272,7 +274,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
                     return ListTile(
                       dense: true,
                       leading: const Icon(Icons.android, size: 18, color: J3Colors.success),
-                      title: Text(pkg.packageName, style: J3Type.mono.copyWith(fontSize: 12)),
+                      title: Text(pkg.packageName, style: J3Type.codeSmall),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -334,7 +336,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
                     : line.contains(' W ') ? J3Colors.warning
                     : line.contains(' I ') ? J3Colors.info
                     : J3Colors.textMuted;
-                return Text(line, style: J3Type.mono.copyWith(fontSize: 10, color: color));
+                return Text(line, style: J3Type.codeSmall.copyWith(fontSize: 10, color: color));
               },
             ),
           ),
@@ -354,10 +356,10 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
               Expanded(
                 child: TextField(
                   controller: _shellController,
-                  style: J3Type.mono.copyWith(fontSize: 12),
+                  style: J3Type.codeSmall,
                   decoration: InputDecoration(
                     hintText: 'adb shell command...',
-                    hintStyle: J3Type.mono.copyWith(fontSize: 12, color: J3Colors.textMuted),
+                    hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
                     isDense: true,
                     contentPadding: const EdgeInsets.all(J3Space.sm),
                     filled: true,
@@ -377,7 +379,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
             color: J3Colors.background,
             padding: const EdgeInsets.all(J3Space.sm),
             child: SingleChildScrollView(
-              child: SelectableText(_shellOutput, style: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.text)),
+              child: SelectableText(_shellOutput, style: J3Type.codeSmall),
             ),
           ),
         ),

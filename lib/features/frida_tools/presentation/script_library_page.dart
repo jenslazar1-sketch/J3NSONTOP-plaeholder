@@ -17,7 +17,7 @@ class ScriptLibraryPage extends ConsumerStatefulWidget {
 }
 
 class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
-  ScriptCategory _category = ScriptCategory.discovery;
+  FridaScriptCategory _category = FridaScriptCategory.discovery;
   FridaScriptTemplate? _selected;
   String _search = '';
 
@@ -54,10 +54,10 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
         Padding(
           padding: const EdgeInsets.all(J3Space.sm),
           child: TextField(
-            style: J3Type.mono.copyWith(fontSize: 11),
+            style: J3Type.code.copyWith(fontSize: 11),
             decoration: InputDecoration(
               hintText: 'Search scripts...',
-              hintStyle: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.textMuted),
+              hintStyle: J3Type.code.copyWith(fontSize: 11, color: J3Colors.textMuted),
               prefixIcon: const Icon(Icons.search, size: 16),
               isDense: true,
               contentPadding: const EdgeInsets.all(J3Space.sm),
@@ -73,10 +73,10 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: J3Space.sm),
             child: Row(
-              children: ScriptCategory.values.map((c) => Padding(
+              children: FridaScriptCategory.values.map((c) => Padding(
                 padding: const EdgeInsets.only(right: J3Space.xs),
                 child: ChoiceChip(
-                  label: Text(c.label, style: J3Type.mono.copyWith(fontSize: 10)),
+                  label: Text(c.label, style: J3Type.code.copyWith(fontSize: 10)),
                   selected: _category == c,
                   onSelected: (_) => setState(() { _category = c; _selected = null; }),
                   selectedColor: J3Colors.darkRed,
@@ -97,8 +97,8 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
                 selected: active,
                 selectedTileColor: J3Colors.surfaceRaised,
                 leading: Icon(_iconForCategory(s.category), size: 16, color: active ? J3Colors.neonText : J3Colors.textMuted),
-                title: Text(s.name, style: J3Type.label.copyWith(fontSize: 12)),
-                subtitle: Text(s.description, style: J3Type.caption.copyWith(fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(s.name, style: J3Type.label),
+                subtitle: Text(s.description, style: J3Type.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                 onTap: () => setState(() => _selected = s),
               );
             },
@@ -140,7 +140,7 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
                     children: [
                       Icon(Icons.info_outline, size: 14, color: J3Colors.warning),
                       const SizedBox(width: J3Space.xs),
-                      Text('This script requires parameters — edit the %%PLACEHOLDERS%% before use', style: J3Type.caption.copyWith(color: J3Colors.warning)),
+                      Expanded(child: Text('This script requires parameters — edit the %%PLACEHOLDERS%% before use', style: J3Type.caption.copyWith(color: J3Colors.warning))),
                     ],
                   ),
                 ],
@@ -161,7 +161,7 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
               ),
               child: SelectableText(
                 s.code.trim(),
-                style: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.text, height: 1.4),
+                style: J3Type.codeSmall,
               ),
             ),
           ),
@@ -170,12 +170,12 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
     );
   }
 
-  IconData _iconForCategory(ScriptCategory cat) => switch (cat) {
-    ScriptCategory.discovery => Icons.search,
-    ScriptCategory.hooking => Icons.link,
-    ScriptCategory.memory => Icons.memory,
-    ScriptCategory.modding => Icons.games,
-    ScriptCategory.spawner => Icons.rocket_launch,
-    ScriptCategory.utility => Icons.build,
+  IconData _iconForCategory(FridaScriptCategory cat) => switch (cat) {
+    FridaScriptCategory.discovery => Icons.search,
+    FridaScriptCategory.hooking => Icons.link,
+    FridaScriptCategory.memory => Icons.memory,
+    FridaScriptCategory.modding => Icons.games,
+    FridaScriptCategory.spawner => Icons.rocket_launch,
+    FridaScriptCategory.utility => Icons.build,
   };
 }

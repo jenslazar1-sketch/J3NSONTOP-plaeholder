@@ -152,7 +152,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
         children: [
           Icon(available ? Icons.check_circle : Icons.cancel, size: 14, color: available ? J3Colors.success : J3Colors.error),
           const SizedBox(width: J3Space.sm),
-          Text(name, style: J3Type.mono),
+          Text(name, style: J3Type.code),
         ],
       ),
     );
@@ -172,7 +172,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
                 selected: _target == InjectionTarget.apk,
                 onSelected: (_) => setState(() => _target = InjectionTarget.apk),
                 selectedColor: J3Colors.darkRed,
-                labelStyle: J3Type.mono,
+                labelStyle: J3Type.code,
               ),
               const SizedBox(width: J3Space.sm),
               ChoiceChip(
@@ -180,20 +180,20 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
                 selected: _target == InjectionTarget.ipa,
                 onSelected: (_) => setState(() => _target = InjectionTarget.ipa),
                 selectedColor: J3Colors.darkRed,
-                labelStyle: J3Type.mono,
+                labelStyle: J3Type.code,
               ),
             ],
           ),
           const SizedBox(height: J3Space.md),
           TextField(
             controller: _inputPathController,
-            style: J3Type.mono.copyWith(fontSize: 12),
+            style: J3Type.codeSmall,
             decoration: _inputDecor('Input ${_target == InjectionTarget.apk ? 'APK' : 'IPA'} path'),
           ),
           const SizedBox(height: J3Space.sm),
           TextField(
             controller: _outputPathController,
-            style: J3Type.mono.copyWith(fontSize: 12),
+            style: J3Type.codeSmall,
             decoration: _inputDecor('Output path'),
           ),
           if (_target == InjectionTarget.apk) ...[
@@ -207,7 +207,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
                 selected: _arch == a,
                 onSelected: (_) => setState(() => _arch = a),
                 selectedColor: J3Colors.darkRed,
-                labelStyle: J3Type.mono.copyWith(fontSize: 11),
+                labelStyle: J3Type.codeSmall,
               )).toList(),
             ),
           ],
@@ -225,7 +225,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
         children: [
           TextField(
             controller: _gadgetPathController,
-            style: J3Type.mono.copyWith(fontSize: 12),
+            style: J3Type.codeSmall,
             decoration: _inputDecor('Frida gadget .so/.dylib path (optional — downloads if empty)'),
           ),
           const SizedBox(height: J3Space.md),
@@ -233,7 +233,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
           const SizedBox(height: J3Space.xs),
           TextField(
             controller: _configController,
-            style: J3Type.mono.copyWith(fontSize: 11),
+            style: J3Type.codeSmall,
             maxLines: 6,
             decoration: _inputDecor(''),
           ),
@@ -248,7 +248,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
       icon: Icons.code,
       child: TextField(
         controller: _scriptController,
-        style: J3Type.mono.copyWith(fontSize: 11),
+        style: J3Type.codeSmall,
         maxLines: 8,
         decoration: _inputDecor('Optional JS script to bundle with the gadget'),
       ),
@@ -297,11 +297,12 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(r.success ? 'Injection successful!' : 'Injection failed', style: J3Type.subtitle),
+
           const SizedBox(height: J3Space.xs),
           if (r.success)
-            Text('Output: ${r.outputPath}', style: J3Type.mono.copyWith(fontSize: 11))
+            Text('Output: ${r.outputPath}', style: J3Type.codeSmall)
           else if (r.error != null)
-            Text('Error: ${r.error}', style: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.error)),
+            Text('Error: ${r.error}', style: J3Type.codeSmall.copyWith(color: J3Colors.error)),
         ],
       ),
     );
@@ -309,7 +310,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
 
   InputDecoration _inputDecor(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: J3Type.mono.copyWith(fontSize: 11, color: J3Colors.textMuted),
+    hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
     isDense: true,
     contentPadding: const EdgeInsets.all(J3Space.sm),
     filled: true,

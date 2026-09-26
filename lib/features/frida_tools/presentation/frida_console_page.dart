@@ -52,7 +52,7 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
       }
       final version = await frida.version();
       setState(() { _fridaVersion = version; _loading = false; });
-      _loadDevices();
+      unawaited(_loadDevices());
     } catch (e) {
       setState(() { _error = '$e'; _loading = false; });
     }
@@ -140,13 +140,13 @@ send({type: 'info', message: mods.length + ' modules loaded'});
         children: [
           Icon(Icons.memory, size: 16, color: _fridaVersion != null ? J3Colors.success : J3Colors.error),
           const SizedBox(width: J3Space.sm),
-          Text(_fridaVersion != null ? 'Frida v$_fridaVersion' : (_error ?? 'Checking...'), style: J3Type.mono.copyWith(fontSize: 12)),
+          Text(_fridaVersion != null ? 'Frida v$_fridaVersion' : (_error ?? 'Checking...'), style: J3Type.codeSmall),
           const Spacer(),
           if (_devices.isNotEmpty) ...[
             DropdownButton<FridaDevice>(
               value: _selectedDevice,
               dropdownColor: J3Colors.surface,
-              style: J3Type.mono.copyWith(fontSize: 11),
+              style: J3Type.codeSmall,
               underline: const SizedBox.shrink(),
               items: _devices.map((d) => DropdownMenuItem(value: d, child: Text('${d.name} (${d.type})'))).toList(),
               onChanged: (d) => setState(() => _selectedDevice = d),
@@ -180,9 +180,9 @@ send({type: 'info', message: mods.length + ' modules loaded'});
               final proc = _processes[i];
               return ListTile(
                 dense: true,
-                leading: Text('${proc.pid}', style: J3Type.mono.copyWith(fontSize: 10, color: J3Colors.textMuted)),
-                title: Text(proc.name, style: J3Type.mono.copyWith(fontSize: 11)),
-                subtitle: proc.identifier != null ? Text(proc.identifier!, style: J3Type.mono.copyWith(fontSize: 9, color: J3Colors.textMuted)) : null,
+                leading: Text('${proc.pid}', style: J3Type.codeSmall.copyWith(fontSize: 10, color: J3Colors.textMuted)),
+                title: Text(proc.name, style: J3Type.codeSmall),
+                subtitle: proc.identifier != null ? Text(proc.identifier!, style: J3Type.codeSmall.copyWith(fontSize: 9, color: J3Colors.textMuted)) : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -226,12 +226,12 @@ send({type: 'info', message: mods.length + ' modules loaded'});
             ),
             child: TextField(
               controller: _scriptController,
-              style: J3Type.mono.copyWith(fontSize: 11),
+              style: J3Type.codeSmall,
               maxLines: null,
               expands: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '// Write your Frida script here...',
-                hintStyle: TextStyle(color: J3Colors.textMuted, fontSize: 11, fontFamily: 'JetBrains Mono'),
+                hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(J3Space.sm),
               ),
@@ -257,7 +257,7 @@ send({type: 'info', message: mods.length + ' modules loaded'});
                     : line.startsWith('[*]') ? J3Colors.info
                     : line.startsWith('[+]') ? J3Colors.success
                     : J3Colors.text;
-                return SelectableText(line, style: J3Type.mono.copyWith(fontSize: 11, color: color));
+                return SelectableText(line, style: J3Type.codeSmall.copyWith(color: color));
               },
             ),
           ),

@@ -63,7 +63,7 @@ class GadgetInjector {
 
   Future<bool> hasZipalign() async {
     try {
-      final r = await Process.run('zipalign', ['-h']);
+      await Process.run('zipalign', ['-h']);
       return true;
     } catch (_) {
       return false;

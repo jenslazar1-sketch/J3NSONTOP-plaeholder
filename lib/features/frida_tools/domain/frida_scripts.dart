@@ -11,12 +11,12 @@ class FridaScriptTemplate {
   final String id;
   final String name;
   final String description;
-  final ScriptCategory category;
+  final FridaScriptCategory category;
   final String code;
   final bool requiresArgs;
 }
 
-enum ScriptCategory {
+enum FridaScriptCategory {
   discovery('Discovery', 'Find classes, methods, exports and memory regions'),
   hooking('Hooking', 'Intercept and modify function calls'),
   memory('Memory', 'Scan, read and write process memory'),
@@ -24,7 +24,7 @@ enum ScriptCategory {
   spawner('Spawner', 'Pre-built spawn configurations'),
   utility('Utility', 'Helpers, logging and tracing');
 
-  const ScriptCategory(this.label, this.description);
+  const FridaScriptCategory(this.label, this.description);
   final String label;
   final String description;
 }
@@ -35,7 +35,7 @@ const List<FridaScriptTemplate> kFridaScripts = [
     id: 'list_classes',
     name: 'List All Classes',
     description: 'Enumerate all loaded Java/ObjC classes',
-    category: ScriptCategory.discovery,
+    category: FridaScriptCategory.discovery,
     code: r'''
 // List all loaded classes
 if (Java.available) {
@@ -58,7 +58,7 @@ if (Java.available) {
     id: 'list_methods',
     name: 'List Class Methods',
     description: 'Show all methods of a specific class',
-    category: ScriptCategory.discovery,
+    category: FridaScriptCategory.discovery,
     requiresArgs: true,
     code: r'''
 // List methods — set TARGET_CLASS to the class you want to inspect
@@ -87,7 +87,7 @@ if (Java.available) {
     id: 'list_exports',
     name: 'List Module Exports',
     description: 'Enumerate exports of a native library',
-    category: ScriptCategory.discovery,
+    category: FridaScriptCategory.discovery,
     requiresArgs: true,
     code: r'''
 // List exports — set MODULE_NAME to the library (e.g. "libil2cpp.so")
@@ -104,7 +104,7 @@ send({type: 'done', count: exports.length});
     id: 'list_modules',
     name: 'List Loaded Modules',
     description: 'Show all loaded native libraries/modules',
-    category: ScriptCategory.discovery,
+    category: FridaScriptCategory.discovery,
     code: r'''
 var modules = Process.enumerateModules();
 modules.forEach(function(m) {
@@ -119,7 +119,7 @@ send({type: 'done', count: modules.length});
     id: 'hook_method',
     name: 'Hook Java/ObjC Method',
     description: 'Intercept a method and log arguments + return value',
-    category: ScriptCategory.hooking,
+    category: FridaScriptCategory.hooking,
     requiresArgs: true,
     code: r'''
 // Hook — set TARGET_CLASS and TARGET_METHOD
@@ -148,7 +148,7 @@ if (Java.available) {
     id: 'hook_native',
     name: 'Hook Native Function',
     description: 'Intercept a native function by address or symbol',
-    category: ScriptCategory.hooking,
+    category: FridaScriptCategory.hooking,
     requiresArgs: true,
     code: r'''
 // Hook native — set MODULE and SYMBOL (or use a raw address)
@@ -175,7 +175,7 @@ if (addr) {
     id: 'hook_replace',
     name: 'Replace Function Return',
     description: 'Replace a function to always return a specific value',
-    category: ScriptCategory.hooking,
+    category: FridaScriptCategory.hooking,
     requiresArgs: true,
     code: r'''
 // Replace return value — set TARGET_CLASS, TARGET_METHOD, RETURN_VALUE
@@ -201,7 +201,7 @@ if (Java.available) {
     id: 'memory_scan',
     name: 'Memory Scanner',
     description: 'Scan process memory for a byte pattern or value',
-    category: ScriptCategory.memory,
+    category: FridaScriptCategory.memory,
     requiresArgs: true,
     code: r'''
 // Memory scan — set MODULE and PATTERN (hex with ?? wildcards)
@@ -230,7 +230,7 @@ if (mod) {
     id: 'memory_read',
     name: 'Read Memory Address',
     description: 'Read bytes/int/float at a specific memory address',
-    category: ScriptCategory.memory,
+    category: FridaScriptCategory.memory,
     requiresArgs: true,
     code: r'''
 // Read memory — set ADDRESS (hex), TYPE (int32/float/double/utf8/bytes), SIZE
@@ -257,7 +257,7 @@ send({type: 'read', address: ADDRESS, dataType: TYPE, value: result});
     id: 'memory_write',
     name: 'Write Memory Address',
     description: 'Write a value to a specific memory address',
-    category: ScriptCategory.memory,
+    category: FridaScriptCategory.memory,
     requiresArgs: true,
     code: r'''
 // Write memory — set ADDRESS (hex), TYPE (int32/float/double), VALUE
@@ -278,7 +278,7 @@ send({type: 'written', address: ADDRESS, dataType: TYPE, value: VALUE});
     id: 'memory_dump',
     name: 'Dump Memory Region',
     description: 'Hexdump a memory region around an address',
-    category: ScriptCategory.memory,
+    category: FridaScriptCategory.memory,
     requiresArgs: true,
     code: r'''
 // Dump — set ADDRESS, SIZE
@@ -296,7 +296,7 @@ console.log(hexdump(ADDRESS, {offset: 0, length: SIZE, header: true, ansi: false
     id: 'il2cpp_dump',
     name: 'IL2CPP Class Dump',
     description: 'Dump Unity IL2CPP classes and methods for modding',
-    category: ScriptCategory.modding,
+    category: FridaScriptCategory.modding,
     code: r'''
 // IL2CPP class dump — finds libil2cpp.so and dumps metadata
 var il2cpp = Process.findModuleByName("libil2cpp.so");
@@ -319,7 +319,7 @@ if (!il2cpp) {
     id: 'unity_mod',
     name: 'Unity Value Modifier',
     description: 'Hook Unity game methods to modify values (health, currency, etc)',
-    category: ScriptCategory.modding,
+    category: FridaScriptCategory.modding,
     requiresArgs: true,
     code: r'''
 // Unity mod — set CLASS_NAMESPACE, CLASS_NAME, METHOD_NAME, NEW_VALUE
@@ -349,7 +349,7 @@ setTimeout(function() {
     id: 'speed_hack',
     name: 'Time Scale Modifier',
     description: 'Modify game time scale (speed up/slow down)',
-    category: ScriptCategory.modding,
+    category: FridaScriptCategory.modding,
     requiresArgs: true,
     code: r'''
 // Time scale — set SPEED_MULTIPLIER (1.0 = normal, 2.0 = 2x, 0.5 = half)
@@ -394,7 +394,7 @@ if (Java.available) {
     id: 'spawner_basic',
     name: 'Basic Spawner',
     description: 'Spawn an app with Frida attached from the start',
-    category: ScriptCategory.spawner,
+    category: FridaScriptCategory.spawner,
     requiresArgs: true,
     code: r'''
 // Basic spawner — launches the target and runs your script
@@ -410,7 +410,7 @@ send({type: 'info', message: 'Modules loaded: ' + Process.enumerateModules().len
     id: 'spawner_ssl_bypass',
     name: 'SSL Pinning Bypass Spawner',
     description: 'Spawn with SSL certificate pinning bypass',
-    category: ScriptCategory.spawner,
+    category: FridaScriptCategory.spawner,
     code: r'''
 // SSL pinning bypass — works on most Android/iOS apps
 if (Java.available) {
@@ -463,7 +463,7 @@ if (Java.available) {
     id: 'spawner_anti_detect',
     name: 'Anti-Detection Spawner',
     description: 'Bypass common Frida detection mechanisms',
-    category: ScriptCategory.spawner,
+    category: FridaScriptCategory.spawner,
     code: r'''
 // Anti-detection — hides Frida from common detection checks
 // Thread name hiding
@@ -517,7 +517,7 @@ send({type: 'ready', message: 'Anti-detection active'});
     id: 'spawner_full_mod',
     name: 'Full Mod Spawner',
     description: 'Complete mod setup: anti-detect + SSL bypass + game hooks ready',
-    category: ScriptCategory.spawner,
+    category: FridaScriptCategory.spawner,
     code: r'''
 // Full mod spawner — combines anti-detection, SSL bypass, and mod framework
 send({type: 'init', message: 'J3NSONTOP Universal Mod Framework starting...'});
@@ -579,7 +579,7 @@ send({type: 'api', message: 'J3MOD API available — use J3MOD.addHook(), J3MOD.
     id: 'trace_calls',
     name: 'Method Call Tracer',
     description: 'Trace all calls to methods matching a pattern',
-    category: ScriptCategory.utility,
+    category: FridaScriptCategory.utility,
     requiresArgs: true,
     code: r'''
 // Trace — set CLASS_PATTERN (regex)
@@ -621,7 +621,7 @@ if (Java.available) {
     id: 'file_monitor',
     name: 'File Access Monitor',
     description: 'Log all file open/read/write operations',
-    category: ScriptCategory.utility,
+    category: FridaScriptCategory.utility,
     code: r'''
 // Monitor file I/O
 var openPtr = Module.findExportByName(null, "open");
@@ -665,7 +665,7 @@ send({type: 'ready', message: 'File I/O monitor active'});
     id: 'network_monitor',
     name: 'Network Traffic Monitor',
     description: 'Log outgoing network connections and data',
-    category: ScriptCategory.utility,
+    category: FridaScriptCategory.utility,
     code: r'''
 // Monitor network connections
 var connectPtr = Module.findExportByName(null, "connect");
@@ -700,5 +700,5 @@ send({type: 'ready', message: 'Network monitor active'});
   ),
 ];
 
-List<FridaScriptTemplate> scriptsInCategory(ScriptCategory cat) =>
+List<FridaScriptTemplate> scriptsInCategory(FridaScriptCategory cat) =>
     kFridaScripts.where((s) => s.category == cat).toList();

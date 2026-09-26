@@ -155,6 +155,11 @@ tool can be tried immediately. The same content is in [`samples/`](samples/).
 | Developer Tools | Case Converter | `dev.case` | camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE and more, with smart word splitting. |
 | Developer Tools | Number Base Converter | `dev.number_base` | Binary, octal, decimal, hex and any base 2-36; two's complement, bytes and float bits. |
 | Developer Tools | JWT Decoder | `dev.jwt` | Decode JWT header and claims with expiry badges. Decode only: signatures are not verified. |
+| Developer Tools | ADB Manager | `frida.adb` | Connect to Android devices, manage packages, logcat, shell and port forwarding. |
+| Developer Tools | Frida Console | `frida.console` | Attach to processes, run Frida scripts, inspect running apps in real time. |
+| Developer Tools | Gadget Injector | `frida.gadget` | Inject Frida gadget into APK and IPA files for persistent instrumentation. |
+| Developer Tools | Frida Scripts | `frida.scripts` | Pre-built Frida script library: discovery, hooking, memory, modding and spawner templates. |
+| Developer Tools | Live AI Mod Engine | `frida.livemod` | AI-powered live game modding: scan, hook and modify running games with generated Frida scripts. |
 | System | Terminal | `system.terminal` | Typed commands for this app's own tools. Not a system shell. |
 
 ### Terminal commands
