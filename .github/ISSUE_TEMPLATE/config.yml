@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Tester guide (install steps and checklist)
+    url: https://github.com/jenslazar1-sketch/J3NSONTOP-plaeholder/blob/main/docs/TESTING.md
+    about: How to install each test build and what to check.

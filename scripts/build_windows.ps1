@@ -231,7 +231,7 @@ Push-Location $root
 try {
     # --- 1. Build ------------------------------------------------------------------
     if (-not $SkipBuild) {
-        Invoke-J3Native flutter @('build', 'windows', '--release')
+        Invoke-J3Native flutter @('build', 'windows', '--release', "--dart-define=J3_BUILD_LABEL=$(Get-J3BuildLabel)")
     }
     $exePath = Join-Path $bundle $exeName
     if (-not (Test-Path -LiteralPath $exePath)) { Stop-J3 "Release build not found: $exePath" }

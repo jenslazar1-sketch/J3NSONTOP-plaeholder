@@ -124,8 +124,8 @@ run_with_timeout() {
 }
 
 # --- Build, install, launch (always; independent of the test runner) ---------------------------
-j3_info "flutter build ios --simulator --debug"
-flutter build ios --simulator --debug
+j3_info "flutter build ios --simulator --debug $(j3_build_label_define)"
+flutter build ios --simulator --debug "$(j3_build_label_define)"
 app="$J3_REPO_ROOT/build/ios/iphonesimulator/Runner.app"
 [ -d "$app" ] || fail "Simulator build not found: $app"
 xcrun simctl uninstall "$udid" "$J3_APP_ID" >/dev/null 2>&1 || true
@@ -165,6 +165,43 @@ if [ -n "$crash_reports" ]; then
   fail "Crash report(s) were written for Runner: $(printf '%s' "$crash_reports" | tr '\n' ' ')"
 fi
 record "Crash reports" "none"
+
+# --- Package the simulator app that just passed the launch checks ------------------------
+# A tester with a Mac and Xcode can run this build in the iOS Simulator without
+# any Apple signing. It is NOT installable on an iPhone or iPad.
+j3_read_version
+label="$(j3_build_label)"
+sim_dist="${J3_IOS_SIM_DIST:-$J3_REPO_ROOT/dist-ios-sim}"
+rm -rf "$sim_dist"
+mkdir -p "$sim_dist"
+sim_zip="$sim_dist/$J3_ARTIFACT_PREFIX-$J3_VERSION-ios-simulator-debug.zip"
+archs="$(lipo -archs "$app/Runner" 2>/dev/null || echo unknown)"
+stage="$work/sim-package/$J3_ARTIFACT_PREFIX-$J3_VERSION-ios-simulator"
+mkdir -p "$stage"
+cp -R "$app" "$stage/Runner.app"
+cat >"$stage/INSTALL-SIMULATOR.txt" <<TXT
+J3NSONTOP Multitool $J3_VERSION - iOS SIMULATOR build
+Build label: $label   (shown in the app under About -> Build label)
+Mode: debug   Architectures: $archs   Simulator it was tested on: $device_name, iOS $ios_version
+
+This build runs ONLY in the iOS Simulator on a Mac with Xcode. It is not
+signed and cannot be installed on an iPhone or iPad (that needs the signed
+IPA from the Release workflow, see docs/SIGNING.md).
+
+1. Unzip this file (you get a folder with Runner.app and this note).
+2. Open the Simulator: open -a Simulator
+3. Drag Runner.app onto the simulator window, or run:
+     xcrun simctl install booted Runner.app
+     xcrun simctl launch booted $J3_APP_ID
+
+Debug builds are slower than release builds: judge features, not speed.
+Report problems as described in docs/TESTING.md.
+TXT
+# One top-level folder holding Runner.app and the instructions.
+ditto -c -k --sequesterRsrc --keepParent "$stage" "$sim_zip" ||
+  (cd "$(dirname "$stage")" && zip -qry "$sim_zip" "$(basename "$stage")")
+sim_hash="$(j3_write_sha256 "$sim_zip")"
+record "Simulator app" "$(basename "$sim_zip") ($(j3_human_size "$(j3_size_of "$sim_zip")"), $archs, SHA-256 $sim_hash)"
 xcrun simctl spawn "$udid" log show --last 3m --style compact --predicate 'process == "Runner"' \
   >"$out/runner-log.txt" 2>/dev/null || true
 xcrun simctl terminate "$udid" "$J3_APP_ID" >/dev/null 2>&1 || true

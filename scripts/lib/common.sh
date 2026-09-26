@@ -122,6 +122,26 @@ j3_summary_text() {
 }
 
 # Lists the integration test files (integration_test/**/*_test.dart).
+# Build label shown in the app (About -> Build label, diagnostics) so testers
+# can name the exact build: J3_BUILD_LABEL if set, "ci<run>-<sha7>" in the CI
+# workflow, "rel<run>-<sha7>" in the Release workflow, else "local-<sha7>".
+j3_build_label() {
+  local sha
+  if [ -n "${J3_BUILD_LABEL:-}" ]; then
+    printf '%s\n' "$J3_BUILD_LABEL"
+  elif [ -n "${GITHUB_RUN_NUMBER:-}" ] && [ -n "${GITHUB_SHA:-}" ]; then
+    if [ "${GITHUB_WORKFLOW:-}" = "Release" ]; then printf 'rel'; else printf 'ci'; fi
+    printf '%s-%s\n' "$GITHUB_RUN_NUMBER" "${GITHUB_SHA:0:7}"
+  elif sha="$(git -C "$J3_REPO_ROOT" rev-parse --short=7 HEAD 2>/dev/null)"; then
+    printf 'local-%s\n' "$sha"
+  else
+    printf 'local\n'
+  fi
+}
+
+# The --dart-define argument that bakes the build label into a build.
+j3_build_label_define() { printf -- '--dart-define=J3_BUILD_LABEL=%s\n' "$(j3_build_label)"; }
+
 j3_integration_tests() {
   [ -d "$J3_REPO_ROOT/integration_test" ] || return 0
   find "$J3_REPO_ROOT/integration_test" -type f -name '*_test.dart' | sort

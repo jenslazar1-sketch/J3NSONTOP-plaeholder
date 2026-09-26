@@ -83,8 +83,8 @@ check_app_info_plist() {
 # ------------------------------------------------------------------------------
 if [ "$mode" = "unsigned" ]; then
   if [ "$skip_build" = "no" ]; then
-    j3_info "flutter build ios --release --no-codesign"
-    flutter build ios --release --no-codesign
+    j3_info "flutter build ios --release --no-codesign $(j3_build_label_define)"
+    flutter build ios --release --no-codesign "$(j3_build_label_define)"
   fi
   app="$J3_REPO_ROOT/build/ios/iphoneos/Runner.app"
   [ -d "$app" ] || j3_die "Runner.app not found: $app"
@@ -244,8 +244,8 @@ cat "$export_plist"
 # --- Build -------------------------------------------------------------------------------
 if [ "$skip_build" = "no" ]; then
   rm -rf "$J3_REPO_ROOT/build/ios/ipa"
-  j3_info "flutter build ipa --release --export-options-plist=$export_plist"
-  flutter build ipa --release --export-options-plist="$export_plist"
+  j3_info "flutter build ipa --release --export-options-plist=$export_plist $(j3_build_label_define)"
+  flutter build ipa --release --export-options-plist="$export_plist" "$(j3_build_label_define)"
 fi
 built_ipa="$(find "$J3_REPO_ROOT/build/ios/ipa" -maxdepth 1 -name '*.ipa' -print 2>/dev/null | head -n 1)"
 if [ -z "$built_ipa" ] || [ ! -f "$built_ipa" ]; then

@@ -13,6 +13,7 @@ import '../../core/theme/j3_typography.dart';
 import '../../core/widgets/widgets.dart';
 import '../intro/skull_art.dart';
 import 'capability_views.dart';
+import 'diagnostics_panel.dart';
 import 'licenses.dart';
 
 /// Identity, scope, capability matrix and credits.
@@ -122,6 +123,7 @@ class AboutScreen extends ConsumerWidget {
               ('Name', AppInfo.fullName),
               ('Version', AppInfo.version),
               ('Build', '${AppInfo.buildNumber}'),
+              ('Build label', AppInfo.buildLabel),
               ('Application id', AppInfo.applicationId),
               ('Platform', caps.platform.label),
               ('Data', 'Local only (no account, no cloud)'),
@@ -216,6 +218,8 @@ class AboutScreen extends ConsumerWidget {
           ),
         );
 
+        final diagnostics = DiagnosticsPanel(keyWidth: c.maxWidth < J3Breakpoints.compact ? 110 : 160);
+
         final gap = const SizedBox(height: J3Space.lg);
         return SingleChildScrollView(
           padding: pad,
@@ -241,6 +245,8 @@ class AboutScreen extends ConsumerWidget {
                     gap,
                     scope,
                   ],
+                  gap,
+                  diagnostics,
                   gap,
                   matrix,
                   gap,

@@ -57,6 +57,7 @@ android/key.properties
 
 # Local packaging output
 /dist/
+/dist-ios-sim/
 __pycache__/
 
 # Agent worktrees (local only)

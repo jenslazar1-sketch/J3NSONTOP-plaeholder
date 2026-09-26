@@ -1,0 +1,80 @@
+name: Bug report (testers)
+description: Something in J3NSONTOP Multitool does not work as expected.
+title: "[bug] "
+labels: ["bug", "testing"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing! The checklist and install steps are in `docs/TESTING.md`.
+        Please do not attach private files or anything with passwords or keys.
+  - type: input
+    id: build
+    attributes:
+      label: Build label
+      description: In the app, About -> Build label (for example `ci14-7e30e7e`).
+      placeholder: ci14-7e30e7e
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Android (phone)
+        - Android (tablet)
+        - Android emulator
+        - Windows (portable ZIP)
+        - Windows (installed with setup EXE)
+        - iOS Simulator
+        - iOS device (built from source)
+        - Linux (development build)
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and OS version
+      placeholder: Pixel 7, Android 15 / Windows 11 24H2 / iPhone 17 Pro simulator, iOS 26.5
+  - type: input
+    id: area
+    attributes:
+      label: Section and tool
+      description: For example "Mods -> Mod Manager" or "Developer Tools -> Regex Tester". Add the checklist ID if the problem came up while following docs/TESTING.md.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Choose the sample file ...
+        3. Press ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Exact error text helps. Screenshots or a short screen recording are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: About -> Report a problem -> Copy diagnostics, then paste here. For crashes, attach the file from "Save diagnostics file" instead.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I can reproduce this on the build named above.
+        - label: The report contains no passwords, keys or private files.
+          required: true

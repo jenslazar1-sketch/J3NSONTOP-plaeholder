@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:j3nsontop_multitool/app/app_info.dart';
+import 'package:j3nsontop_multitool/core/activity/activity_controller.dart';
 import 'package:j3nsontop_multitool/features/intro/skull_art.dart';
 import 'package:j3nsontop_multitool/features/settings/licenses.dart';
 
@@ -59,6 +60,31 @@ void main() {
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.textContaining('SIL OPEN FONT LICENSE'), findsNothing);
+    });
+
+    testWidgets('diagnostics panel copies a bug-report summary', (tester) async {
+      setSurface(tester, const Size(1400, 3000));
+      final files = FakeFileAccess();
+      await tester.pumpWidget(buildExperienceApp(env, initial: '/about', fileAccess: files));
+      await tester.pump();
+      expect(find.text('Report a problem'), findsOneWidget);
+      expect(find.text('Build label'), findsNWidgets(2));
+      expect(find.text(AppInfo.buildLabel), findsNWidgets(2));
+
+      await tester.ensureVisible(find.text('Copy diagnostics'));
+      await tester.tap(find.text('Copy diagnostics'));
+      for (var i = 0; i < 50 && files.copied.isEmpty; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+        await tester.pump();
+      }
+      expect(files.copied, hasLength(1));
+      final copied = files.copied.single;
+      expect(copied, contains('${AppInfo.shortName} diagnostics'));
+      expect(copied, contains('label ${AppInfo.buildLabel}'));
+      expect(copied, contains('Platform: Linux'));
+      expect(copied, contains('Settings: {'));
+      final notices = containerOf(tester).read(activityProvider).notices;
+      expect(notices.map((n) => n.message), contains(startsWith('Diagnostics copied')));
     });
 
     testWidgets('replay intro navigates to the intro route', (tester) async {

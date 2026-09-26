@@ -76,11 +76,12 @@ if [ "$skip_build" = "no" ]; then
   else
     signing_arg="-Pj3ForceDebugSigning=true"
   fi
-  j3_info "flutter build apk --release $signing_arg"
-  flutter build apk --release "$signing_arg"
+  label_define="$(j3_build_label_define)"
+  j3_info "flutter build apk --release $signing_arg $label_define"
+  flutter build apk --release "$signing_arg" "$label_define"
   if [ "$build_aab" = "yes" ]; then
-    j3_info "flutter build appbundle --release $signing_arg"
-    flutter build appbundle --release "$signing_arg"
+    j3_info "flutter build appbundle --release $signing_arg $label_define"
+    flutter build appbundle --release "$signing_arg" "$label_define"
   fi
 fi
 

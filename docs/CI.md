@@ -34,7 +34,7 @@ validate ─┬─ android-test-apk ── android-emulator-smoke
 | `windows` | windows-2025 | `scripts/build_windows.ps1`: release build, app-local MSVC runtime, bundle + import verification, portable ZIP, Inno Setup installer, Authenticode status | `J3NSONTOP-Multitool-<ver>-windows-x64-portable`, `J3NSONTOP-Multitool-<ver>-windows-x64-setup` |
 | `windows-clean-smoke` | windows-2025, **no Flutter/VS set up** | `scripts/ci/windows_smoke.ps1`: checksums; extracts the ZIP to `%RUNNER_TEMP%\J3NSØNTØP Tëst 测试\`; required files; runs the exe with `--smoke-test` / `--data-dir` in non-ASCII paths (exit code + `"ok": true`); normal start (alive, window title, runtime DLLs loaded from the app folder); silent install into a non-ASCII folder, Start menu shortcut and uninstall entry, installed smoke test, silent uninstall and removal check; Authenticode status | `windows-clean-smoke` (reports, installer logs) |
 | `ios-unsigned` | macos-26, Xcode 26.6 | `flutter build ios --release --no-codesign`, zips `Runner.app` + README ("NOT installable") | `J3NSONTOP-Multitool-<ver>-ios-UNSIGNED-compile-check` |
-| `ios-simulator-smoke` | macos-26, Xcode 26.6 | boots the newest available iPhone simulator; runs integration tests if present, otherwise builds a debug simulator app, installs, launches, checks it is running after 20 s and after a relaunch, checks for crash reports, takes screenshots | `ios-simulator-smoke` |
+| `ios-simulator-smoke` | macos-26, Xcode 26.6 | boots the newest available iPhone simulator; builds a debug simulator app, installs and launches it, checks it is running after 20 s and after a relaunch and that no crash report was written; zips that app for testers with a Mac; then runs the integration tests with a 20 min limit (on failure the app log tail, crash reports and a screenshot are printed or saved) | `J3NSONTOP-Multitool-<ver>-ios-simulator-app` (simulator only, not installable on devices), `ios-simulator-smoke` |
 
 Nothing in CI is signed with a real key, so it is safe for pull requests from
 forks. The Windows runner image has the VC++ runtime installed system-wide;
@@ -96,6 +96,12 @@ gh run download <run-id> -n J3NSONTOP-Multitool-1.0.0-windows-x64-setup
 
 Verify a download: `Get-FileHash .\J3NSONTOP-Multitool-1.0.0-windows-x64-setup.exe -Algorithm SHA256`
 (Windows) or `sha256sum -c <file>.sha256` (macOS/Linux: `shasum -a 256 -c`).
+
+Every build is stamped with a build label (`--dart-define=J3_BUILD_LABEL`),
+shown in the app under About -> Build label and in "Copy diagnostics":
+`ci<run number>-<commit>` from this workflow, `rel<run number>-<commit>` from
+the Release workflow, `local-<commit>` from the build scripts on your machine
+(set `J3_BUILD_LABEL` to override). Testers quote it in bug reports.
 
 Artifact retention: test artifacts 14-30 days, release artifacts 90 days
 (or the repository maximum). Attach release files to a GitHub Release if they

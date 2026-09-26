@@ -74,6 +74,21 @@ function Get-J3Version {
     }
 }
 
+# Build label shown in the app (About -> Build label, diagnostics): J3_BUILD_LABEL
+# if set, "ci<run>-<sha7>" in the CI workflow, "rel<run>-<sha7>" in the Release
+# workflow, else "local-<sha7>" (or "local" without git).
+function Get-J3BuildLabel {
+    if ($env:J3_BUILD_LABEL) { return $env:J3_BUILD_LABEL }
+    if ($env:GITHUB_RUN_NUMBER -and $env:GITHUB_SHA) {
+        $prefix = if ($env:GITHUB_WORKFLOW -eq 'Release') { 'rel' } else { 'ci' }
+        return "$prefix$($env:GITHUB_RUN_NUMBER)-$($env:GITHUB_SHA.Substring(0, 7))"
+    }
+    $sha = $null
+    try { $sha = (& git -C $script:J3RepoRoot rev-parse --short=7 HEAD 2>$null | Select-Object -First 1) } catch { $sha = $null }
+    if ($sha -and "$sha".Trim() -match '^[0-9a-f]{7,}$') { return "local-$("$sha".Trim())" }
+    return 'local'
+}
+
 function Get-J3Sha256([string]$Path) {
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }

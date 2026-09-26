@@ -16,6 +16,9 @@ class ErrorLog {
   /// Number of uncaught errors seen in this process (used by smoke tests).
   int get count => recent.length;
 
+  /// `<data>/logs/errors.log`, once [attach] was called.
+  String? get logPath => _path;
+
   void attach(String dataRoot) {
     _path = p.join(dataRoot, 'logs', 'errors.log');
   }

@@ -58,8 +58,9 @@ try {
     if (-not $SkipBuild) {
         $signingArg = '-Pj3ForceDebugSigning=true'
         if ($isRelease) { $signingArg = '-Pj3RequireReleaseSigning=true' }
-        Invoke-J3Native flutter @('build', 'apk', '--release', $signingArg)
-        if ($buildAab) { Invoke-J3Native flutter @('build', 'appbundle', '--release', $signingArg) }
+        $labelDefine = "--dart-define=J3_BUILD_LABEL=$(Get-J3BuildLabel)"
+        Invoke-J3Native flutter @('build', 'apk', '--release', $signingArg, $labelDefine)
+        if ($buildAab) { Invoke-J3Native flutter @('build', 'appbundle', '--release', $signingArg, $labelDefine) }
     }
 
     $builtApk = Join-Path $script:J3RepoRoot 'build\app\outputs\flutter-apk\app-release.apk'

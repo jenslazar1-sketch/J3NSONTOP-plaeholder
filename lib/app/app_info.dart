@@ -20,6 +20,10 @@ abstract final class AppInfo {
   static const String version = '1.0.0';
   static const int buildNumber = 1;
 
+  /// Identifies the exact build a tester is running. CI builds pass
+  /// `--dart-define=J3_BUILD_LABEL=ci<run>-<commit>`; other builds say "local".
+  static const String buildLabel = String.fromEnvironment('J3_BUILD_LABEL', defaultValue: 'local');
+
   static const String tagline = 'J3NSONTOP SYSTEM ONLINE';
 
   /// Short, honest description used on About and in the README.
