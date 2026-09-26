@@ -1,0 +1,323 @@
+# Auto-publish GitHub Releases with downloadable artifacts.
+#
+# Triggers on version tags (v1.0.0, v1.2.3-beta, etc.) and can be run
+# manually from the Actions tab. Builds test artifacts for every platform
+# (no signing secrets required) and attaches them to a GitHub Release.
+#
+# For signed release builds, use release.yml with build_type=release and
+# manually attach to a Release, or configure signing secrets and update
+# this workflow's build steps accordingly.
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (leave empty to use current HEAD as a draft)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.47.5'
+  JAVA_VERSION: '17'
+  ARTIFACT_PREFIX: J3NSONTOP-Multitool
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      full_version: ${{ steps.version.outputs.full_version }}
+      tag: ${{ steps.tag.outputs.tag }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read version from pubspec.yaml
+        id: version
+        run: bash scripts/ci/version_outputs.sh
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            tag="${{ inputs.tag }}"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            tag="${{ github.ref_name }}"
+          else
+            tag="v${{ steps.version.outputs.version }}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [[ "$tag" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Release tag: $tag"
+
+  validate:
+    name: Validate (format, analyze, tests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Linux desktop build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Check formatting
+        run: |
+          dirs=()
+          for d in lib test integration_test tool; do
+            if [ -d "$d" ]; then dirs+=("$d"); fi
+          done
+          dart format --output=none --set-exit-if-changed "${dirs[@]}"
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Unit and widget tests
+        run: flutter test --timeout 120s --reporter expanded
+
+  # ------------------------------------------------------------------ Linux --
+  linux:
+    name: Linux x64
+    needs: [plan, validate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Linux desktop build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build Linux release
+        run: |
+          . scripts/lib/common.sh
+          flutter build linux --release "$(j3_build_label_define)"
+
+      - name: Package Linux tarball
+        run: |
+          mkdir -p dist-linux
+          . scripts/lib/common.sh
+          j3_read_version
+          cd build/linux/x64/release
+          tar czf "$GITHUB_WORKSPACE/dist-linux/${{ env.ARTIFACT_PREFIX }}-${J3_VERSION}-linux-x64.tar.gz" bundle/
+
+      - name: Generate checksum
+        run: |
+          cd dist-linux
+          sha256sum *.tar.gz > SHA256SUMS
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ needs.plan.outputs.version }}-linux-x64
+          path: |
+            dist-linux/*.tar.gz
+            dist-linux/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90
+
+  # ---------------------------------------------------------------- Android --
+  android:
+    name: Android APK (debug-signed)
+    needs: [plan, validate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build test APK (debug-signed)
+        run: bash scripts/build_android.sh --mode test --out-dir dist
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ needs.plan.outputs.version }}-android-apk
+          path: |
+            dist/*.apk
+            dist/*.apk.sha256
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90
+
+  # ---------------------------------------------------------------- Windows --
+  windows:
+    name: Windows x64
+    needs: [plan, validate]
+    runs-on: windows-2025
+    timeout-minutes: 50
+    env:
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies (locked)
+        shell: pwsh
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build, bundle MSVC runtime, verify, ZIP + installer
+        shell: pwsh
+        run: ./scripts/build_windows.ps1 -OutDir dist
+
+      - name: Upload portable ZIP
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-portable
+          path: |
+            dist/*-windows-x64-portable.zip
+            dist/*-windows-x64-portable.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ env.VERSION }}-windows-x64-setup
+          path: |
+            dist/*-windows-x64-setup.exe
+            dist/*-windows-x64-setup.exe.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+  # -------------------------------------------------------------- Release --
+  release:
+    name: Create GitHub Release
+    needs: [plan, linux, android, windows]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: artifacts
+
+      - name: Collect release assets
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name '*.apk' -o -name '*.tar.gz' -o -name '*.zip' -o -name '*.exe' \) \
+            -exec cp {} release-assets/ \;
+          find artifacts -type f -name 'SHA256SUMS' -exec cat {} \; | sort -u > release-assets/SHA256SUMS
+          echo "=== Release assets ==="
+          ls -lh release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.3.2
+        with:
+          tag_name: ${{ needs.plan.outputs.tag }}
+          name: ${{ env.ARTIFACT_PREFIX }} ${{ needs.plan.outputs.version }}
+          prerelease: ${{ needs.plan.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          body: |
+            ## Downloads
+
+            | Platform | File | Notes |
+            | --- | --- | --- |
+            | Android | `*-android-*.apk` | Debug-signed test build. Sideload via `adb install`. |
+            | Linux | `*-linux-x64.tar.gz` | Extract and run `bundle/j3nsontop_multitool`. |
+            | Windows | `*-windows-x64-portable.zip` | Extract and run. No install needed. |
+            | Windows | `*-windows-x64-setup.exe` | Installer with Start Menu shortcut. |
+
+            Verify checksums with `sha256sum -c SHA256SUMS`.
+
+            > **iOS** is not included in auto-releases — it requires Apple signing secrets.
+            > Use the manual **Release** workflow with `build_type=release` and your signing credentials.
+          files: release-assets/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
