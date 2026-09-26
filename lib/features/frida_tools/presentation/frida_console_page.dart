@@ -42,19 +42,31 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
   }
 
   Future<void> _checkFrida() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final frida = ref.read(fridaServiceProvider);
       final available = await frida.isAvailable();
       if (!available) {
-        setState(() { _error = 'Frida not found. Install: pip install frida-tools'; _loading = false; });
+        setState(() {
+          _error = 'Frida not found. Install: pip install frida-tools';
+          _loading = false;
+        });
         return;
       }
       final version = await frida.version();
-      setState(() { _fridaVersion = version; _loading = false; });
+      setState(() {
+        _fridaVersion = version;
+        _loading = false;
+      });
       unawaited(_loadDevices());
     } catch (e) {
-      setState(() { _error = '$e'; _loading = false; });
+      setState(() {
+        _error = '$e';
+        _loading = false;
+      });
     }
   }
 
@@ -69,12 +81,21 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
   }
 
   Future<void> _loadProcesses() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final procs = await ref.read(fridaServiceProvider).listProcesses(device: _selectedDevice?.id);
-      setState(() { _processes = procs; _loading = false; });
+      setState(() {
+        _processes = procs;
+        _loading = false;
+      });
     } catch (e) {
-      setState(() { _error = '$e'; _loading = false; });
+      setState(() {
+        _error = '$e';
+        _loading = false;
+      });
     }
   }
 
@@ -82,7 +103,8 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
     _session?.cancel();
     _output.clear();
     _output.add('[*] Attaching to ${proc.name} (PID: ${proc.pid})...');
-    final defaultScript = '''
+    final defaultScript =
+        '''
 // Attached to ${proc.name} (PID: ${proc.pid})
 send({type: 'attached', pid: ${proc.pid}, name: '${proc.name}'});
 
@@ -169,10 +191,21 @@ send({type: 'info', message: mods.length + ' modules loaded'});
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: J3Space.sm),
-          child: NeonButton.secondary(label: 'Load Processes', icon: Icons.list, dense: true, onPressed: _loadProcesses),
+          child: NeonButton.secondary(
+            label: 'Load Processes',
+            icon: Icons.list,
+            dense: true,
+            onPressed: _loadProcesses,
+          ),
         ),
         const SizedBox(height: J3Space.sm),
-        if (_loading) const Center(child: Padding(padding: EdgeInsets.all(J3Space.lg), child: CircularProgressIndicator(color: J3Colors.neon))),
+        if (_loading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(J3Space.lg),
+              child: CircularProgressIndicator(color: J3Colors.neon),
+            ),
+          ),
         Expanded(
           child: ListView.builder(
             itemCount: _processes.length,
@@ -182,13 +215,23 @@ send({type: 'info', message: mods.length + ' modules loaded'});
                 dense: true,
                 leading: Text('${proc.pid}', style: J3Type.codeSmall.copyWith(fontSize: 10, color: J3Colors.textMuted)),
                 title: Text(proc.name, style: J3Type.codeSmall),
-                subtitle: proc.identifier != null ? Text(proc.identifier!, style: J3Type.codeSmall.copyWith(fontSize: 9, color: J3Colors.textMuted)) : null,
+                subtitle: proc.identifier != null
+                    ? Text(proc.identifier!, style: J3Type.codeSmall.copyWith(fontSize: 9, color: J3Colors.textMuted))
+                    : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(icon: const Icon(Icons.attach_file, size: 14), tooltip: 'Attach', onPressed: () => _attachToProcess(proc)),
+                    IconButton(
+                      icon: const Icon(Icons.attach_file, size: 14),
+                      tooltip: 'Attach',
+                      onPressed: () => _attachToProcess(proc),
+                    ),
                     if (proc.identifier != null)
-                      IconButton(icon: const Icon(Icons.rocket_launch, size: 14), tooltip: 'Spawn', onPressed: () => _spawnApp(proc.identifier!)),
+                      IconButton(
+                        icon: const Icon(Icons.rocket_launch, size: 14),
+                        tooltip: 'Spawn',
+                        onPressed: () => _spawnApp(proc.identifier!),
+                      ),
                   ],
                 ),
               );
@@ -211,7 +254,12 @@ send({type: 'info', message: mods.length + ' modules loaded'});
               const Spacer(),
               NeonButton.ghost(label: 'Run', icon: Icons.play_arrow, dense: true, onPressed: _runScript),
               const SizedBox(width: J3Space.xs),
-              NeonButton.ghost(label: 'Clear', icon: Icons.delete, dense: true, onPressed: () => setState(() => _output.clear())),
+              NeonButton.ghost(
+                label: 'Clear',
+                icon: Icons.delete,
+                dense: true,
+                onPressed: () => setState(() => _output.clear()),
+              ),
             ],
           ),
         ),
@@ -253,9 +301,12 @@ send({type: 'info', message: mods.length + ' modules loaded'});
               itemCount: _output.length,
               itemBuilder: (ctx, i) {
                 final line = _output[i];
-                final color = line.startsWith('[!]') ? J3Colors.error
-                    : line.startsWith('[*]') ? J3Colors.info
-                    : line.startsWith('[+]') ? J3Colors.success
+                final color = line.startsWith('[!]')
+                    ? J3Colors.error
+                    : line.startsWith('[*]')
+                    ? J3Colors.info
+                    : line.startsWith('[+]')
+                    ? J3Colors.success
                     : J3Colors.text;
                 return SelectableText(line, style: J3Type.codeSmall.copyWith(color: color));
               },

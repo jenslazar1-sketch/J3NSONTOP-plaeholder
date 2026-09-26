@@ -208,14 +208,26 @@ if (Java.available) {
 }
 
 class LiveModState {
-  const LiveModState({this.session, this.output = const [], this.isRunning = false, this.discoveredClasses = const [], this.discoveredModules = const []});
+  const LiveModState({
+    this.session,
+    this.output = const [],
+    this.isRunning = false,
+    this.discoveredClasses = const [],
+    this.discoveredModules = const [],
+  });
   final LiveModSession? session;
   final List<String> output;
   final bool isRunning;
   final List<String> discoveredClasses;
   final List<String> discoveredModules;
 
-  LiveModState copyWith({LiveModSession? session, List<String>? output, bool? isRunning, List<String>? discoveredClasses, List<String>? discoveredModules}) {
+  LiveModState copyWith({
+    LiveModSession? session,
+    List<String>? output,
+    bool? isRunning,
+    List<String>? discoveredClasses,
+    List<String>? discoveredModules,
+  }) {
     return LiveModState(
       session: session ?? this.session,
       output: output ?? this.output,
@@ -231,7 +243,9 @@ class LiveModController extends Notifier<LiveModState> {
   LiveModState build() => const LiveModState();
 
   void startSession(String processName, {String? device}) {
-    state = LiveModState(session: LiveModSession(processName: processName, device: device));
+    state = LiveModState(
+      session: LiveModSession(processName: processName, device: device),
+    );
   }
 
   void addOutput(String line) {

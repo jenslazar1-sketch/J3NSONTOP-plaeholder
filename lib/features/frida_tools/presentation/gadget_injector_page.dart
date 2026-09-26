@@ -56,11 +56,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
 
   Future<void> _checkTools() async {
     final injector = ref.read(gadgetInjectorProvider);
-    final results = await Future.wait([
-      injector.hasApktool(),
-      injector.hasZipalign(),
-      injector.hasApksigner(),
-    ]);
+    final results = await Future.wait([injector.hasApktool(), injector.hasZipalign(), injector.hasApksigner()]);
     setState(() {
       _hasApktool = results[0];
       _hasZipalign = results[1];
@@ -71,7 +67,11 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
 
   Future<void> _inject() async {
     if (_inputPathController.text.isEmpty || _outputPathController.text.isEmpty) return;
-    setState(() { _injecting = true; _result = null; _steps.clear(); });
+    setState(() {
+      _injecting = true;
+      _result = null;
+      _steps.clear();
+    });
 
     final injector = ref.read(gadgetInjectorProvider);
     final config = GadgetConfig(
@@ -90,7 +90,10 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
     } else {
       result = await injector.injectIpa(config, onStep: (s) => setState(() => _steps.add(s)));
     }
-    setState(() { _result = result; _injecting = false; });
+    setState(() {
+      _result = result;
+      _injecting = false;
+    });
   }
 
   @override
@@ -116,10 +119,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
       ],
       results: [
         _buildProgress(),
-        if (_result != null) ...[
-          const SizedBox(height: J3Space.md),
-          _buildResult(),
-        ],
+        if (_result != null) ...[const SizedBox(height: J3Space.md), _buildResult()],
       ],
     );
   }
@@ -138,7 +138,10 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
           if (!_hasApktool || !_hasZipalign || !_hasApksigner)
             Padding(
               padding: const EdgeInsets.only(top: J3Space.sm),
-              child: Text('Install missing tools for APK injection. IPA injection needs insert_dylib or optool.', style: J3Type.caption),
+              child: Text(
+                'Install missing tools for APK injection. IPA injection needs insert_dylib or optool.',
+                style: J3Type.caption,
+              ),
             ),
         ],
       ),
@@ -150,7 +153,11 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
       padding: const EdgeInsets.only(bottom: J3Space.xs),
       child: Row(
         children: [
-          Icon(available ? Icons.check_circle : Icons.cancel, size: 14, color: available ? J3Colors.success : J3Colors.error),
+          Icon(
+            available ? Icons.check_circle : Icons.cancel,
+            size: 14,
+            color: available ? J3Colors.success : J3Colors.error,
+          ),
           const SizedBox(width: J3Space.sm),
           Text(name, style: J3Type.code),
         ],
@@ -191,24 +198,24 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
             decoration: _inputDecor('Input ${_target == InjectionTarget.apk ? 'APK' : 'IPA'} path'),
           ),
           const SizedBox(height: J3Space.sm),
-          TextField(
-            controller: _outputPathController,
-            style: J3Type.codeSmall,
-            decoration: _inputDecor('Output path'),
-          ),
+          TextField(controller: _outputPathController, style: J3Type.codeSmall, decoration: _inputDecor('Output path')),
           if (_target == InjectionTarget.apk) ...[
             const SizedBox(height: J3Space.md),
             Text('Architecture', style: J3Type.caption),
             const SizedBox(height: J3Space.xs),
             Wrap(
               spacing: J3Space.sm,
-              children: TargetArch.values.map((a) => ChoiceChip(
-                label: Text(a.name),
-                selected: _arch == a,
-                onSelected: (_) => setState(() => _arch = a),
-                selectedColor: J3Colors.darkRed,
-                labelStyle: J3Type.codeSmall,
-              )).toList(),
+              children: TargetArch.values
+                  .map(
+                    (a) => ChoiceChip(
+                      label: Text(a.name),
+                      selected: _arch == a,
+                      onSelected: (_) => setState(() => _arch = a),
+                      selectedColor: J3Colors.darkRed,
+                      labelStyle: J3Type.codeSmall,
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ],
@@ -231,12 +238,7 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
           const SizedBox(height: J3Space.md),
           Text('Gadget Config JSON', style: J3Type.caption),
           const SizedBox(height: J3Space.xs),
-          TextField(
-            controller: _configController,
-            style: J3Type.codeSmall,
-            maxLines: 6,
-            decoration: _inputDecor(''),
-          ),
+          TextField(controller: _configController, style: J3Type.codeSmall, maxLines: 6, decoration: _inputDecor('')),
         ],
       ),
     );
@@ -264,25 +266,29 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
           ? Text('Ready to inject', style: J3Type.caption)
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: _steps.map((s) => Padding(
-                padding: const EdgeInsets.only(bottom: J3Space.xs),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.chevron_right, size: 14, color: J3Colors.success),
-                    const SizedBox(width: J3Space.xs),
-                    Expanded(
-                      child: Column(
+              children: _steps
+                  .map(
+                    (s) => Padding(
+                      padding: const EdgeInsets.only(bottom: J3Space.xs),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(s.label, style: J3Type.label),
-                          Text(s.detail, style: J3Type.caption),
+                          const Icon(Icons.chevron_right, size: 14, color: J3Colors.success),
+                          const SizedBox(width: J3Space.xs),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(s.label, style: J3Type.label),
+                                Text(s.detail, style: J3Type.caption),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              )).toList(),
+                  )
+                  .toList(),
             ),
     );
   }
@@ -315,6 +321,9 @@ class _GadgetInjectorPageState extends ConsumerState<GadgetInjectorPage> {
     contentPadding: const EdgeInsets.all(J3Space.sm),
     filled: true,
     fillColor: J3Colors.inputFill,
-    border: OutlineInputBorder(borderRadius: J3Radius.small, borderSide: BorderSide(color: J3Colors.border)),
+    border: OutlineInputBorder(
+      borderRadius: J3Radius.small,
+      borderSide: BorderSide(color: J3Colors.border),
+    ),
   );
 }

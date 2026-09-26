@@ -34,7 +34,10 @@ class AdbService {
   final String _adbPath;
 
   Future<String> _run(List<String> args, {String? serial}) async {
-    final fullArgs = <String>[if (serial != null) ...['-s', serial], ...args];
+    final fullArgs = <String>[
+      if (serial != null) ...['-s', serial],
+      ...args,
+    ];
     final result = await Process.run(_adbPath, fullArgs);
     if (result.exitCode != 0) {
       throw AdbException('adb ${args.join(' ')} failed (exit ${result.exitCode}): ${result.stderr}');
@@ -54,19 +57,23 @@ class AdbService {
   Future<List<AdbDevice>> devices() async {
     final out = await _run(['devices', '-l']);
     final lines = out.split('\n').skip(1).where((l) => l.trim().isNotEmpty);
-    return lines.map((l) {
-      final parts = l.trim().split(RegExp(r'\s+'));
-      if (parts.length < 2) return null;
-      final serial = parts[0];
-      final state = parts[1];
-      String? prop(String key) {
-        for (final p in parts.skip(2)) {
-          if (p.startsWith('$key:')) return p.substring(key.length + 1);
-        }
-        return null;
-      }
-      return AdbDevice(serial: serial, state: state, model: prop('model'), product: prop('product'));
-    }).whereType<AdbDevice>().toList();
+    return lines
+        .map((l) {
+          final parts = l.trim().split(RegExp(r'\s+'));
+          if (parts.length < 2) return null;
+          final serial = parts[0];
+          final state = parts[1];
+          String? prop(String key) {
+            for (final p in parts.skip(2)) {
+              if (p.startsWith('$key:')) return p.substring(key.length + 1);
+            }
+            return null;
+          }
+
+          return AdbDevice(serial: serial, state: state, model: prop('model'), product: prop('product'));
+        })
+        .whereType<AdbDevice>()
+        .toList();
   }
 
   Future<List<InstalledPackage>> listPackages(String serial, {bool thirdPartyOnly = true}) async {
@@ -74,8 +81,7 @@ class AdbService {
     final out = await _run(['shell', 'pm', 'list', 'packages', if (flag.isNotEmpty) flag], serial: serial);
     return out.split('\n').where((l) => l.startsWith('package:')).map((l) {
       return InstalledPackage(packageName: l.substring(8).trim());
-    }).toList()
-      ..sort((a, b) => a.packageName.compareTo(b.packageName));
+    }).toList()..sort((a, b) => a.packageName.compareTo(b.packageName));
   }
 
   Future<String> getPackagePath(String serial, String pkg) async {

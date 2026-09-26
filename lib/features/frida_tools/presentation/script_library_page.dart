@@ -25,8 +25,9 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
     var scripts = scriptsInCategory(_category);
     if (_search.isNotEmpty) {
       final q = _search.toLowerCase();
-      scripts = kFridaScripts.where((s) =>
-          s.name.toLowerCase().contains(q) || s.description.toLowerCase().contains(q)).toList();
+      scripts = kFridaScripts
+          .where((s) => s.name.toLowerCase().contains(q) || s.description.toLowerCase().contains(q))
+          .toList();
     }
     return scripts;
   }
@@ -63,7 +64,10 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
               contentPadding: const EdgeInsets.all(J3Space.sm),
               filled: true,
               fillColor: J3Colors.inputFill,
-              border: OutlineInputBorder(borderRadius: J3Radius.small, borderSide: BorderSide(color: J3Colors.border)),
+              border: OutlineInputBorder(
+                borderRadius: J3Radius.small,
+                borderSide: BorderSide(color: J3Colors.border),
+              ),
             ),
             onChanged: (v) => setState(() => _search = v),
           ),
@@ -73,16 +77,23 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: J3Space.sm),
             child: Row(
-              children: FridaScriptCategory.values.map((c) => Padding(
-                padding: const EdgeInsets.only(right: J3Space.xs),
-                child: ChoiceChip(
-                  label: Text(c.label, style: J3Type.code.copyWith(fontSize: 10)),
-                  selected: _category == c,
-                  onSelected: (_) => setState(() { _category = c; _selected = null; }),
-                  selectedColor: J3Colors.darkRed,
-                  visualDensity: VisualDensity.compact,
-                ),
-              )).toList(),
+              children: FridaScriptCategory.values
+                  .map(
+                    (c) => Padding(
+                      padding: const EdgeInsets.only(right: J3Space.xs),
+                      child: ChoiceChip(
+                        label: Text(c.label, style: J3Type.code.copyWith(fontSize: 10)),
+                        selected: _category == c,
+                        onSelected: (_) => setState(() {
+                          _category = c;
+                          _selected = null;
+                        }),
+                        selectedColor: J3Colors.darkRed,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         const SizedBox(height: J3Space.sm),
@@ -96,7 +107,11 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
                 dense: true,
                 selected: active,
                 selectedTileColor: J3Colors.surfaceRaised,
-                leading: Icon(_iconForCategory(s.category), size: 16, color: active ? J3Colors.neonText : J3Colors.textMuted),
+                leading: Icon(
+                  _iconForCategory(s.category),
+                  size: 16,
+                  color: active ? J3Colors.neonText : J3Colors.textMuted,
+                ),
                 title: Text(s.name, style: J3Type.label),
                 subtitle: Text(s.description, style: J3Type.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
                 onTap: () => setState(() => _selected = s),
@@ -123,10 +138,15 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
             kicker: s.category.label.toUpperCase(),
             icon: _iconForCategory(s.category),
             actions: [
-              NeonButton.ghost(label: 'Copy', icon: Icons.copy, dense: true, onPressed: () {
-                Clipboard.setData(ClipboardData(text: s.code));
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Script copied')));
-              }),
+              NeonButton.ghost(
+                label: 'Copy',
+                icon: Icons.copy,
+                dense: true,
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: s.code));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Script copied')));
+                },
+              ),
               const SizedBox(width: J3Space.xs),
               NeonButton.secondary(label: 'Use in Console', icon: Icons.terminal, dense: true, onPressed: () {}),
             ],
@@ -140,7 +160,12 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
                     children: [
                       Icon(Icons.info_outline, size: 14, color: J3Colors.warning),
                       const SizedBox(width: J3Space.xs),
-                      Expanded(child: Text('This script requires parameters — edit the %%PLACEHOLDERS%% before use', style: J3Type.caption.copyWith(color: J3Colors.warning))),
+                      Expanded(
+                        child: Text(
+                          'This script requires parameters — edit the %%PLACEHOLDERS%% before use',
+                          style: J3Type.caption.copyWith(color: J3Colors.warning),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -155,14 +180,8 @@ class _ScriptLibraryPageState extends ConsumerState<ScriptLibraryPage> {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(J3Space.sm),
-              decoration: BoxDecoration(
-                color: J3Colors.background,
-                borderRadius: J3Radius.small,
-              ),
-              child: SelectableText(
-                s.code.trim(),
-                style: J3Type.codeSmall,
-              ),
+              decoration: BoxDecoration(color: J3Colors.background, borderRadius: J3Radius.small),
+              child: SelectableText(s.code.trim(), style: J3Type.codeSmall),
             ),
           ),
         ],

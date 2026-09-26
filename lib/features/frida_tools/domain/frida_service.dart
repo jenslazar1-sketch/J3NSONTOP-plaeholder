@@ -59,42 +59,62 @@ class FridaService {
       }
     }
     final lines = (result.stdout as String).split('\n').where((l) => l.trim().isNotEmpty).skip(1);
-    return lines.map((l) {
-      final parts = l.trim().split(RegExp(r'\s{2,}'));
-      if (parts.length < 3) return null;
-      return FridaDevice(id: parts[0].trim(), name: parts[1].trim(), type: parts[2].trim());
-    }).whereType<FridaDevice>().toList();
+    return lines
+        .map((l) {
+          final parts = l.trim().split(RegExp(r'\s{2,}'));
+          if (parts.length < 3) return null;
+          return FridaDevice(id: parts[0].trim(), name: parts[1].trim(), type: parts[2].trim());
+        })
+        .whereType<FridaDevice>()
+        .toList();
   }
 
   Future<List<FridaProcess>> listProcesses({String? device}) async {
-    final args = <String>[if (device != null) ...['-D', device]];
+    final args = <String>[
+      if (device != null) ...['-D', device],
+    ];
     final result = await Process.run(fridaPsPath, args);
     if (result.exitCode != 0) throw FridaException('frida-ps failed: ${result.stderr}');
     final lines = (result.stdout as String).split('\n').skip(2).where((l) => l.trim().isNotEmpty);
-    return lines.map((l) {
-      final match = RegExp(r'^\s*(\d+)\s+(.+)$').firstMatch(l);
-      if (match == null) return null;
-      return FridaProcess(pid: int.parse(match.group(1)!), name: match.group(2)!.trim());
-    }).whereType<FridaProcess>().toList();
+    return lines
+        .map((l) {
+          final match = RegExp(r'^\s*(\d+)\s+(.+)$').firstMatch(l);
+          if (match == null) return null;
+          return FridaProcess(pid: int.parse(match.group(1)!), name: match.group(2)!.trim());
+        })
+        .whereType<FridaProcess>()
+        .toList();
   }
 
   Future<List<FridaProcess>> listApps({String? device}) async {
-    final args = <String>[if (device != null) ...['-D', device], '-ai'];
+    final args = <String>[
+      if (device != null) ...['-D', device],
+      '-ai',
+    ];
     final result = await Process.run(fridaPsPath, args);
     if (result.exitCode != 0) throw FridaException('frida-ps -ai failed: ${result.stderr}');
     final lines = (result.stdout as String).split('\n').skip(2).where((l) => l.trim().isNotEmpty);
-    return lines.map((l) {
-      final match = RegExp(r'^\s*(\d+)\s+(\S+)\s+(.+)$').firstMatch(l);
-      if (match == null) return null;
-      return FridaProcess(pid: int.parse(match.group(1)!), name: match.group(3)!.trim(), identifier: match.group(2)!.trim());
-    }).whereType<FridaProcess>().toList();
+    return lines
+        .map((l) {
+          final match = RegExp(r'^\s*(\d+)\s+(\S+)\s+(.+)$').firstMatch(l);
+          if (match == null) return null;
+          return FridaProcess(
+            pid: int.parse(match.group(1)!),
+            name: match.group(3)!.trim(),
+            identifier: match.group(2)!.trim(),
+          );
+        })
+        .whereType<FridaProcess>()
+        .toList();
   }
 
   Stream<String> attach({required int pid, required String script, String? device}) {
     final args = <String>[
       if (device != null) ...['-D', device],
-      '-p', '$pid',
-      '-l', script,
+      '-p',
+      '$pid',
+      '-l',
+      script,
       '--no-pause',
     ];
     return _runStream(args);
@@ -103,8 +123,10 @@ class FridaService {
   Stream<String> spawn({required String identifier, required String script, String? device}) {
     final args = <String>[
       if (device != null) ...['-D', device],
-      '-f', identifier,
-      '-l', script,
+      '-f',
+      identifier,
+      '-l',
+      script,
       '--no-pause',
     ];
     return _runStream(args);
@@ -113,9 +135,12 @@ class FridaService {
   Stream<String> attachInline({required int pid, required String jsCode, String? device}) {
     final args = <String>[
       if (device != null) ...['-D', device],
-      '-p', '$pid',
-      '--codeshare', '',
-      '-e', jsCode,
+      '-p',
+      '$pid',
+      '--codeshare',
+      '',
+      '-e',
+      jsCode,
     ];
     return _runStream(args);
   }
@@ -123,8 +148,10 @@ class FridaService {
   Future<FridaScriptResult> runScript({required String target, required String scriptPath, String? device}) async {
     final args = <String>[
       if (device != null) ...['-D', device],
-      '-f', target,
-      '-l', scriptPath,
+      '-f',
+      target,
+      '-l',
+      scriptPath,
       '--no-pause',
       '-q',
     ];

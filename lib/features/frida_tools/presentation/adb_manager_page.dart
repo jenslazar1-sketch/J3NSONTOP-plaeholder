@@ -47,12 +47,18 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
   }
 
   Future<void> _refreshDevices() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final adb = ref.read(adbServiceProvider);
       final available = await adb.isAvailable();
       if (!available) {
-        setState(() { _error = 'ADB not found. Install Android SDK platform-tools and add to PATH.'; _loading = false; });
+        setState(() {
+          _error = 'ADB not found. Install Android SDK platform-tools and add to PATH.';
+          _loading = false;
+        });
         return;
       }
       final devices = await adb.devices();
@@ -63,7 +69,10 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
       });
       if (_selected != null) unawaited(_loadDeviceInfo());
     } catch (e) {
-      setState(() { _error = '$e'; _loading = false; });
+      setState(() {
+        _error = '$e';
+        _loading = false;
+      });
     }
   }
 
@@ -80,9 +89,15 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
     setState(() => _loading = true);
     try {
       final pkgs = await ref.read(adbServiceProvider).listPackages(_selected!.serial);
-      setState(() { _packages = pkgs; _loading = false; });
+      setState(() {
+        _packages = pkgs;
+        _loading = false;
+      });
     } catch (e) {
-      setState(() { _error = '$e'; _loading = false; });
+      setState(() {
+        _error = '$e';
+        _loading = false;
+      });
     }
   }
 
@@ -90,13 +105,16 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
     if (_selected == null) return;
     _logSub?.cancel();
     _logLines.clear();
-    _logSub = ref.read(adbServiceProvider).logcat(_selected!.serial).listen(
-      (line) => setState(() {
-        _logLines.add(line);
-        if (_logLines.length > 2000) _logLines.removeRange(0, _logLines.length - 2000);
-      }),
-      onError: (e) => setState(() => _logLines.add('ERROR: $e')),
-    );
+    _logSub = ref
+        .read(adbServiceProvider)
+        .logcat(_selected!.serial)
+        .listen(
+          (line) => setState(() {
+            _logLines.add(line);
+            if (_logLines.length > 2000) _logLines.removeRange(0, _logLines.length - 2000);
+          }),
+          onError: (e) => setState(() => _logLines.add('ERROR: $e')),
+        );
   }
 
   void _stopLogcat() {
@@ -165,8 +183,13 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
                 style: J3Type.code,
                 underline: const SizedBox.shrink(),
                 isExpanded: true,
-                items: _devices.map((d) => DropdownMenuItem(value: d, child: Text('${d.displayName} (${d.serial})'))).toList(),
-                onChanged: (d) => setState(() { _selected = d; _loadDeviceInfo(); }),
+                items: _devices
+                    .map((d) => DropdownMenuItem(value: d, child: Text('${d.displayName} (${d.serial})')))
+                    .toList(),
+                onChanged: (d) => setState(() {
+                  _selected = d;
+                  _loadDeviceInfo();
+                }),
               ),
             ),
           const SizedBox(width: J3Space.sm),
@@ -207,12 +230,26 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
               runSpacing: J3Space.sm,
               children: [
                 NeonButton.secondary(label: 'Screenshot', icon: Icons.camera_alt, dense: true, onPressed: () {}),
-                NeonButton.secondary(label: 'Reboot', icon: Icons.restart_alt, dense: true, onPressed: () async {
-                  try { await ref.read(adbServiceProvider).shell(_selected!.serial, 'reboot'); } catch (_) {}
-                }),
-                NeonButton.secondary(label: 'Clear Logcat', icon: Icons.delete_sweep, dense: true, onPressed: () async {
-                  try { await ref.read(adbServiceProvider).clearLogcat(_selected!.serial); } catch (_) {}
-                }),
+                NeonButton.secondary(
+                  label: 'Reboot',
+                  icon: Icons.restart_alt,
+                  dense: true,
+                  onPressed: () async {
+                    try {
+                      await ref.read(adbServiceProvider).shell(_selected!.serial, 'reboot');
+                    } catch (_) {}
+                  },
+                ),
+                NeonButton.secondary(
+                  label: 'Clear Logcat',
+                  icon: Icons.delete_sweep,
+                  dense: true,
+                  onPressed: () async {
+                    try {
+                      await ref.read(adbServiceProvider).clearLogcat(_selected!.serial);
+                    } catch (_) {}
+                  },
+                ),
               ],
             ),
           ),
@@ -224,11 +261,15 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
             child: Row(
               children: [
                 Expanded(child: Text('Forward TCP 27042 for Frida', style: J3Type.caption)),
-                NeonButton.ghost(label: 'Forward', dense: true, onPressed: () async {
-                  try {
-                    await ref.read(adbServiceProvider).tcpForward(_selected!.serial, 27042, 27042);
-                  } catch (_) {}
-                }),
+                NeonButton.ghost(
+                  label: 'Forward',
+                  dense: true,
+                  onPressed: () async {
+                    try {
+                      await ref.read(adbServiceProvider).tcpForward(_selected!.serial, 27042, 27042);
+                    } catch (_) {}
+                  },
+                ),
               ],
             ),
           ),
@@ -242,7 +283,10 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
       padding: const EdgeInsets.only(bottom: J3Space.xs),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: J3Type.caption.copyWith(color: J3Colors.textMuted))),
+          SizedBox(
+            width: 100,
+            child: Text(label, style: J3Type.caption.copyWith(color: J3Colors.textMuted)),
+          ),
           Expanded(child: Text(value, style: J3Type.code)),
         ],
       ),
@@ -319,7 +363,12 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
                 onPressed: () => setState(() => _logSub != null ? _stopLogcat() : _startLogcat()),
               ),
               const SizedBox(width: J3Space.xs),
-              NeonButton.ghost(label: 'Clear', icon: Icons.delete, dense: true, onPressed: () => setState(() => _logLines.clear())),
+              NeonButton.ghost(
+                label: 'Clear',
+                icon: Icons.delete,
+                dense: true,
+                onPressed: () => setState(() => _logLines.clear()),
+              ),
             ],
           ),
         ),
@@ -332,9 +381,12 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
               itemCount: _logLines.length,
               itemBuilder: (ctx, i) {
                 final line = _logLines[_logLines.length - 1 - i];
-                final color = line.contains(' E ') ? J3Colors.error
-                    : line.contains(' W ') ? J3Colors.warning
-                    : line.contains(' I ') ? J3Colors.info
+                final color = line.contains(' E ')
+                    ? J3Colors.error
+                    : line.contains(' W ')
+                    ? J3Colors.warning
+                    : line.contains(' I ')
+                    ? J3Colors.info
                     : J3Colors.textMuted;
                 return Text(line, style: J3Type.codeSmall.copyWith(fontSize: 10, color: color));
               },
@@ -364,7 +416,10 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
                     contentPadding: const EdgeInsets.all(J3Space.sm),
                     filled: true,
                     fillColor: J3Colors.inputFill,
-                    border: OutlineInputBorder(borderRadius: J3Radius.small, borderSide: BorderSide(color: J3Colors.border)),
+                    border: OutlineInputBorder(
+                      borderRadius: J3Radius.small,
+                      borderSide: BorderSide(color: J3Colors.border),
+                    ),
                   ),
                   onSubmitted: (_) => _runShell(),
                 ),
@@ -378,9 +433,7 @@ class _AdbManagerPageState extends ConsumerState<AdbManagerPage> with SingleTick
           child: Container(
             color: J3Colors.background,
             padding: const EdgeInsets.all(J3Space.sm),
-            child: SingleChildScrollView(
-              child: SelectableText(_shellOutput, style: J3Type.codeSmall),
-            ),
+            child: SingleChildScrollView(child: SelectableText(_shellOutput, style: J3Type.codeSmall)),
           ),
         ),
       ],

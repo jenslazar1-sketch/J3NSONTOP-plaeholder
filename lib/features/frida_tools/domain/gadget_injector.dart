@@ -39,12 +39,7 @@ class InjectionStep {
 }
 
 class InjectionResult {
-  const InjectionResult({
-    required this.success,
-    required this.outputPath,
-    required this.steps,
-    this.error,
-  });
+  const InjectionResult({required this.success, required this.outputPath, required this.steps, this.error});
   final bool success;
   final String outputPath;
   final List<InjectionStep> steps;
@@ -130,10 +125,14 @@ class GadgetInjector {
       step('Sign', 'Signing with debug key...');
       await _exec('apksigner', [
         'sign',
-        '--ks', _debugKeystore(),
-        '--ks-pass', 'pass:android',
-        '--ks-key-alias', 'androiddebugkey',
-        '--out', config.outputPath,
+        '--ks',
+        _debugKeystore(),
+        '--ks-pass',
+        'pass:android',
+        '--ks-key-alias',
+        'androiddebugkey',
+        '--out',
+        config.outputPath,
         aligned,
       ]);
 
@@ -172,9 +171,9 @@ class GadgetInjector {
       final payloadDir = Directory('$workDir/Payload');
       if (!payloadDir.existsSync()) throw Exception('No Payload directory in IPA');
       final appDir = payloadDir.listSync().whereType<Directory>().firstWhere(
-            (d) => d.path.endsWith('.app'),
-            orElse: () => throw Exception('No .app bundle found'),
-          );
+        (d) => d.path.endsWith('.app'),
+        orElse: () => throw Exception('No .app bundle found'),
+      );
 
       step('Inject dylib', 'Copying FridaGadget.dylib...');
       final frameworksDir = Directory('${appDir.path}/Frameworks');
@@ -192,9 +191,22 @@ class GadgetInjector {
       final appName = appDir.path.split('/').last.replaceAll('.app', '');
       final binary = '${appDir.path}/$appName';
       try {
-        await _exec('insert_dylib', ['--strip-codesig', '--inplace', '@executable_path/Frameworks/FridaGadget.dylib', binary]);
+        await _exec('insert_dylib', [
+          '--strip-codesig',
+          '--inplace',
+          '@executable_path/Frameworks/FridaGadget.dylib',
+          binary,
+        ]);
       } catch (_) {
-        await _exec('optool', ['install', '-c', 'load', '-p', '@executable_path/Frameworks/FridaGadget.dylib', '-t', binary]);
+        await _exec('optool', [
+          'install',
+          '-c',
+          'load',
+          '-p',
+          '@executable_path/Frameworks/FridaGadget.dylib',
+          '-t',
+          binary,
+        ]);
       }
 
       step('Repack', 'Creating output IPA...');
@@ -212,22 +224,24 @@ class GadgetInjector {
   }
 
   String _archDir(TargetArch arch) => switch (arch) {
-        TargetArch.arm => 'armeabi-v7a',
-        TargetArch.arm64 => 'arm64-v8a',
-        TargetArch.x86 => 'x86',
-        TargetArch.x86_64 => 'x86_64',
-      };
+    TargetArch.arm => 'armeabi-v7a',
+    TargetArch.arm64 => 'arm64-v8a',
+    TargetArch.x86 => 'x86',
+    TargetArch.x86_64 => 'x86_64',
+  };
 
   Future<String> _downloadGadget(TargetArch arch, String? version) async {
     throw UnimplementedError(
-        'Provide a local frida-gadget .so file. '
-        'Download from https://github.com/frida/frida/releases for ${_archDir(arch)}');
+      'Provide a local frida-gadget .so file. '
+      'Download from https://github.com/frida/frida/releases for ${_archDir(arch)}',
+    );
   }
 
   Future<String> _downloadGadgetIos(String? version) async {
     throw UnimplementedError(
-        'Provide a local FridaGadget.dylib. '
-        'Download the iOS universal dylib from https://github.com/frida/frida/releases');
+      'Provide a local FridaGadget.dylib. '
+      'Download the iOS universal dylib from https://github.com/frida/frida/releases',
+    );
   }
 
   Future<void> _patchSmali(String workDir) async {
@@ -274,10 +288,7 @@ class GadgetInjector {
     }
 
     if (!content.contains('extractNativeLibs')) {
-      content = content.replaceFirst(
-        '<application',
-        '<application android:extractNativeLibs="true"',
-      );
+      content = content.replaceFirst('<application', '<application android:extractNativeLibs="true"');
     }
     manifest.writeAsStringSync(content);
   }
