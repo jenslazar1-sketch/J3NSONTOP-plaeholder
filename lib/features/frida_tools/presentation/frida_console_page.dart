@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/j3_colors.dart';
@@ -27,6 +28,8 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
   final List<String> _output = [];
   StreamSubscription<String>? _session;
   final _scriptController = TextEditingController();
+  final _scrollController = ScrollController();
+  bool _running = false;
 
   @override
   void initState() {
@@ -37,7 +40,9 @@ class _FridaConsolePageState extends ConsumerState<FridaConsolePage> {
   @override
   void dispose() {
     _session?.cancel();
+    ref.read(fridaServiceProvider).killActive();
     _scriptController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -116,10 +121,102 @@ send({type: 'info', message: mods.length + ' modules loaded'});
     setState(() {});
   }
 
+  Future<void> _testConnection() async {
+    final conn = ref.read(fridaConnectionProvider);
+    ref.read(fridaConnectionProvider.notifier).setTesting(true);
+    _addOutput('[*] Testing connection to ${conn.address}...');
+
+    try {
+      final frida = ref.read(fridaServiceProvider);
+      final ok = await frida.testRemoteConnection(conn.host, conn.port);
+      if (ok) {
+        ref.read(fridaConnectionProvider.notifier).setConnected(true);
+        _addOutput('[+] Connected to Frida server at ${conn.address}');
+        try {
+          final procs = await frida.listRemoteProcesses(conn.host, conn.port);
+          _addOutput('[+] ${procs.length} processes found on remote host');
+        } catch (_) {}
+      } else {
+        ref.read(fridaConnectionProvider.notifier).setConnected(false);
+        _addOutput('[!] Cannot connect to ${conn.address} — is the gadget running?');
+        _addOutput('[*] Try: adb forward tcp:${conn.port} tcp:${conn.port}');
+      }
+    } catch (e) {
+      ref.read(fridaConnectionProvider.notifier).setConnected(false);
+      _addOutput('[!] Connection failed: $e');
+    } finally {
+      ref.read(fridaConnectionProvider.notifier).setTesting(false);
+    }
+  }
+
+  Future<void> _setupAdbForward() async {
+    final conn = ref.read(fridaConnectionProvider);
+    _addOutput('[*] Setting up ADB port forward tcp:${conn.port}...');
+    try {
+      final msg = await FridaService.setupAdbForward(localPort: conn.port, remotePort: conn.port);
+      _addOutput('[+] $msg');
+    } catch (e) {
+      _addOutput('[!] ADB forward failed: $e');
+    }
+  }
+
   void _runScript() {
     if (_scriptController.text.isEmpty) return;
+    final conn = ref.read(fridaConnectionProvider);
+    if (!conn.connected) {
+      _addOutput('[!] Not connected. Click "Test" to verify the connection first.');
+      return;
+    }
+
+    _stopScript();
+    setState(() => _running = true);
+    _addOutput('[*] Executing script on ${conn.target}@${conn.address}...');
+
+    final frida = ref.read(fridaServiceProvider);
+    final stream = frida.executeOnRemote(
+      host: conn.host,
+      port: conn.port,
+      target: conn.target,
+      jsCode: _scriptController.text,
+    );
+
+    _session = stream.listen(
+      (line) => _addOutput(line),
+      onError: (e) {
+        _addOutput('[!] Error: $e');
+        setState(() => _running = false);
+      },
+      onDone: () {
+        _addOutput('[*] Script session ended.');
+        setState(() => _running = false);
+      },
+    );
+  }
+
+  void _stopScript() {
     _session?.cancel();
-    setState(() => _output.add('[*] Running script...'));
+    _session = null;
+    ref.read(fridaServiceProvider).killActive();
+    if (_running) {
+      _addOutput('[*] Session stopped.');
+      setState(() => _running = false);
+    }
+  }
+
+  void _addOutput(String line) {
+    setState(() {
+      _output.add(line);
+      if (_output.length > 5000) _output.removeRange(0, _output.length - 5000);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _spawnApp(String identifier) {
@@ -133,12 +230,14 @@ send({type: 'info', message: mods.length + ' modules loaded'});
 
   @override
   Widget build(BuildContext context) {
+    final conn = ref.watch(fridaConnectionProvider);
     return ToolScaffold(
       toolId: FridaConsolePage.id,
       scrollable: false,
       body: Column(
         children: [
           _buildStatusBar(),
+          _buildConnectionBar(conn),
           Expanded(
             child: Row(
               children: [
@@ -180,6 +279,81 @@ send({type: 'info', message: mods.length + ' modules loaded'});
       ),
     );
   }
+
+  Widget _buildConnectionBar(FridaConnectionConfig conn) {
+    return NeonPanel(
+      emphasis: conn.connected ? PanelEmphasis.success : PanelEmphasis.normal,
+      padding: const EdgeInsets.symmetric(horizontal: J3Space.md, vertical: J3Space.sm),
+      brackets: false,
+      child: Row(
+        children: [
+          Icon(
+            conn.connected ? Icons.link : Icons.link_off,
+            size: 16,
+            color: conn.connected ? J3Colors.success : J3Colors.textMuted,
+          ),
+          const SizedBox(width: J3Space.sm),
+          SizedBox(
+            width: 120,
+            child: TextField(
+              style: J3Type.codeSmall,
+              decoration: _compactInput('Host'),
+              controller: TextEditingController(text: conn.host),
+              onChanged: (v) => ref.read(fridaConnectionProvider.notifier).setHost(v),
+            ),
+          ),
+          const SizedBox(width: J3Space.xs),
+          const Text(':', style: TextStyle(color: J3Colors.textMuted)),
+          const SizedBox(width: J3Space.xs),
+          SizedBox(
+            width: 64,
+            child: TextField(
+              style: J3Type.codeSmall,
+              decoration: _compactInput('Port'),
+              controller: TextEditingController(text: '${conn.port}'),
+              keyboardType: TextInputType.number,
+              onChanged: (v) {
+                final p = int.tryParse(v);
+                if (p != null) ref.read(fridaConnectionProvider.notifier).setPort(p);
+              },
+            ),
+          ),
+          const SizedBox(width: J3Space.sm),
+          SizedBox(
+            width: 100,
+            child: TextField(
+              style: J3Type.codeSmall,
+              decoration: _compactInput('Target'),
+              controller: TextEditingController(text: conn.target),
+              onChanged: (v) => ref.read(fridaConnectionProvider.notifier).setTarget(v),
+            ),
+          ),
+          const SizedBox(width: J3Space.sm),
+          NeonButton.ghost(
+            label: conn.testing ? '...' : 'Test',
+            icon: Icons.wifi_tethering,
+            dense: true,
+            onPressed: conn.testing ? null : _testConnection,
+          ),
+          const SizedBox(width: J3Space.xs),
+          NeonButton.ghost(label: 'ADB Fwd', icon: Icons.swap_horiz, dense: true, onPressed: _setupAdbForward),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _compactInput(String hint) => InputDecoration(
+    hintText: hint,
+    hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted, fontSize: 10),
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: J3Space.xs, vertical: J3Space.xs),
+    filled: true,
+    fillColor: J3Colors.inputFill,
+    border: OutlineInputBorder(
+      borderRadius: J3Radius.small,
+      borderSide: BorderSide(color: J3Colors.border),
+    ),
+  );
 
   Widget _buildProcessList() {
     return Column(
@@ -252,7 +426,30 @@ send({type: 'info', message: mods.length + ' modules loaded'});
             children: [
               Text('// CONSOLE', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
               const Spacer(),
-              NeonButton.ghost(label: 'Run', icon: Icons.play_arrow, dense: true, onPressed: _runScript),
+              if (_running) ...[
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: J3Colors.neon),
+                ),
+                const SizedBox(width: J3Space.xs),
+                NeonButton.ghost(label: 'Stop', icon: Icons.stop, dense: true, onPressed: _stopScript),
+                const SizedBox(width: J3Space.xs),
+              ] else ...[
+                NeonButton(label: 'Execute', icon: Icons.play_arrow, dense: true, onPressed: _runScript),
+                const SizedBox(width: J3Space.xs),
+              ],
+              NeonButton.ghost(
+                label: 'Copy',
+                icon: Icons.copy,
+                dense: true,
+                onPressed: _scriptController.text.isNotEmpty
+                    ? () {
+                        Clipboard.setData(ClipboardData(text: _scriptController.text));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Script copied')));
+                      }
+                    : null,
+              ),
               const SizedBox(width: J3Space.xs),
               NeonButton.ghost(
                 label: 'Clear',
@@ -270,7 +467,7 @@ send({type: 'info', message: mods.length + ' modules loaded'});
             decoration: BoxDecoration(
               color: J3Colors.inputFill,
               borderRadius: J3Radius.small,
-              border: Border.all(color: J3Colors.border),
+              border: Border.all(color: _running ? J3Colors.neon.withValues(alpha: 0.5) : J3Colors.border),
             ),
             child: TextField(
               controller: _scriptController,
@@ -278,15 +475,26 @@ send({type: 'info', message: mods.length + ' modules loaded'});
               maxLines: null,
               expands: true,
               decoration: InputDecoration(
-                hintText: '// Write your Frida script here...',
+                hintText: '// Write your Frida script here...\n// Click Execute to push to the remote Frida session',
                 hintStyle: J3Type.codeSmall.copyWith(color: J3Colors.textMuted),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.all(J3Space.sm),
+                contentPadding: const EdgeInsets.all(J3Space.sm),
               ),
             ),
           ),
         ),
         const SizedBox(height: J3Space.sm),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: J3Space.sm),
+          child: Row(
+            children: [
+              Text('// OUTPUT', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+              const Spacer(),
+              Text('${_output.length} lines', style: J3Type.caption),
+            ],
+          ),
+        ),
+        const SizedBox(height: J3Space.xs),
         Expanded(
           flex: 3,
           child: Container(
@@ -298,6 +506,7 @@ send({type: 'info', message: mods.length + ' modules loaded'});
             ),
             padding: const EdgeInsets.all(J3Space.sm),
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: _output.length,
               itemBuilder: (ctx, i) {
                 final line = _output[i];
@@ -307,6 +516,8 @@ send({type: 'info', message: mods.length + ' modules loaded'});
                     ? J3Colors.info
                     : line.startsWith('[+]')
                     ? J3Colors.success
+                    : line.startsWith('[>]')
+                    ? J3Colors.neonText
                     : J3Colors.text;
                 return SelectableText(line, style: J3Type.codeSmall.copyWith(color: color));
               },

@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/j3_colors.dart';
 import '../../../core/theme/j3_spacing.dart';
 import '../../../core/theme/j3_typography.dart';
 import '../../../core/widgets/widgets.dart';
+import '../domain/frida_service.dart';
 import '../domain/live_mod_ai.dart';
 
 class LiveModPage extends ConsumerStatefulWidget {
@@ -19,15 +23,20 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
   final _targetController = TextEditingController();
   final _promptController = TextEditingController();
   final _valueController = TextEditingController();
+  final _scrollController = ScrollController();
   AiModAction _action = AiModAction.scan;
   String? _generatedScript;
   String? _selectedClass;
+  StreamSubscription<String>? _fridaSession;
 
   @override
   void dispose() {
+    _fridaSession?.cancel();
+    ref.read(fridaServiceProvider).killActive();
     _targetController.dispose();
     _promptController.dispose();
     _valueController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -51,18 +60,124 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
     setState(() => _generatedScript = session.generateModScript(request));
   }
 
+  void _executeScript() {
+    if (_generatedScript == null) return;
+    final conn = ref.read(fridaConnectionProvider);
+    final modNotifier = ref.read(liveModProvider.notifier);
+
+    if (!conn.connected) {
+      modNotifier.addOutput('[!] Not connected. Go to Frida Console and click "Test" first.');
+      return;
+    }
+
+    _fridaSession?.cancel();
+    ref.read(fridaServiceProvider).killActive();
+    modNotifier.setRunning(true);
+    modNotifier.addOutput('[*] Executing on ${conn.target}@${conn.address}...');
+
+    final stream = ref
+        .read(fridaServiceProvider)
+        .executeOnRemote(host: conn.host, port: conn.port, target: conn.target, jsCode: _generatedScript!);
+
+    _fridaSession = stream.listen(
+      (line) {
+        modNotifier.addOutput(line);
+        _parseDiscovery(line);
+        _autoScroll();
+      },
+      onError: (e) {
+        modNotifier.addOutput('[!] Error: $e');
+        modNotifier.setRunning(false);
+      },
+      onDone: () {
+        modNotifier.addOutput('[*] Script session ended.');
+        modNotifier.setRunning(false);
+      },
+    );
+  }
+
+  void _stopScript() {
+    _fridaSession?.cancel();
+    _fridaSession = null;
+    ref.read(fridaServiceProvider).killActive();
+    ref.read(liveModProvider.notifier).setRunning(false);
+    ref.read(liveModProvider.notifier).addOutput('[*] Stopped.');
+  }
+
+  void _autoScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void _parseDiscovery(String line) {
+    if (line.contains('"ai_class"') || line.contains("'ai_class'")) {
+      final match = RegExp(r'"name"\s*:\s*"([^"]+)"').firstMatch(line);
+      if (match != null) {
+        ref.read(liveModProvider.notifier).addDiscoveredClass(match.group(1)!);
+      }
+    }
+    if (line.contains('"ai_module"') || line.contains("'ai_module'")) {
+      final match = RegExp(r'"name"\s*:\s*"([^"]+)"').firstMatch(line);
+      if (match != null) {
+        ref.read(liveModProvider.notifier).addDiscoveredModule(match.group(1)!);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final modState = ref.watch(liveModProvider);
+    final conn = ref.watch(fridaConnectionProvider);
 
     return ToolScaffold(
       toolId: LiveModPage.id,
       scrollable: false,
-      body: Row(
+      body: Column(
         children: [
-          SizedBox(width: 320, child: _buildControlPanel(modState)),
-          const VerticalDivider(width: 1, color: J3Colors.border),
-          Expanded(child: _buildMainArea(modState)),
+          _buildConnectionStatus(conn),
+          Expanded(
+            child: Row(
+              children: [
+                SizedBox(width: 320, child: _buildControlPanel(modState)),
+                const VerticalDivider(width: 1, color: J3Colors.border),
+                Expanded(child: _buildMainArea(modState)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectionStatus(FridaConnectionConfig conn) {
+    return NeonPanel(
+      emphasis: conn.connected ? PanelEmphasis.success : PanelEmphasis.normal,
+      padding: const EdgeInsets.symmetric(horizontal: J3Space.md, vertical: J3Space.sm),
+      brackets: false,
+      child: Row(
+        children: [
+          Icon(
+            conn.connected ? Icons.link : Icons.link_off,
+            size: 16,
+            color: conn.connected ? J3Colors.success : J3Colors.error,
+          ),
+          const SizedBox(width: J3Space.sm),
+          Text(
+            conn.connected ? 'Connected: ${conn.target}@${conn.address}' : 'Not connected — set up in Frida Console',
+            style: J3Type.codeSmall.copyWith(color: conn.connected ? J3Colors.success : J3Colors.textMuted),
+          ),
+          const Spacer(),
+          if (conn.connected)
+            Text('Ready to execute', style: J3Type.caption.copyWith(color: J3Colors.success))
+          else
+            NeonButton.ghost(label: 'Open Console', icon: Icons.terminal, dense: true, onPressed: () {}),
         ],
       ),
     );
@@ -235,22 +350,22 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                 dense: true,
                 onPressed: _generatedScript != null
                     ? () {
-                        // Copy to clipboard
+                        Clipboard.setData(ClipboardData(text: _generatedScript!));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Script copied')));
                       }
                     : null,
               ),
               const SizedBox(width: J3Space.xs),
-              NeonButton.secondary(
-                label: 'Execute',
-                icon: Icons.play_arrow,
-                dense: true,
-                onPressed: _generatedScript != null
-                    ? () {
-                        ref.read(liveModProvider.notifier).addOutput('[*] Executing generated script...');
-                        ref.read(liveModProvider.notifier).setRunning(true);
-                      }
-                    : null,
-              ),
+              if (modState.isRunning) ...[
+                NeonButton.ghost(label: 'Stop', icon: Icons.stop, dense: true, onPressed: _stopScript),
+              ] else ...[
+                NeonButton(
+                  label: 'Execute',
+                  icon: Icons.play_arrow,
+                  dense: true,
+                  onPressed: _generatedScript != null ? _executeScript : null,
+                ),
+              ],
             ],
           ),
         ),
@@ -262,7 +377,11 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
               color: J3Colors.inputFill,
               borderRadius: J3Radius.small,
               border: Border.all(
-                color: _generatedScript != null ? J3Colors.neon.withValues(alpha: 0.3) : J3Colors.border,
+                color: modState.isRunning
+                    ? J3Colors.neon.withValues(alpha: 0.5)
+                    : _generatedScript != null
+                    ? J3Colors.neon.withValues(alpha: 0.3)
+                    : J3Colors.border,
               ),
             ),
             padding: const EdgeInsets.all(J3Space.sm),
@@ -293,6 +412,9 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
                     Text('Running...', style: J3Type.caption.copyWith(color: J3Colors.success)),
                   ],
                 ),
+              const SizedBox(width: J3Space.sm),
+              Text('${modState.output.length} lines', style: J3Type.caption),
+              const SizedBox(width: J3Space.sm),
               NeonButton.ghost(
                 label: 'Clear',
                 icon: Icons.delete,
@@ -313,8 +435,9 @@ class _LiveModPageState extends ConsumerState<LiveModPage> {
             ),
             padding: const EdgeInsets.all(J3Space.sm),
             child: modState.output.isEmpty
-                ? Center(child: Text('Output will appear here', style: J3Type.caption))
+                ? Center(child: Text('Output will appear here when you execute a script', style: J3Type.caption))
                 : ListView.builder(
+                    controller: _scrollController,
                     itemCount: modState.output.length,
                     itemBuilder: (ctx, i) {
                       final line = modState.output[i];
