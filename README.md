@@ -53,9 +53,13 @@ SHA-256 of the files inside):
 
 Not produced yet: a release-signed Android APK/AAB and a signed IPA need
 the secrets listed under [Signing](#signing) and are built by the manual
-**Release** workflow. The Windows binaries are not Authenticode-signed
-(no certificate configured), so SmartScreen may warn; compare the checksum
-before running.
+**Release** workflow. It was run without secrets
+([run](https://github.com/jenslazar1-sketch/J3NSONTOP-plaeholder/actions/runs/36230407920),
+`build_type=release`): the Android and iOS release jobs stopped at their
+secret checks, named the missing secrets and produced no unsigned fallback;
+Windows built and passed its clean-machine test. The Windows binaries are
+not Authenticode-signed (no certificate configured), so SmartScreen may
+warn; compare the checksum before running.
 
 ## Contents
 
