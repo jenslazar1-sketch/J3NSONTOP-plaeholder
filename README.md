@@ -1,4 +1,7 @@
-# J3NSONTOP BIGGEST MULTITOOL MADE
+# J3NSONTOP BIGGEST MULTITOOL MADE BY J3NSONTOP 
+
+
+# ignore this down here this is for claude!!!
 
 ```
 
