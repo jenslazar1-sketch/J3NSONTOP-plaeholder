@@ -228,38 +228,7 @@ class DllBackend {
 }
 
 const List<DllBackend> builtInBackends = [
-  DllBackend(
-    name: 'WeAreDevs API',
-    dllFileName: 'wearedevs_exploit_api.dll',
-    isAttachedFn: 'IsAttached',
-    attachFn: 'Attach',
-    executeFn: 'Execute',
-    settingsFn: 'SetSettings',
-  ),
-  DllBackend(
-    name: 'Krnl',
-    dllFileName: 'krnl.dll',
-    isAttachedFn: 'is_injected',
-    attachFn: 'inject',
-    executeFn: 'execute',
-    settingsFn: '',
-  ),
-  DllBackend(
-    name: 'Fluxus',
-    dllFileName: 'fluxus.dll',
-    isAttachedFn: 'isAttached',
-    attachFn: 'attach',
-    executeFn: 'runScript',
-    settingsFn: '',
-  ),
-  DllBackend(
-    name: 'Oxygen U',
-    dllFileName: 'oxygenu.dll',
-    isAttachedFn: 'IsInjected',
-    attachFn: 'Inject',
-    executeFn: 'Execute',
-    settingsFn: '',
-  ),
+  DllBackend(name: 'Xeno (DLL)', mode: BackendMode.xeno, dllFileName: 'Xeno.dll'),
   DllBackend(
     name: 'Custom DLL',
     dllFileName: '',
@@ -268,7 +237,6 @@ const List<DllBackend> builtInBackends = [
     executeFn: 'Execute',
     settingsFn: '',
   ),
-  DllBackend(name: 'Xeno (DLL)', mode: BackendMode.xeno, dllFileName: 'Xeno.dll'),
   DllBackend(name: 'Custom EXE', mode: BackendMode.process, executeArgsTemplate: '{script_path}'),
   DllBackend(name: 'Cloudy (DLL)', mode: BackendMode.cloudy, dllFileName: 'Cloudy.dll'),
   DllBackend(name: 'Cloudy (Pipe)', mode: BackendMode.cloudyPipe),
@@ -309,7 +277,7 @@ class ExecutorState {
     this.error,
     this.output = const [],
     this.lastScript = '',
-    this.activeBackend = const DllBackend(name: 'WeAreDevs API', dllFileName: 'wearedevs_exploit_api.dll'),
+    this.activeBackend = const DllBackend(name: 'Xeno (DLL)', mode: BackendMode.xeno, dllFileName: 'Xeno.dll'),
     this.loadedDllPath,
     this.diagnostics = const [],
     this.boundFunctions = const [],

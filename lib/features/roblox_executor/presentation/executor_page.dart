@@ -77,7 +77,7 @@ class _ExecutorPageState extends ConsumerState<ExecutorPage> {
                   Text('Windows Only', style: J3Type.headline.copyWith(color: J3Colors.error)),
                   const SizedBox(height: J3Space.sm),
                   Text(
-                    'The Roblox Executor requires Windows and the WeAreDevs API DLL.',
+                    'The Roblox Executor requires Windows and the Xeno DLL.',
                     style: J3Type.caption,
                     textAlign: TextAlign.center,
                   ),
@@ -386,10 +386,10 @@ class _ExecutorPageState extends ConsumerState<ExecutorPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _step('1', 'Download wearedevs_exploit_api.dll'),
-            _step('2', 'Place it next to j3nsontop_multitool.exe'),
+            _step('1', 'Download Xeno.dll and its dependencies'),
+            _step('2', 'Place them next to j3nsontop_multitool.exe'),
             _step('3', 'Launch Roblox and join a game'),
-            _step('4', 'Click "Load DLL" then "Attach"'),
+            _step('4', 'Click "Load DLL" — it will Initialize and Attach'),
             _step('5', 'Write or pick a script and Execute'),
             const SizedBox(height: J3Space.md),
             Text(
