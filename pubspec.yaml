@@ -4,7 +4,7 @@ publish_to: 'none'
 
 # Version shown on the About screen, Android versionName/versionCode,
 # iOS CFBundleShortVersionString/CFBundleVersion and Windows file version.
-version: 1.0.0+1
+version: 1.1.0+2
 
 # Toolchain tested with: Flutter 3.47.5 (stable) / Dart 3.13.4.
 # See docs/TOOLCHAIN.md for the full pinned toolchain.
