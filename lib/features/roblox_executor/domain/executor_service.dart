@@ -39,6 +39,10 @@ typedef _PtrRetDart = Pointer<Void> Function();
 // FFI typedefs — Xeno API
 // ---------------------------------------------------------------------------
 
+// Execute(char* script) -> bool (int32)
+typedef _XenoExecNative = Int32 Function(Pointer<Uint8>);
+typedef _XenoExecDart = int Function(Pointer<Uint8>);
+
 // Version() -> char*
 typedef _StrRetNative = Pointer<Uint8> Function();
 typedef _StrRetDart = Pointer<Uint8> Function();
@@ -334,7 +338,7 @@ class ExecutorController extends Notifier<ExecutorState> {
   // Xeno-specific bindings
   _VoidDart? _xenoInit;
   _VoidDart? _xenoAttachFn;
-  _PtrVoidDart? _xenoExec;
+  _XenoExecDart? _xenoExec;
   _PtrRetDart? _xenoGetClients;
   _TwoPtrVoidDart? _xenoSetSetting;
   _StrRetDart? _xenoVersion;
@@ -851,8 +855,13 @@ class ExecutorController extends Notifier<ExecutorState> {
     _xenoAttachFn = _bindVoid('Attach');
     if (_xenoAttachFn != null) bound.add('Attach');
 
-    _xenoExec = _bindPtrVoid('Execute');
-    if (_xenoExec != null) bound.add('Execute');
+    try {
+      _xenoExec = _lib!.lookupFunction<_XenoExecNative, _XenoExecDart>('Execute');
+      bound.add('Execute');
+    } catch (_) {
+      _xenoExec = null;
+      addOutput('[!] Function "Execute" not found in Xeno.dll');
+    }
 
     try {
       _xenoGetClients = _lib!.lookupFunction<_PtrRetNative, _PtrRetDart>('GetClients');
@@ -1433,8 +1442,18 @@ class ExecutorController extends Notifier<ExecutorState> {
       }
     }
 
-    addOutput('[*] Waiting for injection (3s)...');
-    Future.delayed(const Duration(seconds: 3)).then((_) {
+    addOutput('[*] Waiting for injection...');
+    _pollXenoClients(0);
+  }
+
+  void _pollXenoClients(int attempt) {
+    const maxAttempts = 6;
+    const delayMs = 2000;
+
+    Future.delayed(const Duration(milliseconds: delayMs)).then((_) {
+      if (state.status != ExecutorStatus.attaching) return;
+
+      bool hasClient = false;
       if (_xenoGetClients != null) {
         try {
           final ptr = _xenoGetClients!();
@@ -1442,15 +1461,33 @@ class ExecutorController extends Notifier<ExecutorState> {
             final asStr = _readCString(Pointer<Uint8>.fromAddress(ptr.address));
             if (asStr.isNotEmpty) {
               addOutput('[+] Clients: $asStr');
+              hasClient = true;
             }
           }
         } catch (e) {
-          addOutput('[*] GetClients() returned: $e — continuing');
+          addOutput('[*] GetClients(): $e');
         }
       }
 
-      state = state.copyWith(status: ExecutorStatus.attached);
-      addOutput('[+] Xeno API attached!');
+      if (hasClient || attempt >= maxAttempts - 1) {
+        state = state.copyWith(status: ExecutorStatus.attached);
+        if (hasClient) {
+          addOutput('[+] Xeno API attached — client found!');
+        } else {
+          addOutput('[+] Xeno API attached (no client confirmed — try executing anyway)');
+        }
+        if (_xenoVersion != null) {
+          try {
+            final vPtr = _xenoVersion!();
+            if (vPtr.address != 0) {
+              addOutput('[*] Xeno version: ${_readCString(vPtr)}');
+            }
+          } catch (_) {}
+        }
+      } else {
+        addOutput('[*] Polling for clients (${attempt + 1}/$maxAttempts)...');
+        _pollXenoClients(attempt + 1);
+      }
     });
   }
 
@@ -1730,8 +1767,28 @@ class ExecutorController extends Notifier<ExecutorState> {
 
     final ptr = _toNativeUtf8(script);
     try {
-      _xenoExec!(ptr);
-      addOutput('[+] Script executed via Xeno.');
+      final result = _xenoExec!(ptr);
+      if (result != 0) {
+        addOutput('[+] Script executed via Xeno (result: $result)');
+      } else {
+        addOutput('[!] Execute returned 0 — retrying in 500ms...');
+        Future.delayed(const Duration(milliseconds: 500)).then((_) {
+          final retryPtr = _toNativeUtf8(script);
+          try {
+            final retryResult = _xenoExec!(retryPtr);
+            if (retryResult != 0) {
+              addOutput('[+] Script executed on retry (result: $retryResult)');
+            } else {
+              addOutput('[!] Execute failed again (result: 0). '
+                  'Make sure Roblox is running and you are in a game.');
+            }
+          } catch (e) {
+            addOutput('[!] Retry failed: $e');
+          } finally {
+            _freeNativeUtf8(retryPtr);
+          }
+        });
+      }
     } catch (e) {
       addOutput('[!] Execute failed: $e');
     } finally {
