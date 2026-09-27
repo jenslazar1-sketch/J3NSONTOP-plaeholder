@@ -13,7 +13,7 @@ with an animated, laughing ASCII skull.
 * One Flutter/Dart codebase for **Android**, **iOS** and **Windows** (Linux is
   kept as a development/test target).
 * Application id `com.j3nsontop.multitool` · short name **J3NSONTOP Multitool** ·
-  version `1.0.0` (build 1).
+  version `1.1.0` (build 2).
 * No login, no telemetry, no cloud upload. The network is only used when you
   press *Send* in the HTTP developer tool.
 * Scope: user-controlled files, supported game mod workflows, backups, asset
@@ -23,7 +23,7 @@ with an animated, laughing ASCII skull.
 
 ## Status
 
-Version 1.0.0, ready for testing. **Testers: start with
+Version 1.1.0, ready for testing. **Testers: start with
 [docs/TESTING.md](docs/TESTING.md)** (downloads, install steps, a 120-case
 checklist and how to report problems).
 
