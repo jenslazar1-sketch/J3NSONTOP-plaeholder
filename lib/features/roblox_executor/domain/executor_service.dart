@@ -36,6 +36,18 @@ typedef _PtrRetNative = Pointer<Void> Function();
 typedef _PtrRetDart = Pointer<Void> Function();
 
 // ---------------------------------------------------------------------------
+// FFI typedefs — Xeno API
+// ---------------------------------------------------------------------------
+
+// Version() -> char*
+typedef _StrRetNative = Pointer<Uint8> Function();
+typedef _StrRetDart = Pointer<Uint8> Function();
+
+// SetSetting(char* key, char* value)
+typedef _TwoPtrVoidNative = Void Function(Pointer<Uint8>, Pointer<Uint8>);
+typedef _TwoPtrVoidDart = void Function(Pointer<Uint8>, Pointer<Uint8>);
+
+// ---------------------------------------------------------------------------
 // FFI typedefs — kernel32 named-pipe I/O
 // ---------------------------------------------------------------------------
 
@@ -114,7 +126,7 @@ void _freeNativeStringArray(Pointer<Pointer<Uint8>> array, int count) {
 // Backend model
 // ---------------------------------------------------------------------------
 
-enum BackendMode { dll, process, cloudy, cloudyPipe }
+enum BackendMode { dll, process, cloudy, cloudyPipe, xeno }
 
 class DllBackend {
   const DllBackend({
@@ -199,6 +211,7 @@ class DllBackend {
       'process' => BackendMode.process,
       'cloudy' => BackendMode.cloudy,
       'cloudyPipe' => BackendMode.cloudyPipe,
+      'xeno' => BackendMode.xeno,
       _ => BackendMode.dll,
     },
     dllFileName: j['dllFileName'] as String? ?? '',
@@ -255,7 +268,7 @@ const List<DllBackend> builtInBackends = [
     executeFn: 'Execute',
     settingsFn: '',
   ),
-  DllBackend(name: 'Xeno', mode: BackendMode.process),
+  DllBackend(name: 'Xeno (DLL)', mode: BackendMode.xeno, dllFileName: 'Xeno.dll'),
   DllBackend(name: 'Custom EXE', mode: BackendMode.process, executeArgsTemplate: '{script_path}'),
   DllBackend(name: 'Cloudy (DLL)', mode: BackendMode.cloudy, dllFileName: 'Cloudy.dll'),
   DllBackend(name: 'Cloudy (Pipe)', mode: BackendMode.cloudyPipe),
@@ -267,6 +280,8 @@ const List<DllBackend> builtInBackends = [
 
 const _cloudyDeps = ['libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'xxhash.dll', 'zstd.dll'];
 const _cloudyPipeName = r'\\.\pipe\CLDYexecution';
+
+const _xenoDeps = ['libcurl.dll', 'libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'xxhash.dll', 'zstd.dll', 'zlib1.dll'];
 
 // ---------------------------------------------------------------------------
 // State
@@ -347,6 +362,14 @@ class ExecutorController extends Notifier<ExecutorState> {
   _VoidDart? _cloudyInit;
   _PtrRetDart? _cloudyGetClients;
   _CloudyExecDart? _cloudyExec;
+
+  // Xeno-specific bindings
+  _VoidDart? _xenoInit;
+  _VoidDart? _xenoAttachFn;
+  _PtrVoidDart? _xenoExec;
+  _PtrRetDart? _xenoGetClients;
+  _TwoPtrVoidDart? _xenoSetSetting;
+  _StrRetDart? _xenoVersion;
 
   // kernel32 for named-pipe I/O
   DynamicLibrary? _kernel32;
@@ -483,6 +506,7 @@ class ExecutorController extends Notifier<ExecutorState> {
       BackendMode.process => _loadProcess(),
       BackendMode.cloudy => _loadCloudy(),
       BackendMode.cloudyPipe => _loadCloudyPipe(),
+      BackendMode.xeno => _loadXeno(),
     };
   }
 
@@ -737,6 +761,181 @@ class ExecutorController extends Notifier<ExecutorState> {
   }
 
   // ---------------------------------------------------------------------------
+  // Load — Xeno DLL
+  // ---------------------------------------------------------------------------
+
+  bool _loadXeno() {
+    if (_lib != null) return true;
+    if (!Platform.isWindows) {
+      state = state.copyWith(status: ExecutorStatus.error, error: 'Windows only');
+      return false;
+    }
+
+    final backend = state.activeBackend;
+    final candidates = _findDllCandidates(backend);
+
+    if (candidates.isEmpty) {
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'No Xeno.dll path configured. Open Settings to pick the DLL path.',
+      );
+      return false;
+    }
+
+    String? foundPath;
+    for (final p in candidates) {
+      if (File(p).existsSync()) {
+        foundPath = p;
+        break;
+      }
+    }
+
+    if (foundPath == null) {
+      final searched = candidates.map((p) => '  - $p').join('\n');
+      addOutput('[!] Xeno.dll not found. Searched:\n$searched');
+      final diagnostics = _diagnose(candidates.first);
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Xeno.dll not found. Place it next to the app or set a custom path in Settings.',
+        diagnostics: diagnostics,
+      );
+      return false;
+    }
+
+    addOutput('[*] Found Xeno.dll at: $foundPath');
+    final diagnostics = _diagnose(foundPath);
+    state = state.copyWith(diagnostics: diagnostics);
+
+    for (final d in diagnostics) {
+      final icon = d.passed ? '[+]' : '[!]';
+      addOutput('$icon ${d.label}: ${d.detail ?? (d.passed ? "OK" : "FAIL")}');
+    }
+
+    final archCheck = diagnostics.where((d) => d.label == 'Architecture' && !d.passed);
+    if (archCheck.isNotEmpty) {
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Architecture mismatch — ${archCheck.first.detail}',
+        diagnostics: diagnostics,
+      );
+      return false;
+    }
+
+    // Preload dependency DLLs from the same directory
+    final dllDir = File(foundPath).parent.path;
+    final sep = Platform.pathSeparator;
+    for (final dep in _xenoDeps) {
+      final depPath = '$dllDir$sep$dep';
+      if (File(depPath).existsSync()) {
+        try {
+          DynamicLibrary.open(depPath);
+          addOutput('[+] Loaded dependency: $dep');
+        } catch (e) {
+          addOutput('[*] Could not preload $dep: $e (may already be loaded)');
+        }
+      } else {
+        addOutput('[*] Dependency not found: $depPath (may cause load failure)');
+      }
+    }
+
+    try {
+      _lib = DynamicLibrary.open(foundPath);
+      addOutput('[+] Xeno.dll opened successfully');
+    } on ArgumentError catch (e) {
+      final msg = e.message.toString();
+      String hint;
+      if (msg.contains('126') || msg.contains('module could not be found')) {
+        hint =
+            'Missing dependencies — ensure libcurl, libssl, libcrypto, '
+            'xxhash, zstd, zlib1 DLLs are in the same folder';
+      } else if (msg.contains('193') || msg.contains('not a valid Win32 application')) {
+        hint = 'Architecture mismatch — Xeno.dll must be 64-bit for this app';
+      } else if (msg.contains('5') || msg.contains('Access is denied')) {
+        hint = 'Access denied — antivirus may be blocking Xeno.dll';
+      } else {
+        hint = 'OS error: $msg';
+      }
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Xeno.dll load failed: $hint',
+        diagnostics: diagnostics,
+        loadedDllPath: foundPath,
+      );
+      addOutput('[!] Load failed: $hint');
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Xeno.dll load failed: $e',
+        diagnostics: diagnostics,
+        loadedDllPath: foundPath,
+      );
+      addOutput('[!] Load failed: $e');
+      return false;
+    }
+
+    // Bind Xeno API functions
+    final bound = <String>[];
+
+    _xenoInit = _bindVoid('Initialize');
+    if (_xenoInit != null) bound.add('Initialize');
+
+    _xenoAttachFn = _bindVoid('Attach');
+    if (_xenoAttachFn != null) bound.add('Attach');
+
+    _xenoExec = _bindPtrVoid('Execute');
+    if (_xenoExec != null) bound.add('Execute');
+
+    try {
+      _xenoGetClients = _lib!.lookupFunction<_PtrRetNative, _PtrRetDart>('GetClients');
+      bound.add('GetClients');
+    } catch (_) {
+      addOutput('[!] Function "GetClients" not found in Xeno.dll');
+    }
+
+    try {
+      _xenoSetSetting = _lib!.lookupFunction<_TwoPtrVoidNative, _TwoPtrVoidDart>('SetSetting');
+      bound.add('SetSetting');
+    } catch (_) {
+      addOutput('[!] Function "SetSetting" not found in Xeno.dll');
+    }
+
+    try {
+      _xenoVersion = _lib!.lookupFunction<_StrRetNative, _StrRetDart>('Version');
+      bound.add('Version');
+    } catch (_) {
+      addOutput('[!] Function "Version" not found in Xeno.dll');
+    }
+
+    if (_xenoExec == null) {
+      state = state.copyWith(
+        status: ExecutorStatus.error,
+        error: 'Missing Xeno API exports — need Execute at minimum.',
+        loadedDllPath: foundPath,
+        boundFunctions: bound,
+      );
+      return false;
+    }
+
+    // Try to get version info
+    if (_xenoVersion != null) {
+      try {
+        final vPtr = _xenoVersion!();
+        if (vPtr.address != 0) {
+          final version = _readCString(vPtr);
+          if (version.isNotEmpty) addOutput('[+] Xeno API version: $version');
+        }
+      } catch (e) {
+        addOutput('[*] Version() call failed: $e');
+      }
+    }
+
+    addOutput('[+] Bound ${bound.length} Xeno functions: ${bound.join(", ")}');
+    state = state.copyWith(status: ExecutorStatus.ready, loadedDllPath: foundPath, boundFunctions: bound);
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
   // Load — standard DLL
   // ---------------------------------------------------------------------------
 
@@ -918,6 +1117,12 @@ class ExecutorController extends Notifier<ExecutorState> {
     _cloudyInit = null;
     _cloudyGetClients = null;
     _cloudyExec = null;
+    _xenoInit = null;
+    _xenoAttachFn = null;
+    _xenoExec = null;
+    _xenoGetClients = null;
+    _xenoSetSetting = null;
+    _xenoVersion = null;
     state = state.copyWith(status: ExecutorStatus.unloaded, loadedDllPath: null, boundFunctions: [], diagnostics: []);
   }
 
@@ -930,6 +1135,7 @@ class ExecutorController extends Notifier<ExecutorState> {
       BackendMode.process => _testProcessBindings(),
       BackendMode.cloudy => _testCloudyBindings(),
       BackendMode.cloudyPipe => _testCloudyPipeBindings(),
+      BackendMode.xeno => _testXenoBindings(),
       BackendMode.dll => _testDllBindings(),
     };
   }
@@ -1007,6 +1213,26 @@ class ExecutorController extends Notifier<ExecutorState> {
     return results;
   }
 
+  Map<String, bool> _testXenoBindings() {
+    final results = <String, bool>{};
+
+    if (_lib == null) {
+      for (final fn in ['Initialize', 'Attach', 'Execute', 'GetClients', 'SetSetting', 'Version']) {
+        results[fn] = false;
+      }
+      return results;
+    }
+
+    results['Initialize'] = _xenoInit != null;
+    results['Attach'] = _xenoAttachFn != null;
+    results['Execute'] = _xenoExec != null;
+    results['GetClients'] = _xenoGetClients != null;
+    results['SetSetting'] = _xenoSetSetting != null;
+    results['Version'] = _xenoVersion != null;
+
+    return results;
+  }
+
   // ---------------------------------------------------------------------------
   // Attach — dispatches by mode
   // ---------------------------------------------------------------------------
@@ -1019,6 +1245,9 @@ class ExecutorController extends Notifier<ExecutorState> {
       } catch (_) {
         return false;
       }
+    }
+    if (state.activeBackend.mode == BackendMode.xeno) {
+      return state.status == ExecutorStatus.attached;
     }
     if (_isAttached == null) return false;
     try {
@@ -1038,6 +1267,8 @@ class ExecutorController extends Notifier<ExecutorState> {
         _cloudyAttach();
       case BackendMode.cloudyPipe:
         _cloudyPipeAttach();
+      case BackendMode.xeno:
+        _xenoAttach();
     }
   }
 
@@ -1201,6 +1432,61 @@ class ExecutorController extends Notifier<ExecutorState> {
   }
 
   // ---------------------------------------------------------------------------
+  // Attach — Xeno DLL (calls Initialize, then Attach, checks clients)
+  // ---------------------------------------------------------------------------
+
+  void _xenoAttach() {
+    if (_xenoInit == null && _xenoAttachFn == null) {
+      addOutput('[!] Xeno.dll not loaded');
+      return;
+    }
+
+    state = state.copyWith(status: ExecutorStatus.attaching);
+
+    if (_xenoInit != null) {
+      addOutput('[*] Calling Xeno Initialize()...');
+      try {
+        _xenoInit!();
+      } catch (e) {
+        state = state.copyWith(status: ExecutorStatus.error, error: 'Initialize() failed: $e');
+        addOutput('[!] Initialize() failed: $e');
+        return;
+      }
+    }
+
+    if (_xenoAttachFn != null) {
+      addOutput('[*] Calling Xeno Attach()...');
+      try {
+        _xenoAttachFn!();
+      } catch (e) {
+        state = state.copyWith(status: ExecutorStatus.error, error: 'Attach() failed: $e');
+        addOutput('[!] Attach() failed: $e');
+        return;
+      }
+    }
+
+    addOutput('[*] Waiting for injection (3s)...');
+    Future.delayed(const Duration(seconds: 3)).then((_) {
+      if (_xenoGetClients != null) {
+        try {
+          final ptr = _xenoGetClients!();
+          if (ptr.address != 0) {
+            final asStr = _readCString(Pointer<Uint8>.fromAddress(ptr.address));
+            if (asStr.isNotEmpty) {
+              addOutput('[+] Clients: $asStr');
+            }
+          }
+        } catch (e) {
+          addOutput('[*] GetClients() returned: $e — continuing');
+        }
+      }
+
+      state = state.copyWith(status: ExecutorStatus.attached);
+      addOutput('[+] Xeno API attached!');
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Execute — dispatches by mode
   // ---------------------------------------------------------------------------
 
@@ -1214,6 +1500,8 @@ class ExecutorController extends Notifier<ExecutorState> {
         _cloudyExecute(script);
       case BackendMode.cloudyPipe:
         _cloudyPipeExecute(script);
+      case BackendMode.xeno:
+        _xenoExecute(script);
     }
   }
 
@@ -1452,6 +1740,34 @@ class ExecutorController extends Notifier<ExecutorState> {
       }
     } finally {
       _freeNativeUtf8(pipePath.cast<Uint8>());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Execute — Xeno DLL (calls Execute with script)
+  // ---------------------------------------------------------------------------
+
+  void _xenoExecute(String script) {
+    if (_xenoExec == null) {
+      addOutput('[!] Xeno.dll not loaded — no Execute function');
+      return;
+    }
+    if (state.status != ExecutorStatus.attached) {
+      addOutput('[!] Not attached. Click Attach first.');
+      return;
+    }
+
+    state = state.copyWith(lastScript: script);
+    addOutput('[>] Executing via Xeno API (${script.length} chars)...');
+
+    final ptr = _toNativeUtf8(script);
+    try {
+      _xenoExec!(ptr);
+      addOutput('[+] Script executed via Xeno.');
+    } catch (e) {
+      addOutput('[!] Execute failed: $e');
+    } finally {
+      _freeNativeUtf8(ptr);
     }
   }
 

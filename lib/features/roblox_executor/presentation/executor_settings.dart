@@ -132,6 +132,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
       ],
       BackendMode.cloudy => [_cloudyDllPathField(), const SizedBox(height: J3Space.md), _cloudyDepsInfo()],
       BackendMode.cloudyPipe => [_cloudyPipeExeField(), const SizedBox(height: J3Space.md), _cloudyPipeInfo()],
+      BackendMode.xeno => [_xenoDllPathField(), const SizedBox(height: J3Space.md), _xenoDepsInfo()],
     };
   }
 
@@ -174,6 +175,10 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
                   ],
                   if (b.mode == BackendMode.cloudy || b.mode == BackendMode.cloudyPipe) ...[
                     const Icon(Icons.cloud, size: 10, color: J3Colors.info),
+                    const SizedBox(width: 3),
+                  ],
+                  if (b.mode == BackendMode.xeno) ...[
+                    const Icon(Icons.memory, size: 10, color: J3Colors.success),
                     const SizedBox(width: 3),
                   ],
                   Text(b.name, style: J3Type.codeSmall.copyWith(fontSize: 11)),
@@ -225,6 +230,12 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
         J3Colors.warning,
         'CLOUDY PIPE',
         'Injects via EXE, executes scripts through named pipe',
+      ),
+      BackendMode.xeno => (
+        Icons.memory,
+        J3Colors.success,
+        'XENO DLL',
+        'Loads Xeno.dll — Initialize, Attach, Execute, Version',
       ),
     };
 
@@ -466,6 +477,72 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
   }
 
   // ---------------------------------------------------------------------------
+  // Xeno DLL mode fields
+  // ---------------------------------------------------------------------------
+
+  Widget _xenoDllPathField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('XENO.DLL PATH', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Text(
+          'Path to Xeno.dll. Auto-searches in the bin\\ subfolder next to the app. '
+          'Set a custom path if your Xeno files are elsewhere.',
+          style: J3Type.caption,
+        ),
+        const SizedBox(height: J3Space.xs),
+        _inputField(_dllPathController, 'C:\\path\\to\\Xeno\\Xeno.dll'),
+        const SizedBox(height: J3Space.xs),
+        Text('Auto-search: Xeno.dll (app dir, bin\\, data\\)', style: J3Type.caption),
+      ],
+    );
+  }
+
+  Widget _xenoDepsInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('XENO API INFO', style: J3Type.kicker.copyWith(color: J3Colors.neonText)),
+        const SizedBox(height: J3Space.xs),
+        Container(
+          padding: const EdgeInsets.all(J3Space.sm),
+          decoration: BoxDecoration(
+            color: J3Colors.success.withValues(alpha: 0.05),
+            borderRadius: J3Radius.small,
+            border: Border.all(color: J3Colors.success.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Functions (auto-bound):', style: J3Type.codeSmall.copyWith(color: J3Colors.success)),
+              const SizedBox(height: J3Space.xs),
+              Text('  Initialize()  — starts the Xeno runtime', style: J3Type.caption),
+              Text('  Attach()      — hooks into Roblox process', style: J3Type.caption),
+              Text('  Execute()     — sends Lua script (UTF-8)', style: J3Type.caption),
+              Text('  GetClients()  — lists connected clients', style: J3Type.caption),
+              Text('  SetSetting()  — configures key/value pair', style: J3Type.caption),
+              Text('  Version()     — returns API version string', style: J3Type.caption),
+              const SizedBox(height: J3Space.sm),
+              Text(
+                'Required dependency DLLs (same folder):',
+                style: J3Type.codeSmall.copyWith(color: J3Colors.warning),
+              ),
+              const SizedBox(height: J3Space.xs),
+              Text('  libcurl.dll', style: J3Type.caption),
+              Text('  libcrypto-3-x64.dll', style: J3Type.caption),
+              Text('  libssl-3-x64.dll', style: J3Type.caption),
+              Text('  xxhash.dll', style: J3Type.caption),
+              Text('  zstd.dll', style: J3Type.caption),
+              Text('  zlib1.dll', style: J3Type.caption),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Shared widgets
   // ---------------------------------------------------------------------------
 
@@ -518,6 +595,7 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
       BackendMode.process => 'TEST PATHS',
       BackendMode.cloudy => 'TEST CLOUDY API',
       BackendMode.cloudyPipe => 'TEST PIPE SETUP',
+      BackendMode.xeno => 'TEST XENO API',
     };
 
     final testHint = switch (_backend.mode) {
@@ -525,10 +603,11 @@ class _ExecutorSettingsDialogState extends ConsumerState<ExecutorSettingsDialog>
       BackendMode.process => 'Click Test to verify paths and folder access.',
       BackendMode.cloudy => 'Click Test to load Cloudy.dll and verify API exports.',
       BackendMode.cloudyPipe => 'Click Test to verify kernel32 and Injector.exe.',
+      BackendMode.xeno => 'Click Test to load Xeno.dll and verify all 6 exports.',
     };
 
     final okLabel = switch (_backend.mode) {
-      BackendMode.dll => 'BOUND',
+      BackendMode.dll || BackendMode.xeno => 'BOUND',
       _ => 'OK',
     };
 
