@@ -1762,18 +1762,33 @@ class ExecutorController extends Notifier<ExecutorState> {
       return;
     }
 
+    if (_xenoGetClients != null) {
+      try {
+        final cPtr = _xenoGetClients!();
+        if (cPtr.address == 0) {
+          addOutput('[!] No Xeno clients — re-attach and try again.');
+          return;
+        }
+      } catch (_) {}
+    }
+
     state = state.copyWith(lastScript: script);
     addOutput('[>] Executing via Xeno API (${script.length} chars)...');
 
     final ptr = _toNativeUtf8(script);
     try {
-      _xenoExec!(ptr);
-      addOutput('[+] Script sent to Xeno.');
+      final result = _xenoExec!(ptr);
+      addOutput('[+] Script sent to Xeno (result=$result).');
     } catch (e) {
       addOutput('[!] Execute failed: $e');
-    } finally {
       _freeNativeUtf8(ptr);
+      return;
     }
+    // Xeno reads the script buffer asynchronously — keep it alive while
+    // the injection pipeline writes it into the target process.
+    Future.delayed(const Duration(seconds: 5)).then((_) {
+      _freeNativeUtf8(ptr);
+    });
   }
 
   // ---------------------------------------------------------------------------
