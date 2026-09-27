@@ -1779,8 +1779,10 @@ class ExecutorController extends Notifier<ExecutorState> {
             if (retryResult != 0) {
               addOutput('[+] Script executed on retry (result: $retryResult)');
             } else {
-              addOutput('[!] Execute failed again (result: 0). '
-                  'Make sure Roblox is running and you are in a game.');
+              addOutput(
+                '[!] Execute failed again (result: 0). '
+                'Make sure Roblox is running and you are in a game.',
+              );
             }
           } catch (e) {
             addOutput('[!] Retry failed: $e');
