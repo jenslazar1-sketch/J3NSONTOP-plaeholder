@@ -1767,30 +1767,8 @@ class ExecutorController extends Notifier<ExecutorState> {
 
     final ptr = _toNativeUtf8(script);
     try {
-      final result = _xenoExec!(ptr);
-      if (result != 0) {
-        addOutput('[+] Script executed via Xeno (result: $result)');
-      } else {
-        addOutput('[!] Execute returned 0 — retrying in 500ms...');
-        Future.delayed(const Duration(milliseconds: 500)).then((_) {
-          final retryPtr = _toNativeUtf8(script);
-          try {
-            final retryResult = _xenoExec!(retryPtr);
-            if (retryResult != 0) {
-              addOutput('[+] Script executed on retry (result: $retryResult)');
-            } else {
-              addOutput(
-                '[!] Execute failed again (result: 0). '
-                'Make sure Roblox is running and you are in a game.',
-              );
-            }
-          } catch (e) {
-            addOutput('[!] Retry failed: $e');
-          } finally {
-            _freeNativeUtf8(retryPtr);
-          }
-        });
-      }
+      _xenoExec!(ptr);
+      addOutput('[+] Script sent to Xeno.');
     } catch (e) {
       addOutput('[!] Execute failed: $e');
     } finally {
