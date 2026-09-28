@@ -39,9 +39,9 @@ typedef _PtrRetDart = Pointer<Void> Function();
 // FFI typedefs — Xeno API
 // ---------------------------------------------------------------------------
 
-// Execute(char* script) -> bool (int32)
-typedef _XenoExecNative = Int32 Function(Pointer<Uint8>);
-typedef _XenoExecDart = int Function(Pointer<Uint8>);
+// Xeno's Execute shares the same 3-arg ABI as _CloudyExec* above:
+//   void Execute(char* script, char** clientUsers, int numUsers)
+// It runs the script on the named clients, so the client list is required.
 
 // Version() -> char*
 typedef _StrRetNative = Pointer<Uint8> Function();
@@ -338,7 +338,7 @@ class ExecutorController extends Notifier<ExecutorState> {
   // Xeno-specific bindings
   _VoidDart? _xenoInit;
   _VoidDart? _xenoAttachFn;
-  _XenoExecDart? _xenoExec;
+  _CloudyExecDart? _xenoExec;
   _PtrRetDart? _xenoGetClients;
   _TwoPtrVoidDart? _xenoSetSetting;
   _StrRetDart? _xenoVersion;
@@ -856,7 +856,7 @@ class ExecutorController extends Notifier<ExecutorState> {
     if (_xenoAttachFn != null) bound.add('Attach');
 
     try {
-      _xenoExec = _lib!.lookupFunction<_XenoExecNative, _XenoExecDart>('Execute');
+      _xenoExec = _lib!.lookupFunction<_CloudyExecNative, _CloudyExecDart>('Execute');
       bound.add('Execute');
     } catch (_) {
       _xenoExec = null;
@@ -1453,28 +1453,25 @@ class ExecutorController extends Notifier<ExecutorState> {
     Future.delayed(const Duration(milliseconds: delayMs)).then((_) {
       if (state.status != ExecutorStatus.attaching) return;
 
-      bool hasClient = false;
+      List<_CloudyClient> clients = const [];
       if (_xenoGetClients != null) {
         try {
-          final ptr = _xenoGetClients!();
-          if (ptr.address != 0) {
-            final asStr = _readCString(Pointer<Uint8>.fromAddress(ptr.address));
-            if (asStr.isNotEmpty) {
-              addOutput('[+] Clients: $asStr');
-              hasClient = true;
-            }
-          }
+          clients = _parseClients(_xenoGetClients!());
         } catch (e) {
           addOutput('[*] GetClients(): $e');
         }
+      }
+      final hasClient = clients.isNotEmpty;
+      if (hasClient) {
+        addOutput('[+] Clients: ${clients.map((c) => c.name).join(", ")}');
       }
 
       if (hasClient || attempt >= maxAttempts - 1) {
         state = state.copyWith(status: ExecutorStatus.attached);
         if (hasClient) {
-          addOutput('[+] Xeno API attached — client found!');
+          addOutput('[+] Xeno API attached — ${clients.length} client(s) found!');
         } else {
-          addOutput('[+] Xeno API attached (no client confirmed — try executing anyway)');
+          addOutput('[+] Xeno API attached (no client confirmed — open Roblox, then execute)');
         }
         if (_xenoVersion != null) {
           try {
@@ -1762,33 +1759,40 @@ class ExecutorController extends Notifier<ExecutorState> {
       return;
     }
 
+    // Xeno's Execute takes the script AND the list of clients to run it on:
+    //   void Execute(char* script, char** clientUsers, int numUsers)
+    // Passing only the script (as older builds did) ran it on zero clients,
+    // so nothing happened. Enumerate clients via GetClients() first.
+    List<_CloudyClient> clients = const [];
     if (_xenoGetClients != null) {
       try {
-        final cPtr = _xenoGetClients!();
-        if (cPtr.address == 0) {
-          addOutput('[!] No Xeno clients — re-attach and try again.');
-          return;
-        }
-      } catch (_) {}
+        clients = _parseClients(_xenoGetClients!());
+      } catch (e) {
+        addOutput('[!] GetClients() failed: $e');
+      }
     }
 
-    state = state.copyWith(lastScript: script);
-    addOutput('[>] Executing via Xeno API (${script.length} chars)...');
-
-    final ptr = _toNativeUtf8(script);
-    try {
-      final result = _xenoExec!(ptr);
-      addOutput('[+] Script sent to Xeno (result=$result).');
-    } catch (e) {
-      addOutput('[!] Execute failed: $e');
-      _freeNativeUtf8(ptr);
+    if (clients.isEmpty) {
+      addOutput('[!] No Xeno clients connected — open Roblox and re-attach.');
       return;
     }
-    // Xeno reads the script buffer asynchronously — keep it alive while
-    // the injection pipeline writes it into the target process.
-    Future.delayed(const Duration(seconds: 5)).then((_) {
-      _freeNativeUtf8(ptr);
-    });
+
+    final clientNames = clients.map((c) => c.name).toList();
+    state = state.copyWith(lastScript: script);
+    addOutput('[>] Executing via Xeno API (${script.length} chars)...');
+    addOutput('[*] Targeting ${clientNames.length} client(s): ${clientNames.join(", ")}');
+
+    final scriptPtr = _toNativeUtf8(script);
+    final namesPtr = _toNativeStringArray(clientNames);
+    try {
+      _xenoExec!(scriptPtr, namesPtr, clientNames.length);
+      addOutput('[+] Script sent to Xeno.');
+    } catch (e) {
+      addOutput('[!] Execute failed: $e');
+    } finally {
+      _freeNativeUtf8(scriptPtr);
+      _freeNativeStringArray(namesPtr, clientNames.length);
+    }
   }
 
   // ---------------------------------------------------------------------------

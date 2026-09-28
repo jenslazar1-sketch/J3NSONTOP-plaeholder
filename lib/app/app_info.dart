@@ -17,8 +17,8 @@ abstract final class AppInfo {
   static const String applicationId = 'com.j3nsontop.multitool';
 
   /// Kept in sync with `version:` in pubspec.yaml (verified by a unit test).
-  static const String version = '1.2.2';
-  static const int buildNumber = 5;
+  static const String version = '1.2.3';
+  static const int buildNumber = 6;
 
   /// Identifies the exact build a tester is running. CI builds pass
   /// `--dart-define=J3_BUILD_LABEL=ci<run>-<commit>`; other builds say "local".
